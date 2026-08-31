@@ -1,0 +1,906 @@
+/* ─── Theme Variables ─── */
+:root {
+     --bg-primary: #0d1117;
+     --bg-secondary: #161b22;
+     --bg-table: #161b22;
+     --bg-table-hover: #1c2333;
+     --bg-sidebar: #0d1117;
+     --bg-sidebar-hover: #1c2333;
+     --text-primary: #f0f6fc;
+     --text-secondary: #8b949e;
+     --text-muted: #6e7681;
+     --text-inverse: #1a1a2e;
+     --border-color: #30363d;
+     --shadow-color: rgba(0, 0, 0, 0.4);
+     --hover-color: #1c2333;
+     --link-color: #58a6ff;
+     --link-hover-bg: #1c2333;
+     --link-hover-color: #79c0ff;
+     --placeholder-bg: #161b22;
+     --placeholder-border: #30363d;
+     --summary-hover: #58a6ff;
+     --say-text-decoration: #58a6ff;
+     --thead-bg: #0d1117;
+     --thead-color: #f0f6fc;
+     --highlight-bg: #d4a72c;
+     --highlight-color: #0d1117;
+     --diphthong-underline: #e4bd63;
+}
+
+/* Light mode */
+html.light-mode {
+     --bg-primary: #f6f8fa;
+     --bg-secondary: #ffffff;
+     --bg-table: #ffffff;
+     --bg-table-hover: #f3f4f6;
+     --bg-sidebar: #24292e;
+     --bg-sidebar-hover: #2d333b;
+     --text-primary: #1f2328;
+     --text-secondary: #57606a;
+     --text-muted: #8b949e;
+     --text-inverse: #f6f8fa;
+     --border-color: #d0d7de;
+     --shadow-color: rgba(0, 0, 0, 0.08);
+     --hover-color: #f3f4f6;
+     --link-color: #0969da;
+     --link-hover-bg: #ddf4ff;
+     --link-hover-color: #0550ae;
+     --placeholder-bg: #f6f8fa;
+     --placeholder-border: #d0d7de;
+     --summary-hover: #0969da;
+     --say-text-decoration: #0969da;
+     --thead-bg: #d0d7de;
+     --thead-color: #1f2328;
+     --highlight-bg: #d4a72c;
+     --highlight-color: #1f2328;
+     --diphthong-underline: #b8860b;
+}
+
+/* ─── Reset & Base ─── */
+* {
+     box-sizing: border-box;
+     margin: 0;
+     padding: 0;
+}
+
+body {
+     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     line-height: 1.6;
+     display: flex;
+     min-height: 100vh;
+     transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Category toggle buttons ─── */
+.category-toggle {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     width: 100%;
+     padding: 10px 14px;
+     border: none;
+     border-radius: 8px;
+     background: rgba(255, 255, 255, 0.04);
+     color: var(--text-muted);
+     font-size: 0.9rem;
+     font-weight: 600;
+     cursor: pointer;
+     transition: all 0.2s;
+     text-align: left;
+     text-transform: uppercase;
+     letter-spacing: 0.5px;
+     margin-top: 6px;
+}
+
+.category-toggle:hover {
+     background: rgba(255, 255, 255, 0.08);
+     color: var(--text-primary);
+}
+
+.category-toggle .icon {
+     font-size: 0.8rem;
+     transition: transform 0.2s;
+     width: 20px;
+     text-align: center;
+}
+
+.category-toggle.open .icon {
+     transform: rotate(90deg);
+}
+
+/* ─── Category items container ─── */
+.category-items {
+     overflow: hidden;
+     max-height: 0;
+     transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s ease,
+          padding 0.3s ease;
+     padding-left: 8px;
+     opacity: 0;
+}
+
+.category-items.open {
+     max-height: none;
+     opacity: 1;
+     padding-top: 4px;
+     padding-bottom: 4px;
+}
+
+.category-items .nav-item {
+     padding-left: 32px;
+     font-size: 0.9rem;
+}
+
+/* ─── Sidebar ─── */
+#sidebar {
+     width: 320px;
+     min-height: 100vh;
+     background: var(--bg-secondary);
+     color: var(--text-primary);
+     padding: 20px 0;
+     position: sticky;
+     top: 0;
+     height: 100vh;
+     overflow-y: auto;
+     flex-shrink: 0;
+     display: flex;
+     flex-direction: column;
+     box-shadow: 2px 0 12px var(--shadow-color);
+     z-index: 100;
+     transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+}
+
+.sidebar-header {
+     padding: 0 20px 16px;
+     border-bottom: 1px solid var(--border-color);
+     margin-bottom: 16px;
+     transition: border-color 0.3s ease;
+}
+
+.header-top {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     gap: 12px;
+}
+
+.header-top h2 {
+     font-size: 1.4rem;
+     margin: 0;
+     color: var(--text-primary);
+     transition: color 0.3s ease;
+     flex: 1;
+}
+
+.header-actions {
+     display: flex;
+     align-items: center;
+     gap: 4px;
+     flex-shrink: 0;
+}
+
+.sidebar-header h2 {
+     font-size: 1.6rem;
+     margin-bottom: 2px;
+     color: var(--text-primary);
+     transition: color 0.3s ease;
+}
+
+.sidebar-header .subtitle {
+     font-size: 0.75rem;
+     color: var(--text-muted);
+     letter-spacing: 1px;
+     text-transform: uppercase;
+     transition: color 0.3s ease;
+     margin-top: 2px;
+}
+
+#navSearch {
+     display: block;
+     width: 100%;
+     margin-top: 12px;
+     padding: 8px 10px;
+     border: 1px solid var(--border-color);
+     border-radius: 8px;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     font-size: 0.9rem;
+}
+
+#navSearch:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 1px;
+}
+
+.search-empty {
+     margin-top: 8px;
+     font-size: 0.8rem;
+     color: var(--text-muted);
+}
+
+.nav-item.search-hidden,
+.category-toggle.search-hidden,
+.category-items.search-hidden {
+     display: none;
+}
+
+.page-toolbar {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 12px;
+     margin: 0 0 16px;
+     padding: 10px 12px;
+     border: 1px solid var(--border-color);
+     border-radius: 8px;
+     background: var(--bg-secondary);
+     font-size: 0.9rem;
+}
+
+.page-toolbar button {
+     cursor: pointer;
+     border: 1px solid var(--border-color);
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     border-radius: 6px;
+     padding: 6px 10px;
+     font-size: 0.85rem;
+}
+
+.page-toolbar button:hover {
+     background: var(--hover-color);
+}
+
+.say.search-hit {
+     background: var(--highlight-bg);
+     color: var(--highlight-color);
+     border-radius: 4px;
+}
+
+.see-also {
+     margin-top: 28px;
+     padding-top: 8px;
+}
+
+.see-also-links {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 8px;
+     margin: 8px 0 0;
+}
+
+.see-also-link {
+     cursor: pointer;
+     border: 1px solid var(--border-color);
+     background: var(--bg-secondary);
+     color: var(--link-color);
+     border-radius: 999px;
+     padding: 6px 12px;
+     font-size: 0.85rem;
+}
+
+.see-also-link:hover {
+     background: var(--link-hover-bg);
+     color: var(--link-hover-color);
+}
+
+.practice-link {
+     display: block;
+     margin-top: 8px;
+     color: var(--link-color);
+     text-decoration: none;
+     font-size: 0.8rem;
+}
+
+.practice-link:hover {
+     color: var(--link-hover-color);
+     text-decoration: underline;
+}
+
+#nav {
+     flex: 1;
+     padding: 0 10px;
+}
+
+.nav-item {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     width: 100%;
+     padding: 10px 14px;
+     border: none;
+     border-radius: 8px;
+     background: transparent;
+     color: var(--text-secondary);
+     font-size: 1rem;
+     cursor: pointer;
+     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+     text-align: left;
+     font-weight: 500;
+}
+
+.nav-item:hover {
+     background: rgba(255, 255, 255, 0.06);
+     color: var(--text-primary);
+     transform: translateX(4px);
+}
+
+.nav-item.active {
+     background: rgba(255, 255, 255, 0.15);
+     color: var(--text-primary);
+     box-shadow: inset 3px 0 0 #f1c40f;
+     transform: translateX(2px);
+}
+
+html.light-mode .nav-item.active {
+     background: rgba(0, 0, 0, 0.08);
+     color: #1a1a2e;
+     box-shadow: inset 3px 0 0 #f1c40f;
+}
+
+.sidebar-footer {
+     padding: 16px 20px;
+     border-top: 1px solid var(--border-color);
+     font-size: 0.75rem;
+     color: var(--text-muted);
+     transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+#serverStatus.online {
+     color: #2ecc71;
+}
+
+#serverStatus.offline {
+     color: #e74c3c;
+}
+
+/* ─── Main Content ─── */
+#main {
+     flex: 1;
+     padding: 30px 40px 100px;
+     max-width: 1100px;
+     margin: 0 auto;
+     transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section {
+     display: none;
+     animation: fadeIn 0.3s ease;
+}
+
+.section.active {
+     display: block;
+}
+
+@keyframes fadeIn {
+     from {
+          opacity: 0;
+          transform: translateY(10px);
+     }
+
+     to {
+          opacity: 1;
+          transform: translateY(0);
+     }
+}
+
+.section h1 {
+     font-size: 2rem;
+     margin-bottom: 4px;
+     color: var(--text-primary);
+     transition: color 0.3s ease;
+}
+
+.section-desc {
+     color: var(--text-secondary);
+     margin-bottom: 24px;
+     font-size: 1rem;
+     transition: color 0.3s ease;
+}
+
+.section-desc .highlight {
+     background: #f1c40f;
+     color: #1a1a2e;
+     padding: 2px 8px;
+     border-radius: 4px;
+     font-weight: 500;
+}
+
+/* ─── Placeholder sections ─── */
+.placeholder {
+     background: var(--placeholder-bg);
+     padding: 30px;
+     border-radius: 12px;
+     border: 2px dashed var(--placeholder-border);
+     text-align: center;
+     color: var(--text-secondary);
+     transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.placeholder p {
+     margin: 8px 0;
+}
+
+/* ─── Details / Summary ─── */
+details {
+     margin: 12px 0;
+}
+
+details summary {
+     cursor: pointer;
+     font-size: 1.05rem;
+     padding: 8px 0;
+     user-select: none;
+     transition: color 0.3s ease;
+}
+
+details summary:hover {
+     color: var(--summary-hover);
+}
+
+details[open] summary {
+     color: var(--summary-hover);
+}
+
+/* ─── Tables ─── */
+table {
+     width: 100%;
+     border-collapse: collapse;
+     margin: 12px 0 20px;
+     font-size: 0.92rem;
+     background: var(--bg-table);
+     box-shadow: 0 1px 4px var(--shadow-color);
+     border-radius: 8px;
+     overflow: hidden;
+     transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+thead {
+     background: var(--thead-bg, #1a1a2e);
+     color: var(--thead-color, #fff);
+     transition: background 0.3s ease, color 0.3s ease;
+}
+
+html.light-mode thead {
+     background: #e9ecef;
+     color: #1a1a2e;
+}
+
+th {
+     padding: 10px 14px;
+     text-align: left;
+     font-weight: 600;
+}
+
+td {
+     padding: 9px 14px;
+     border-bottom: 1px solid var(--border-color);
+     transition: border-color 0.3s ease;
+}
+
+tr:last-child td {
+     border-bottom: none;
+}
+
+tr:hover td {
+     background: var(--bg-table-hover);
+     transition: background 0.2s ease;
+}
+
+/* ─── Lists inside details ─── */
+details ul {
+     padding-left: 24px;
+     margin: 8px 0 16px;
+}
+
+details ul li {
+     margin: 4px 0;
+}
+
+/* ─── Clickable words (audio) ─── */
+.say {
+     cursor: pointer;
+     color: var(--link-color);
+     font-weight: 500;
+     text-decoration: underline dotted var(--say-text-decoration);
+     transition: all 0.15s ease;
+     border-radius: 4px;
+     padding: 0 4px;
+}
+
+.say:hover {
+     background: var(--link-hover-bg);
+     text-decoration: underline solid var(--link-color);
+     color: var(--link-hover-color);
+}
+
+.say.playing {
+     color: #e67e22;
+     text-decoration-color: #e67e22;
+}
+
+/* Diphthong letters only — sits below the dotted "click to hear" line */
+.diphthong {
+     text-decoration: underline solid var(--diphthong-underline);
+     text-decoration-thickness: 1px;
+     text-underline-offset: 3px;
+     text-decoration-skip-ink: none;
+}
+
+/* ─── Floating Audio Player ─── */
+#audioPlayerContainer {
+     position: fixed;
+     bottom: 20px;
+     right: 20px;
+     background: var(--bg-secondary);
+     padding: 12px 16px 8px;
+     border-radius: 12px;
+     box-shadow: 0 4px 24px var(--shadow-color);
+     z-index: 9999;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 4px;
+     min-width: 250px;
+     border: 1px solid var(--border-color);
+     transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+#audioPlayerContainer:hover {
+     transform: scale(1.02);
+}
+
+#audioPlayer {
+     width: 100%;
+     height: 36px;
+     border-radius: 6px;
+     background: var(--bg-table);
+     transition: background 0.3s ease;
+}
+
+/* Audio player controls in dark/light mode */
+#audioPlayer::-webkit-media-controls-panel {
+     background: var(--bg-table);
+     transition: background 0.3s ease;
+}
+
+#audioPlayer::-webkit-media-controls-current-time-display,
+#audioPlayer::-webkit-media-controls-time-remaining-display {
+     color: var(--text-secondary);
+}
+
+.player-lang-label {
+     font-size: 0.7rem;
+     color: var(--text-muted);
+     width: 100%;
+     margin-top: 2px;
+}
+
+#ttsLang {
+     width: 100%;
+     padding: 4px 6px;
+     border: 1px solid var(--border-color);
+     border-radius: 6px;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     font-size: 0.8rem;
+}
+
+#audioStatus {
+     font-size: 0.75rem;
+     color: var(--text-muted);
+     text-align: center;
+     min-height: 1.2em;
+     padding: 2px 6px;
+     width: 100%;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     transition: color 0.3s ease;
+}
+
+/* ─── Toggle button in sidebar header ─── */
+.toggle-btn {
+     background: none;
+     border: none;
+     color: var(--text-primary);
+     font-size: 1.2rem;
+     cursor: pointer;
+     padding: 4px 6px;
+     border-radius: 6px;
+     transition: all 0.2s;
+     display: block;
+     line-height: 1;
+}
+
+.toggle-btn:hover {
+     background: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-btn .close {
+     display: none;
+}
+
+.toggle-btn.collapsed .hamburger {
+     display: none;
+}
+
+.toggle-btn.collapsed .close {
+     display: inline;
+}
+
+/* ─── Floating toggle button ─── */
+.floating-toggle {
+     position: fixed;
+     top: 10px;
+     left: 10px;
+     z-index: 1100;
+     /* background: #1a1a2e; */
+     background: var(--bg-table-hover);
+     /* color: #fff; */
+     color: var(--text-primary);
+     border: none;
+     border-radius: 8px;
+     padding: 4px 6px;
+     font-size: 1rem;
+     cursor: pointer;
+     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+     transition: all 0.3s;
+     display: none;
+}
+
+.floating-toggle:hover {
+     background: #2d2d44;
+     transform: scale(1.05);
+}
+
+/* ─── Sidebar states ─── */
+#sidebar.hidden {
+     transform: translateX(-100%);
+     width: 0;
+     min-width: 0;
+     padding: 0;
+     overflow: hidden;
+     margin: 0;
+     box-shadow: none;
+}
+
+/* ─── Theme Toggle Button ─── */
+.theme-toggle-wrapper {
+     display: flex;
+     justify-content: flex-end;
+     margin-top: 8px;
+}
+
+.theme-toggle {
+     background: none;
+     border: none;
+     border-radius: 50%;
+     width: 40px;
+     height: 40px;
+     font-size: 1.3rem;
+     cursor: pointer;
+     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background: rgba(255, 255, 255, 0.06);
+     color: var(--text-primary);
+}
+
+.theme-toggle:hover {
+     background: rgba(255, 255, 255, 0.12);
+     transform: rotate(20deg) scale(1.1);
+}
+
+.theme-toggle .theme-icon-light {
+     display: none;
+}
+
+.theme-toggle .theme-icon-dark {
+     display: inline;
+}
+
+/* Light mode toggle styles */
+html.light-mode .theme-toggle {
+     color: #1a1a2e;
+     background: rgba(0, 0, 0, 0.06);
+}
+
+html.light-mode .theme-toggle:hover {
+     background: rgba(0, 0, 0, 0.12);
+}
+
+html.light-mode .theme-toggle .theme-icon-light {
+     display: inline;
+}
+
+html.light-mode .theme-toggle .theme-icon-dark {
+     display: none;
+}
+
+/* ─── Footer with toggle ─── */
+.sidebar-footer .footer-content {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     gap: 12px;
+}
+
+.sidebar-footer .theme-toggle {
+     width: 36px;
+     height: 36px;
+     font-size: 1.1rem;
+}
+
+/* ─── Scrollbar ─── */
+#sidebar::-webkit-scrollbar {
+     width: 4px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+     background: transparent;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+     background: rgba(255, 255, 255, 0.2);
+     border-radius: 4px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+     background: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+     body {
+          flex-direction: column;
+     }
+
+     #sidebar {
+          width: 100%;
+          min-height: auto;
+          height: auto;
+          position: static;
+          padding: 12px 0;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 4px;
+     }
+
+     .sidebar-header {
+          padding: 0 16px 10px;
+          width: 100%;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          margin-bottom: 8px;
+     }
+
+     .sidebar-header h2 {
+          font-size: 1.2rem;
+     }
+
+     #nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          padding: 0 10px 8px;
+          flex: none;
+          width: 100%;
+     }
+
+     .nav-item {
+          padding: 6px 12px;
+          font-size: 0.8rem;
+          width: auto;
+          border-radius: 20px;
+     }
+
+     .nav-item .icon {
+          font-size: 1rem;
+          width: 20px;
+     }
+
+     .nav-item.active {
+          box-shadow: none;
+          background: rgba(255, 255, 255, 0.15);
+     }
+
+     .sidebar-footer {
+          display: block;
+          padding: 12px 16px;
+     }
+
+     #main {
+          padding: 16px;
+     }
+
+     .section h1 {
+          font-size: 1.5rem;
+     }
+
+     table {
+          font-size: 0.78rem;
+     }
+
+     th,
+     td {
+          padding: 6px 8px;
+     }
+
+     #audioPlayerContainer {
+          bottom: 10px;
+          right: 10px;
+          min-width: 140px;
+          padding: 8px 10px 4px;
+     }
+
+     #audioPlayer {
+          height: 30px;
+     }
+
+     .toggle-btn,
+     .floating-toggle {
+          display: block;
+     }
+
+     #sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 280px;
+          height: 100vh;
+          z-index: 999;
+          transform: translateX(0);
+     }
+
+     #sidebar.hidden {
+          transform: translateX(-100%);
+     }
+
+     /* Overlay when sidebar is open */
+     #sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 998;
+     }
+
+     #sidebar-overlay.active {
+          display: block;
+     }
+
+     /* Main content shifts when sidebar is hidden */
+     #main {
+          transition: margin-left 0.3s ease;
+          margin-left: 0;
+     }
+}
+
+/* ─── Desktop: show toggle button (smaller) ─── */
+@media (min-width: 769px) {
+     .toggle-btn {
+          display: block;
+          font-size: 0.9rem;
+          padding: 2px 6px;
+          margin-bottom: 4px;
+          color: var(--text-primary);
+     }
+
+     .floating-toggle {
+          display: none;
+     }
+}
+
+.secondary {
+     color: #919090;
+     /* Light gray */
+     font-size: 0.9em;
+     /* Slightly smaller */
+}

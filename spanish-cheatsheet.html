@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Spanish Cheat Sheet</title>
+          <link rel="stylesheet" href="./css/spanish-cheatsheet.css" />
+     </head>
+     <body>
+          <!-- http://127.0.0.1:8765/spanish-cheatsheet.html -->
+          <!-- http://127.0.0.1:8765/spanish-practice.html -->
+          <!-- ─── Floating Audio Player ─── -->
+          <div id="audioPlayerContainer">
+               <audio id="audioPlayer" controls></audio>
+               <label class="player-lang-label" for="ttsLang">Voice</label>
+               <select id="ttsLang" aria-label="Spanish voice">
+                    <option value="es-419" selected>Latin America (es-419)</option>
+                    <option value="es">Spain (es)</option>
+               </select>
+               <div id="audioStatus">Ready</div>
+          </div>
+
+          <button id="floatingToggle" class="floating-toggle" aria-label="Show sidebar">☰</button>
+
+          <!-- ─── Sidebar Navigation ─── -->
+          <aside id="sidebar">
+               <div class="sidebar-header">
+                    <div class="header-top">
+                         <h2>🇪🇸 Spanish</h2>
+                         <div class="header-actions">
+                              <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle sidebar">
+                                   <span class="hamburger">☰</span>
+                                   <span class="close">✕</span>
+                              </button>
+                              <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+                                   <span class="theme-icon-dark">🌙</span>
+                                   <span class="theme-icon-light">☀️</span>
+                              </button>
+                         </div>
+                    </div>
+                    <p class="subtitle">Cheat Sheet</p>
+                    <input type="search" id="navSearch" placeholder="Search pages & words…" autocomplete="off" aria-label="Search pages and words" />
+                    <p id="searchEmpty" class="search-empty" hidden>No matching pages</p>
+               </div>
+
+               <nav id="nav">
+                    <!-- Category 1: Pronunciation Basics -->
+                    <button class="category-toggle" data-category="pronunciation"><span class="icon">▶️</span> Pronunciation Basics</button>
+                    <div class="category-items" data-category="pronunciation">
+                         <button class="nav-item" data-section="pronunciation-basics/alphabet"><span class="icon">📖</span> Alphabet</button>
+                         <button class="nav-item" data-section="pronunciation-basics/vowels"><span class="icon">🔤</span> Vowels</button>
+                         <button class="nav-item" data-section="pronunciation-basics/pronunciation"><span class="icon">🔊</span> Pronunciation</button>
+                         <button class="nav-item" data-section="pronunciation-basics/diphthongs"><span class="icon">🎵</span> Diphthongs</button>
+                         <button class="nav-item" data-section="pronunciation-basics/accent-stress"><span class="icon">´</span> Accent & Stress</button>
+                    </div>
+
+                    <!-- Category 2: Grammar Core -->
+                    <button class="category-toggle" data-category="grammar"><span class="icon">▶️</span> Grammar Core</button>
+                    <div class="category-items" data-category="grammar">
+                         <button class="nav-item" data-section="grammar-core/adjectives"><span class="icon">🎨</span> Adjectives</button>
+                         <button class="nav-item" data-section="grammar-core/adverbs"><span class="icon">➡️</span> Adverbs</button>
+                         <button class="nav-item" data-section="grammar-core/comparisons"><span class="icon">⚖️</span> Comparisons</button>
+                         <button class="nav-item" data-section="grammar-core/conjunctions"><span class="icon">🔗</span> Conjunctions</button>
+                         <button class="nav-item" data-section="grammar-core/diminutives"><span class="icon">🔹</span> Diminutives</button>
+                         <button class="nav-item" data-section="grammar-core/false-friends"><span class="icon">⚠️</span> False Friends</button>
+                         <button class="nav-item" data-section="grammar-core/gender"><span class="icon">⚥</span> Gender</button>
+                         <button class="nav-item" data-section="grammar-core/negation"><span class="icon">🚫</span> Negation</button>
+                         <button class="nav-item" data-section="grammar-core/nouns"><span class="icon">📝</span> Nouns</button>
+                         <button class="nav-item" data-section="grammar-core/obligation"><span class="icon">📌</span> Obligation</button>
+                         <button class="nav-item" data-section="grammar-core/passive-se"><span class="icon">🔁</span> Passive / Se</button>
+                         <button class="nav-item" data-section="grammar-core/personal-a"><span class="icon">👉</span> Personal A</button>
+                         <button class="nav-item" data-section="grammar-core/plural-rules"><span class="icon">📚</span> Plural Rules</button>
+                         <button class="nav-item" data-section="grammar-core/por-para"><span class="icon">🔀</span> Por vs Para</button>
+                         <button class="nav-item" data-section="grammar-core/prepositions"><span class="icon">📍</span> Prepositions</button>
+                         <button class="nav-item" data-section="grammar-core/pronoun-placement"><span class="icon">↔️</span> Pronoun Placement</button>
+                         <button class="nav-item" data-section="grammar-core/pronouns"><span class="icon">👤</span> Pronouns</button>
+                         <button class="nav-item" data-section="grammar-core/question-words"><span class="icon">❓</span> Question Words</button>
+                         <button class="nav-item" data-section="grammar-core/subjunctive-triggers"><span class="icon">⚡</span> Subjunctive Triggers</button>
+                         <button class="nav-item" data-section="grammar-core/tu-usted-vos"><span class="icon">👤</span> Tú / Usted / Vos</button>
+                    </div>
+
+                    <!-- Category 3: Verbs -->
+                    <button class="category-toggle" data-category="verbs"><span class="icon">▶️</span> Verbs</button>
+                    <div class="category-items" data-category="verbs">
+                         <button class="nav-item" data-section="verbs/verbs"><span class="icon">🏃</span> Verbs</button>
+                         <button class="nav-item" data-section="verbs/irregular-verbs"><span class="icon">🏃</span> Irregular Verbs</button>
+                         <button class="nav-item" data-section="verbs/ser-estar"><span class="icon">🔀</span> Ser - Estar</button>
+                         <button class="nav-item" data-section="verbs/ser"><span class="icon">🔀</span> Ser</button>
+                         <button class="nav-item" data-section="verbs/estar"><span class="icon">🔀</span> Estar</button>
+                         <button class="nav-item" data-section="verbs/ir"><span class="icon">🔀</span> Ir</button>
+                         <button class="nav-item" data-section="verbs/hacer"><span class="icon">🔀</span> Hacer</button>
+                         <button class="nav-item" data-section="verbs/jugar"><span class="icon">🔀</span> Jugar</button>
+                         <button class="nav-item" data-section="verbs/tener"><span class="icon">🔀</span> Tener</button>
+                         <button class="nav-item" data-section="verbs/gustar"><span class="icon">🔀</span> Gustar</button>
+                         <button class="nav-item" data-section="verbs/haber"><span class="icon">🔀</span> Haber / Hay</button>
+                         <button class="nav-item" data-section="verbs/poder"><span class="icon">🔀</span> Poder</button>
+                         <button class="nav-item" data-section="verbs/querer"><span class="icon">🔀</span> Querer</button>
+                         <button class="nav-item" data-section="verbs/decir"><span class="icon">🔀</span> Decir</button>
+                    </div>
+
+                    <!-- Category 4: Grammar Tense -->
+                    <button class="category-toggle" data-category="Tenses"><span class="icon">▶️</span> Tenses</button>
+                    <div class="category-items" data-category="Tenses">
+                         <button class="nav-item" data-section="tense/charts"><span class="icon">⚡</span> Tense Conjugations Chart</button>
+                         <button class="nav-item" data-section="tense/tense-conjugations"><span class="icon">⚡</span> Tense Conjugations</button>
+                         <button class="nav-item" data-section="tense/preterite-tense"><span class="icon">⚡</span> Preterite Tense</button>
+                         <button class="nav-item" data-section="tense/imperfect-tense"><span class="icon">⚡</span> Imperfect Tense</button>
+                         <button class="nav-item" data-section="tense/conditional-tense"><span class="icon">⚡</span> Conditional Tense</button>
+                         <button class="nav-item" data-section="tense/future-tense"><span class="icon">⚡</span> Future Tense</button>
+                         <button class="nav-item" data-section="tense/affirmative-imperative"><span class="icon">⚡</span> Affirmative Imperative</button>
+                         <button class="nav-item" data-section="tense/negative-imperative"><span class="icon">⚡</span> Negative Imperative</button>
+                         <button class="nav-item" data-section="tense/present-subjective-tense"><span class="icon">⚡</span> Present Subjunctive</button>
+                         <button class="nav-item" data-section="tense/imperfect-subjective-tense"><span class="icon">⚡</span> Imperfect Subjunctive</button>
+                         <button class="nav-item" data-section="tense/present-progressive-tense"><span class="icon">⚡</span> Present Progressive</button>
+                         <button class="nav-item" data-section="tense/preterite-progressive-tense"><span class="icon">⚡</span> Preterite Progressive</button>
+                         <button class="nav-item" data-section="tense/imperfect-progressive-tense"><span class="icon">⚡</span> Imperfect Progressive</button>
+                         <button class="nav-item" data-section="tense/conditional-progressive-tense"><span class="icon">⚡</span> Conditional Progressive</button>
+                         <button class="nav-item" data-section="tense/future-progressive-tense"><span class="icon">⚡</span> Future Progressive</button>
+                         <button class="nav-item" data-section="tense/present-perfect-tense"><span class="icon">⚡</span> Present Perfect</button>
+                         <button class="nav-item" data-section="tense/past-perfect-tense"><span class="icon">⚡</span> Past Perfect</button>
+                         <button class="nav-item" data-section="tense/conditional-perfect-tense"><span class="icon">⚡</span> Conditional Perfect</button>
+                         <button class="nav-item" data-section="tense/future-perfect-tense"><span class="icon">⚡</span> Future Perfect</button>
+                         <button class="nav-item" data-section="tense/present-perfect-subjunctive-tense"><span class="icon">⚡</span> Present Perfect Subjunctive</button>
+                         <button class="nav-item" data-section="tense/past-perfect-subjunctive-tense"><span class="icon">⚡</span> Past Perfect Subjunctive</button>
+                         <button class="nav-item" data-section="tense/informal-future-tense"><span class="icon">⚡</span> Informal Future</button>
+                         <button class="nav-item" data-section="tense/preterite-vs-imperfect"><span class="icon">⚡</span> Preterite vs Imperfect</button>
+                    </div>
+
+                    <!-- Category 5: Vocabulary -->
+                    <button class="category-toggle" data-category="vocabulary"><span class="icon">▶️</span> Vocabulary</button>
+                    <div class="category-items" data-category="vocabulary">
+                         <button class="nav-item" data-section="vocabulary/animals"><span class="icon">🐾</span> Animals</button>
+                         <button class="nav-item" data-section="vocabulary/body"><span class="icon">🧍</span> Body</button>
+                         <button class="nav-item" data-section="vocabulary/clothing"><span class="icon">👕</span> Clothing</button>
+                         <button class="nav-item" data-section="vocabulary/directions-places"><span class="icon">🗺️</span> Directions & Places</button>
+                         <button class="nav-item" data-section="vocabulary/emotions"><span class="icon">😊</span> Emotions</button>
+                         <button class="nav-item" data-section="vocabulary/essentials"><span class="icon">🗺️</span> Essential Sayings</button>
+                         <button class="nav-item" data-section="vocabulary/family"><span class="icon">👪</span> Family</button>
+                         <button class="nav-item" data-section="vocabulary/food"><span class="icon">🍽️</span> Food & Drink</button>
+                         <button class="nav-item" data-section="vocabulary/greetings"><span class="icon">👋</span> Greetings</button>
+                         <button class="nav-item" data-section="vocabulary/house"><span class="icon">🏠</span> House</button>
+                         <button class="nav-item" data-section="vocabulary/numbers"><span class="icon">🔢</span> Numbers</button>
+                         <button class="nav-item" data-section="vocabulary/shopping"><span class="icon">🛒</span> Shopping & Money</button>
+                         <button class="nav-item" data-section="vocabulary/time-calendar"><span class="icon">📅</span> Time & Calendar</button>
+                         <button class="nav-item" data-section="vocabulary/travel"><span class="icon">✈️</span> Travel & Hotel</button>
+                         <button class="nav-item" data-section="vocabulary/weather"><span class="icon">⛅</span> Weather</button>
+                         <button class="nav-item" data-section="vocabulary/work-school"><span class="icon">🎒</span> Work & School</button>
+                    </div>
+               </nav>
+
+               <div class="sidebar-footer">
+                    <span id="serverStatus">🔌 checking...</span>
+                    <a class="practice-link" href="spanish-practice.html" target="_blank" rel="noopener">🎤 Open Practice</a>
+               </div>
+          </aside>
+
+          <!-- ─── Main Content ─── -->
+          <main id="main">
+               <!-- Sections are loaded dynamically via JavaScript -->
+               <div id="content"></div>
+          </main>
+
+          <script src="./js/spanish-cheatsheet.js"></script>
+     </body>
+</html>

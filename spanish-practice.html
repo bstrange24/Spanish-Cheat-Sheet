@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Spanish Pronunciation Practice – Pro</title>
+          <link rel="stylesheet" href="css/spanish-practice.css" />
+          <script src="js/dictionary.js"></script>
+          <script src="js/dictionary-extra.js"></script>
+          <script src="js/top1000.js"></script>
+     </head>
+     <body>
+          <div class="header">
+               <div class="header-left">
+                    <h1>Spanish Pronunciation Practice</h1>
+                    <p class="subtitle">Pro version ~ http://127.0.0.1:8765/spanish-practice.html</p>
+               </div>
+               <div class="header-right">
+                    <div class="streak" id="streakDisplay">🔥 Streak: 0 days</div>
+                    <button class="theme-toggle" id="themeBtn">🌙</button>
+               </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)">
+               <span id="goalDisplay">Today: 0 / 10</span>
+          </div>
+
+          <label for="lang">Spanish variant</label>
+          <select id="lang">
+               <option value="es-ES">Spain (es-ES)</option>
+               <option value="es-MX" selected>Mexico (es-MX)</option>
+               <option value="es-US">United States (es-US)</option>
+               <option value="es-AR">Argentina (es-AR)</option>
+          </select>
+
+          <label for="target">Spanish word or sentence</label>
+          <input type="text" id="target" placeholder="Type or click 🎲 Random" />
+
+          <div class="filters">
+               <div>
+                    <label for="difficulty">Difficulty</label>
+                    <select id="difficulty" style="width: auto; margin: 0; padding: 6px 10px">
+                         <option value="all">All</option>
+                         <option value="beginner">Beginner</option>
+                         <option value="intermediate">Intermediate</option>
+                         <option value="advanced">Advanced</option>
+                    </select>
+               </div>
+               <div>
+                    <label for="category">Category</label>
+                    <select id="category" style="width: auto; margin: 0; padding: 6px 10px">
+                         <option value="all">All</option>
+                         <option value="greetings">Greetings</option>
+                         <option value="food">Food</option>
+                         <option value="verbs">Verbs</option>
+                         <option value="everyday">Everyday</option>
+                         <option value="travel">Travel</option>
+                         <option value="family">Family</option>
+                         <option value="body">Body</option>
+                         <option value="house">House</option>
+                         <option value="weather">Weather</option>
+                         <option value="shopping">Shopping</option>
+                         <option value="clothing">Clothing</option>
+                         <option value="animals">Animals</option>
+                         <option value="emotions">Emotions</option>
+                         <option value="work">Work & School</option>
+                         <option value="numbers">Numbers</option>
+                         <option value="time">Time</option>
+                    </select>
+               </div>
+               <label><input type="checkbox" id="onlyVerbs" /> Only verbs</label>
+               <label><input type="checkbox" id="testMode" /> Test Mode (hide meaning)</label>
+               <label><input type="checkbox" id="autoAdvance" /> Auto-advance</label>
+          </div>
+
+          <div class="settings-row">
+               <label style="margin: 0; white-space: nowrap">TTS Speed</label>
+               <input type="range" id="ttsRate" min="0.5" max="1.2" step="0.05" value="0.85" style="flex: 1; margin: 0" />
+               <span id="rateValue">0.85</span>
+               <label style="margin: 0"><input type="checkbox" id="showPhonetic" checked /> Show phonetic</label>
+          </div>
+
+          <div class="btn-row">
+               <button id="speakBtn">🔊 Hear</button>
+               <button id="listenBtn">🎤 Speak</button>
+               <button id="tryAgainBtn">🔄 Again</button>
+               <button id="randomBtn">🎲 Random</button>
+               <button id="starBtn">⭐ Star</button>
+               <button id="weakBtn">📉 Weak</button>
+               <button id="top1000Btn">📚 Top 1000</button>
+               <button id="quizBtn">📝 Quiz</button>
+               <button id="dictationBtn">✍️ Dictation</button>
+               <button id="cardsBtn">🃏 Cards</button>
+               <button id="recordBtn">⏺ Record me</button>
+               <button id="playMyBtn" disabled>▶ My voice</button>
+               <button id="playerBtn">🎧 Player</button>
+               <button id="historyBtn">📜 History</button>
+               <button id="statsBtn">📊 Stats</button>
+               <button id="exportBtn">⬆ Export</button>
+               <button id="importBtn">⬇ Import</button>
+               <button id="resetBtn">🗑 Reset</button>
+               <button id="clearBtn">Clear</button>
+          </div>
+
+          <div class="info" style="margin-bottom: 12px">Shortcuts: <kbd>Space</kbd> Speak • <kbd>R</kbd> Random • <kbd>H</kbd> Hear • <kbd>T</kbd> Test Mode • <kbd>S</kbd> Star • <kbd>P</kbd> Player</div>
+
+          <!-- Target Card -->
+          <div class="card" id="targetCard" style="display: none">
+               <div>
+                    <strong>Target:</strong> <span id="targetText"></span>
+                    <span id="starIndicator" style="margin-left: 8px"></span>
+               </div>
+               <div class="phonetic" id="phoneticGuide"></div>
+               <div class="meaning" id="meaningGuide"></div>
+               <details class="tips">
+                    <summary>▶ Phonetic tips</summary>
+                    <div id="phoneticTipsContent"></div>
+               </details>
+               <div class="progress" id="phraseProgress"></div>
+          </div>
+
+          <!-- Study Card (quiz / dictation / flashcards) — hidden until a study mode starts -->
+          <div class="card" id="studyCard" style="display: none">
+               <div class="player-controls">
+                    <strong id="studyTitle">Study</strong>
+                    <div class="player-buttons">
+                         <button type="button" id="studyExitBtn">✕ Close study</button>
+                    </div>
+               </div>
+               <div id="studyBody"></div>
+          </div>
+
+          <!-- Result Card -->
+          <div class="card" id="resultCard">Results will appear here…</div>
+
+          <!-- Player Container -->
+          <div class="card" id="playerContainer">
+               <div class="player-controls">
+                    <strong>🎧 Pronunciation Player</strong>
+                    <div class="player-buttons">
+                         <button id="openPlayerBtn">🔗 Open in new tab</button>
+                         <button id="testPlayerBtn">🔍 Test Connection</button>
+                         <button id="refreshPlayerBtn">🔄 Refresh</button>
+                         <button id="togglePlayerBtn">▼ Hide</button>
+                    </div>
+               </div>
+               <div id="playerStatus" class="player-status">⏳ Loading player...</div>
+               <iframe id="playerFrame" src=""></iframe>
+               <div style="font-size: 0.8rem; color: var(--muted); margin-top: 6px">Powered by <code id="playerUrlDisplay">http://127.0.0.1:8765/pronunciation_player.html</code></div>
+          </div>
+
+          <!-- Modals -->
+          <div class="modal" id="historyModal">
+               <div class="modal-content">
+                    <h3>Practice History (last 25)</h3>
+                    <div id="historyList"></div>
+                    <button onclick="closeModal('historyModal')" style="margin-top: 12px; background: #64748b; color: white">Close</button>
+               </div>
+          </div>
+
+          <div class="modal" id="statsModal">
+               <div class="modal-content">
+                    <h3>Stats</h3>
+                    <div id="statsContent"></div>
+                    <button onclick="closeModal('statsModal')" style="margin-top: 12px; background: #64748b; color: white">Close</button>
+               </div>
+          </div>
+
+          <script src="./js/spanish-practice.js"></script>
+          <script src="./js/spanish-study.js"></script>
+     </body>
+</html>
