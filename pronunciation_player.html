@@ -183,6 +183,18 @@
       return `${base}/api/tts?text=${encodeURIComponent(w)}&lang=${encodeURIComponent(lang)}`;
     }
 
+    function fallbackSpeech(w) {
+      if (!("speechSynthesis" in window)) return false;
+      const utterance = new SpeechSynthesisUtterance(w);
+      utterance.lang = lang === "es" || lang === "es-es" ? "es-ES" : "es-MX";
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      setHint("Using browser voice fallback.", "ok");
+      return true;
+    }
+
     function loadAndPlay(w) {
       const url = ttsApiUrl(w);
       setHint("Loading natural voice…");
@@ -198,9 +210,12 @@
 
     player.addEventListener("ended", () => setHint("Done. Press Play to hear again.", "ok"));
     player.addEventListener("error", () => {
+      const fallbackUsed = fallbackSpeech(text);
       setHint(
-        "Could not load neural audio. Is the server running? (python scripts/start_player_server.py)",
-        "err"
+        fallbackUsed
+          ? "Audio server failed, using browser voice instead."
+          : "Could not load neural audio. The deployed TTS route is blocked from Vercel.",
+        fallbackUsed ? "ok" : "err"
       );
     });
 

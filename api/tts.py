@@ -2,6 +2,8 @@ import asyncio
 import os
 import re
 import tempfile
+from urllib.parse import quote_plus
+from urllib.request import Request, urlopen
 
 import edge_tts
 from flask import Flask, Response, request
@@ -45,6 +47,27 @@ async def synthesize_to_bytes(text: str, voice: str) -> bytes:
             os.remove(temp_path)
 
 
+def google_translate_tts_url(text: str, lang: str) -> str:
+    tl = "es"
+    normalized_lang = (lang or "es-419").lower()
+    if normalized_lang in {"es-419", "es-mx", "es-us", "es", "es-es"}:
+        tl = "es"
+    else:
+        tl = normalized_lang.split("-")[0] or "es"
+    encoded = quote_plus(text)
+    return f"https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl={tl}&q={encoded}"
+
+
+def synthesize_google_translate(text: str, lang: str) -> bytes:
+    url = google_translate_tts_url(text, lang)
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urlopen(req, timeout=30) as resp:
+        data = resp.read()
+    if not data:
+        raise RuntimeError("empty Google Translate TTS response")
+    return data
+
+
 @app.route("/api/tts", methods=["GET"])
 def tts():
     text = request.args.get("text") or request.args.get("q") or ""
@@ -53,7 +76,15 @@ def tts():
     try:
         cleaned = normalize_text(text)
         voice = pick_voice(lang)
-        audio = asyncio.run(synthesize_to_bytes(cleaned, voice))
+
+        if os.getenv("VERCEL"):
+            audio = synthesize_google_translate(cleaned, lang)
+        else:
+            try:
+                audio = asyncio.run(synthesize_to_bytes(cleaned, voice))
+            except Exception:
+                audio = synthesize_google_translate(cleaned, lang)
+
         return Response(
             audio,
             mimetype="audio/mpeg",
