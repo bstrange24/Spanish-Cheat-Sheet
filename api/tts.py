@@ -48,12 +48,15 @@ async def synthesize_to_bytes(text: str, voice: str) -> bytes:
 
 
 def google_translate_tts_url(text: str, lang: str) -> str:
-    tl = "es"
-    normalized_lang = (lang or "es-419").lower()
-    if normalized_lang in {"es-419", "es-mx", "es-us", "es", "es-es"}:
-        tl = "es"
-    else:
-        tl = normalized_lang.split("-")[0] or "es"
+    locale_map = {
+        "es-419": "es-MX",
+        "es-mx": "es-MX",
+        "es-us": "es-US",
+        "es": "es-ES",
+        "es-es": "es-ES",
+    }
+    normalized_lang = (lang or "es-419").lower().strip()
+    tl = locale_map.get(normalized_lang, "es")
     encoded = quote_plus(text)
     return f"https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl={tl}&q={encoded}"
 
