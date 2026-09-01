@@ -209,6 +209,44 @@
           });
      }
 
+     function nounGenderClass(text) {
+          const t = String(text || '').trim();
+          if (!t) return '';
+
+          const normalized = t
+               .toLowerCase()
+               .replace(/^[“"'«]+|[”"'»]+$/g, '')
+               .replace(/\s+/g, ' ');
+          if (!normalized) return '';
+
+          const first = normalized.match(/^(el|la|los|las|un|una|unos|unas|lo)\b/);
+          if (!first) return '';
+
+          switch (first[1]) {
+               case 'el':
+               case 'los':
+               case 'un':
+               case 'unos':
+                    return 'noun-masc';
+               case 'lo':
+                    return 'noun-neuter';
+               default:
+                    return 'noun-fem';
+          }
+     }
+
+     function applyNounColors(root) {
+          if (!root) return;
+          root.querySelectorAll('.say').forEach(el => {
+               if (el.dataset.nounColorApplied === 'true') return;
+               const text = el.getAttribute('data-text') || el.textContent || '';
+               const cls = nounGenderClass(text);
+               if (!cls) return;
+               el.classList.add(cls);
+               el.dataset.nounColorApplied = 'true';
+          });
+     }
+
      const SEE_ALSO = {
           alphabet: [
                { id: 'vowels', label: 'Vowels' },
@@ -950,6 +988,7 @@
                const html = await response.text();
                content.innerHTML = html;
                highlightDiphthongs(content);
+               applyNounColors(content);
                currentSectionId = sectionId;
                addPageToolbar(sectionId);
                addSeeAlso(sectionId);

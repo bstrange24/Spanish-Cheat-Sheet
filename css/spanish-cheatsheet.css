@@ -25,6 +25,9 @@
      --highlight-bg: #d4a72c;
      --highlight-color: #0d1117;
      --diphthong-underline: #e4bd63;
+     --noun-masc: #7bbcff;
+     --noun-fem: #f7a8c8;
+     --noun-neuter: #7ee0a2;
 }
 
 /* Light mode */
@@ -54,6 +57,9 @@ html.light-mode {
      --highlight-bg: #d4a72c;
      --highlight-color: #1f2328;
      --diphthong-underline: #b8860b;
+     --noun-masc: #0056b3;
+     --noun-fem: #d63384;
+     --noun-neuter: #2e7d32;
 }
 
 /* ─── Reset & Base ─── */
@@ -532,10 +538,47 @@ details ul li {
      padding: 0 4px;
 }
 
+.noun-masc {
+     color: var(--noun-masc);
+     font-weight: 700;
+     text-decoration-color: var(--noun-masc);
+}
+
+.say.noun-masc {
+     color: var(--noun-masc);
+     font-weight: 700;
+     text-decoration-color: var(--noun-masc);
+}
+
+.noun-fem {
+     color: var(--noun-fem);
+     font-weight: 700;
+     text-decoration-color: var(--noun-fem);
+}
+
+.say.noun-fem {
+     color: var(--noun-fem);
+     font-weight: 700;
+     text-decoration-color: var(--noun-fem);
+}
+
+.say.noun-neuter {
+     color: var(--noun-neuter);
+     font-weight: 700;
+     text-decoration-color: var(--noun-neuter);
+}
+
 .say:hover {
      background: var(--link-hover-bg);
      text-decoration: underline solid var(--link-color);
      color: var(--link-hover-color);
+}
+
+.say.noun-masc:hover,
+.say.noun-fem:hover,
+.say.noun-neuter:hover {
+     background: rgba(0, 0, 0, 0.04);
+     text-decoration: underline solid currentColor;
 }
 
 .say.playing {
