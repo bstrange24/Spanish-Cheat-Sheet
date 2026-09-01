@@ -1,5 +1,9 @@
 // ===================== CONFIGURATION =====================
-const PLAYER_BASE_URL = 'http://127.0.0.1:8765/pronunciation_player.html';
+const PLAYER_BASE_URL = (() => {
+     const host = window.location.hostname;
+     const isLocal = host === 'localhost' || host === '127.0.0.1';
+     return (isLocal ? 'http://127.0.0.1:8765' : window.location.origin) + '/pronunciation_player.html';
+})();
 
 const TIPS = ['Vowels are pure: a=AH, e=EH, i=EE, o=OH, u=OO', 'j / g(e,i) = strong H (like loch)', 'll & y ≈ English y (or zh in Argentina)', 'ñ = ny (canyon)', 'rr and initial r are rolled', 'h is always silent'];
 

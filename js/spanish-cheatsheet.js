@@ -1,6 +1,12 @@
 (function () {
      'use strict';
 
+     function getAudioBaseUrl() {
+          const host = window.location.hostname;
+          const isLocal = host === 'localhost' || host === '127.0.0.1';
+          return isLocal ? 'http://127.0.0.1:8765' : window.location.origin;
+     }
+
      // ─── DOM refs ───
      const player = document.getElementById('audioPlayer');
      const status = document.getElementById('audioStatus');
@@ -31,22 +37,23 @@
 
      // ─── Server check ───
      async function checkServer() {
+          const baseUrl = getAudioBaseUrl();
+          const isLocal = baseUrl === 'http://127.0.0.1:8765';
+
           try {
-               // Try to fetch the server root (or just check if the server is reachable)
-               const resp = await fetch('http://127.0.0.1:8765/', {
+               const resp = await fetch(baseUrl + '/', {
                     method: 'GET',
                     signal: AbortSignal.timeout(2000),
                });
                if (resp.ok || resp.status === 404) {
-                    // If we get any response, the server is running
-                    serverStatus.textContent = '✅ Server online';
+                    serverStatus.textContent = isLocal ? '✅ Server online' : '✅ Vercel audio API ready';
                     serverStatus.className = 'online';
                } else {
                     serverStatus.textContent = '❌ Server error';
                     serverStatus.className = 'offline';
                }
           } catch {
-               serverStatus.textContent = '❌ Server offline — start server!';
+               serverStatus.textContent = isLocal ? '❌ Server offline — start server!' : '❌ Audio API unavailable';
                serverStatus.className = 'offline';
           }
      }
@@ -57,7 +64,7 @@
           if (!text || !text.trim()) return;
           text = text.trim();
           lang = lang || getTtsLang();
-          const url = 'http://127.0.0.1:8765/api/tts?text=' + encodeURIComponent(text) + '&lang=' + encodeURIComponent(lang);
+          const url = getAudioBaseUrl() + '/api/tts?text=' + encodeURIComponent(text) + '&lang=' + encodeURIComponent(lang);
           player.src = url;
           status.textContent = '🔊 ' + (text.length > 30 ? text.substring(0, 30) + '…' : text);
           player.play().catch(err => {
@@ -142,7 +149,7 @@
                candidates.push([start, end]);
           }
 
-          candidates.sort((a, b) => a[0] - b[0] || (b[1] - b[0]) - (a[1] - a[0]));
+          candidates.sort((a, b) => a[0] - b[0] || b[1] - b[0] - (a[1] - a[0]));
           const chosen = [];
           candidates.forEach(span => {
                if (chosen.some(c => spansOverlap(span, c))) return;
@@ -203,67 +210,234 @@
      }
 
      const SEE_ALSO = {
-          alphabet: [{ id: 'vowels', label: 'Vowels' }, { id: 'pronunciation', label: 'Pronunciation' }, { id: 'accent-stress', label: 'Accent & Stress' }],
-          vowels: [{ id: 'diphthongs', label: 'Diphthongs' }, { id: 'accent-stress', label: 'Accent & Stress' }],
-          pronunciation: [{ id: 'alphabet', label: 'Alphabet' }, { id: 'diphthongs', label: 'Diphthongs' }, { id: 'accent-stress', label: 'Accent & Stress' }],
-          diphthongs: [{ id: 'vowels', label: 'Vowels' }, { id: 'accent-stress', label: 'Accent & Stress' }],
-          'accent-stress': [{ id: 'diphthongs', label: 'Diphthongs' }, { id: 'question-words', label: 'Question Words' }],
-          verbs: [{ id: 'irregular-verbs', label: 'Irregular Verbs' }, { id: 'tense/tense-conjugations', label: 'Tense Conjugations' }],
-          'irregular-verbs': [{ id: 'verbs', label: 'Verbs' }, { id: 'poder', label: 'Poder' }, { id: 'querer', label: 'Querer' }, { id: 'decir', label: 'Decir' }],
-          'ser-estar': [{ id: 'hacer', label: 'Hacer' }, { id: 'tener', label: 'Tener' }, { id: 'weather', label: 'Weather' }],
-          hacer: [{ id: 'ser-estar', label: 'Ser - Estar' }, { id: 'weather', label: 'Weather' }],
-          tener: [{ id: 'obligation', label: 'Obligation' }, { id: 'ser-estar', label: 'Ser - Estar' }],
-          nouns: [{ id: 'gender', label: 'Gender' }, { id: 'plural-rules', label: 'Plural Rules' }],
-          gender: [{ id: 'nouns', label: 'Nouns' }, { id: 'adjectives', label: 'Adjectives' }],
-          'plural-rules': [{ id: 'nouns', label: 'Nouns' }, { id: 'gender', label: 'Gender' }],
-          pronouns: [{ id: 'pronoun-placement', label: 'Pronoun Placement' }, { id: 'gustar', label: 'Gustar' }, { id: 'tu-usted-vos', label: 'Tú / Usted / Vos' }],
-          conjunctions: [{ id: 'adverbs', label: 'Adverbs' }, { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' }],
-          adverbs: [{ id: 'adjectives', label: 'Adjectives' }, { id: 'conjunctions', label: 'Conjunctions' }],
-          adjectives: [{ id: 'gender', label: 'Gender' }, { id: 'comparisons', label: 'Comparisons' }, { id: 'adverbs', label: 'Adverbs' }],
-          prepositions: [{ id: 'por-para', label: 'Por vs Para' }, { id: 'personal-a', label: 'Personal A' }],
-          'question-words': [{ id: 'accent-stress', label: 'Accent & Stress' }, { id: 'negation', label: 'Negation' }],
+          alphabet: [
+               { id: 'vowels', label: 'Vowels' },
+               { id: 'pronunciation', label: 'Pronunciation' },
+               { id: 'accent-stress', label: 'Accent & Stress' },
+          ],
+          vowels: [
+               { id: 'diphthongs', label: 'Diphthongs' },
+               { id: 'accent-stress', label: 'Accent & Stress' },
+          ],
+          pronunciation: [
+               { id: 'alphabet', label: 'Alphabet' },
+               { id: 'diphthongs', label: 'Diphthongs' },
+               { id: 'accent-stress', label: 'Accent & Stress' },
+          ],
+          diphthongs: [
+               { id: 'vowels', label: 'Vowels' },
+               { id: 'accent-stress', label: 'Accent & Stress' },
+          ],
+          'accent-stress': [
+               { id: 'diphthongs', label: 'Diphthongs' },
+               { id: 'question-words', label: 'Question Words' },
+          ],
+          verbs: [
+               { id: 'irregular-verbs', label: 'Irregular Verbs' },
+               { id: 'tense/tense-conjugations', label: 'Tense Conjugations' },
+          ],
+          'irregular-verbs': [
+               { id: 'verbs', label: 'Verbs' },
+               { id: 'poder', label: 'Poder' },
+               { id: 'querer', label: 'Querer' },
+               { id: 'decir', label: 'Decir' },
+          ],
+          'ser-estar': [
+               { id: 'hacer', label: 'Hacer' },
+               { id: 'tener', label: 'Tener' },
+               { id: 'weather', label: 'Weather' },
+          ],
+          hacer: [
+               { id: 'ser-estar', label: 'Ser - Estar' },
+               { id: 'weather', label: 'Weather' },
+          ],
+          tener: [
+               { id: 'obligation', label: 'Obligation' },
+               { id: 'ser-estar', label: 'Ser - Estar' },
+          ],
+          nouns: [
+               { id: 'gender', label: 'Gender' },
+               { id: 'plural-rules', label: 'Plural Rules' },
+          ],
+          gender: [
+               { id: 'nouns', label: 'Nouns' },
+               { id: 'adjectives', label: 'Adjectives' },
+          ],
+          'plural-rules': [
+               { id: 'nouns', label: 'Nouns' },
+               { id: 'gender', label: 'Gender' },
+          ],
+          pronouns: [
+               { id: 'pronoun-placement', label: 'Pronoun Placement' },
+               { id: 'gustar', label: 'Gustar' },
+               { id: 'tu-usted-vos', label: 'Tú / Usted / Vos' },
+          ],
+          conjunctions: [
+               { id: 'adverbs', label: 'Adverbs' },
+               { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' },
+          ],
+          adverbs: [
+               { id: 'adjectives', label: 'Adjectives' },
+               { id: 'conjunctions', label: 'Conjunctions' },
+          ],
+          adjectives: [
+               { id: 'gender', label: 'Gender' },
+               { id: 'comparisons', label: 'Comparisons' },
+               { id: 'adverbs', label: 'Adverbs' },
+          ],
+          prepositions: [
+               { id: 'por-para', label: 'Por vs Para' },
+               { id: 'personal-a', label: 'Personal A' },
+          ],
+          'question-words': [
+               { id: 'accent-stress', label: 'Accent & Stress' },
+               { id: 'negation', label: 'Negation' },
+          ],
           'por-para': [{ id: 'prepositions', label: 'Prepositions' }],
-          ir: [{ id: 'tense/informal-future-tense', label: 'Informal Future' }, { id: 'directions-places', label: 'Directions & Places' }, { id: 'travel', label: 'Travel & Hotel' }],
-          gustar: [{ id: 'pronouns', label: 'Pronouns' }, { id: 'emotions', label: 'Emotions' }],
-          haber: [{ id: 'obligation', label: 'Obligation' }, { id: 'tense/present-perfect-tense', label: 'Present Perfect' }],
+          ir: [
+               { id: 'tense/informal-future-tense', label: 'Informal Future' },
+               { id: 'directions-places', label: 'Directions & Places' },
+               { id: 'travel', label: 'Travel & Hotel' },
+          ],
+          gustar: [
+               { id: 'pronouns', label: 'Pronouns' },
+               { id: 'emotions', label: 'Emotions' },
+          ],
+          haber: [
+               { id: 'obligation', label: 'Obligation' },
+               { id: 'tense/present-perfect-tense', label: 'Present Perfect' },
+          ],
           comparisons: [{ id: 'adjectives', label: 'Adjectives' }],
           negation: [{ id: 'question-words', label: 'Question Words' }],
-          'personal-a': [{ id: 'prepositions', label: 'Prepositions' }, { id: 'pronouns', label: 'Pronouns' }],
-          diminutives: [{ id: 'nouns', label: 'Nouns' }, { id: 'adjectives', label: 'Adjectives' }],
-          obligation: [{ id: 'tener', label: 'Tener' }, { id: 'haber', label: 'Haber / Hay' }],
-          'passive-se': [{ id: 'pronouns', label: 'Pronouns' }, { id: 'pronoun-placement', label: 'Pronoun Placement' }],
-          poder: [{ id: 'querer', label: 'Querer' }, { id: 'irregular-verbs', label: 'Irregular Verbs' }],
-          querer: [{ id: 'poder', label: 'Poder' }, { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' }],
-          decir: [{ id: 'irregular-verbs', label: 'Irregular Verbs' }, { id: 'pronoun-placement', label: 'Pronoun Placement' }],
-          'tu-usted-vos': [{ id: 'pronouns', label: 'Pronouns' }, { id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' }],
-          'subjunctive-triggers': [{ id: 'tense/present-subjective-tense', label: 'Present Subjunctive' }, { id: 'querer', label: 'Querer' }, { id: 'conjunctions', label: 'Conjunctions' }],
-          'pronoun-placement': [{ id: 'pronouns', label: 'Pronouns' }, { id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' }, { id: 'tense/negative-imperative', label: 'Negative Imperative' }],
-          'false-friends': [{ id: 'adjectives', label: 'Adjectives' }, { id: 'emotions', label: 'Emotions' }],
-          'tense/tense-conjugations': [{ id: 'verbs', label: 'Verbs' }, { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' }],
-          'tense/preterite-tense': [{ id: 'tense/imperfect-tense', label: 'Imperfect Tense' }, { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' }],
-          'tense/imperfect-tense': [{ id: 'tense/preterite-tense', label: 'Preterite Tense' }, { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' }],
-          'tense/informal-future-tense': [{ id: 'ir', label: 'Ir' }, { id: 'tense/future-tense', label: 'Future Tense' }],
-          'tense/present-subjective-tense': [{ id: 'subjunctive-triggers', label: 'Subjunctive Triggers' }, { id: 'tense/imperfect-subjective-tense', label: 'Imperfect Subjunctive' }],
-          'tense/imperfect-subjective-tense': [{ id: 'subjunctive-triggers', label: 'Subjunctive Triggers' }, { id: 'tense/present-subjective-tense', label: 'Present Subjunctive' }],
+          'personal-a': [
+               { id: 'prepositions', label: 'Prepositions' },
+               { id: 'pronouns', label: 'Pronouns' },
+          ],
+          diminutives: [
+               { id: 'nouns', label: 'Nouns' },
+               { id: 'adjectives', label: 'Adjectives' },
+          ],
+          obligation: [
+               { id: 'tener', label: 'Tener' },
+               { id: 'haber', label: 'Haber / Hay' },
+          ],
+          'passive-se': [
+               { id: 'pronouns', label: 'Pronouns' },
+               { id: 'pronoun-placement', label: 'Pronoun Placement' },
+          ],
+          poder: [
+               { id: 'querer', label: 'Querer' },
+               { id: 'irregular-verbs', label: 'Irregular Verbs' },
+          ],
+          querer: [
+               { id: 'poder', label: 'Poder' },
+               { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' },
+          ],
+          decir: [
+               { id: 'irregular-verbs', label: 'Irregular Verbs' },
+               { id: 'pronoun-placement', label: 'Pronoun Placement' },
+          ],
+          'tu-usted-vos': [
+               { id: 'pronouns', label: 'Pronouns' },
+               { id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' },
+          ],
+          'subjunctive-triggers': [
+               { id: 'tense/present-subjective-tense', label: 'Present Subjunctive' },
+               { id: 'querer', label: 'Querer' },
+               { id: 'conjunctions', label: 'Conjunctions' },
+          ],
+          'pronoun-placement': [
+               { id: 'pronouns', label: 'Pronouns' },
+               { id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' },
+               { id: 'tense/negative-imperative', label: 'Negative Imperative' },
+          ],
+          'false-friends': [
+               { id: 'adjectives', label: 'Adjectives' },
+               { id: 'emotions', label: 'Emotions' },
+          ],
+          'tense/tense-conjugations': [
+               { id: 'verbs', label: 'Verbs' },
+               { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' },
+          ],
+          'tense/preterite-tense': [
+               { id: 'tense/imperfect-tense', label: 'Imperfect Tense' },
+               { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' },
+          ],
+          'tense/imperfect-tense': [
+               { id: 'tense/preterite-tense', label: 'Preterite Tense' },
+               { id: 'tense/preterite-vs-imperfect', label: 'Preterite vs Imperfect' },
+          ],
+          'tense/informal-future-tense': [
+               { id: 'ir', label: 'Ir' },
+               { id: 'tense/future-tense', label: 'Future Tense' },
+          ],
+          'tense/present-subjective-tense': [
+               { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' },
+               { id: 'tense/imperfect-subjective-tense', label: 'Imperfect Subjunctive' },
+          ],
+          'tense/imperfect-subjective-tense': [
+               { id: 'subjunctive-triggers', label: 'Subjunctive Triggers' },
+               { id: 'tense/present-subjective-tense', label: 'Present Subjunctive' },
+          ],
           'tense/present-perfect-tense': [{ id: 'haber', label: 'Haber / Hay' }],
-          'tense/preterite-vs-imperfect': [{ id: 'tense/preterite-tense', label: 'Preterite Tense' }, { id: 'tense/imperfect-tense', label: 'Imperfect Tense' }],
-          'tense/affirmative-imperative': [{ id: 'tense/negative-imperative', label: 'Negative Imperative' }, { id: 'pronoun-placement', label: 'Pronoun Placement' }],
-          'tense/negative-imperative': [{ id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' }, { id: 'negation', label: 'Negation' }],
-          'directions-places': [{ id: 'travel', label: 'Travel & Hotel' }, { id: 'prepositions', label: 'Prepositions' }, { id: 'ir', label: 'Ir' }],
+          'tense/preterite-vs-imperfect': [
+               { id: 'tense/preterite-tense', label: 'Preterite Tense' },
+               { id: 'tense/imperfect-tense', label: 'Imperfect Tense' },
+          ],
+          'tense/affirmative-imperative': [
+               { id: 'tense/negative-imperative', label: 'Negative Imperative' },
+               { id: 'pronoun-placement', label: 'Pronoun Placement' },
+          ],
+          'tense/negative-imperative': [
+               { id: 'tense/affirmative-imperative', label: 'Affirmative Imperative' },
+               { id: 'negation', label: 'Negation' },
+          ],
+          'directions-places': [
+               { id: 'travel', label: 'Travel & Hotel' },
+               { id: 'prepositions', label: 'Prepositions' },
+               { id: 'ir', label: 'Ir' },
+          ],
           numbers: [{ id: 'time-calendar', label: 'Time & Calendar' }],
-          'time-calendar': [{ id: 'numbers', label: 'Numbers' }, { id: 'weather', label: 'Weather' }],
-          greetings: [{ id: 'tu-usted-vos', label: 'Tú / Usted / Vos' }, { id: 'emotions', label: 'Emotions' }],
+          'time-calendar': [
+               { id: 'numbers', label: 'Numbers' },
+               { id: 'weather', label: 'Weather' },
+          ],
+          greetings: [
+               { id: 'tu-usted-vos', label: 'Tú / Usted / Vos' },
+               { id: 'emotions', label: 'Emotions' },
+          ],
           family: [{ id: 'greetings', label: 'Greetings' }],
           food: [{ id: 'shopping', label: 'Shopping & Money' }],
-          body: [{ id: 'emotions', label: 'Emotions' }, { id: 'gustar', label: 'Gustar' }],
+          body: [
+               { id: 'emotions', label: 'Emotions' },
+               { id: 'gustar', label: 'Gustar' },
+          ],
           house: [{ id: 'directions-places', label: 'Directions & Places' }],
-          weather: [{ id: 'hacer', label: 'Hacer' }, { id: 'ser-estar', label: 'Ser - Estar' }, { id: 'clothing', label: 'Clothing' }],
-          shopping: [{ id: 'numbers', label: 'Numbers' }, { id: 'food', label: 'Food & Drink' }],
+          weather: [
+               { id: 'hacer', label: 'Hacer' },
+               { id: 'ser-estar', label: 'Ser - Estar' },
+               { id: 'clothing', label: 'Clothing' },
+          ],
+          shopping: [
+               { id: 'numbers', label: 'Numbers' },
+               { id: 'food', label: 'Food & Drink' },
+          ],
           'work-school': [{ id: 'obligation', label: 'Obligation' }],
-          clothing: [{ id: 'weather', label: 'Weather' }, { id: 'shopping', label: 'Shopping & Money' }],
+          clothing: [
+               { id: 'weather', label: 'Weather' },
+               { id: 'shopping', label: 'Shopping & Money' },
+          ],
           animals: [{ id: 'family', label: 'Family' }],
-          emotions: [{ id: 'gustar', label: 'Gustar' }, { id: 'body', label: 'Body' }, { id: 'false-friends', label: 'False Friends' }],
-          travel: [{ id: 'directions-places', label: 'Directions & Places' }, { id: 'ir', label: 'Ir' }, { id: 'greetings', label: 'Greetings' }],
+          emotions: [
+               { id: 'gustar', label: 'Gustar' },
+               { id: 'body', label: 'Body' },
+               { id: 'false-friends', label: 'False Friends' },
+          ],
+          travel: [
+               { id: 'directions-places', label: 'Directions & Places' },
+               { id: 'ir', label: 'Ir' },
+               { id: 'greetings', label: 'Greetings' },
+          ],
      };
 
      let currentSectionId = '';
@@ -281,11 +455,13 @@
      }
 
      function searchWords(text) {
-          return String(text || '')
-               .toLowerCase()
-               .normalize('NFD')
-               .replace(/[\u0300-\u036f]/g, '')
-               .match(/[a-z0-9]+/g) || [];
+          return (
+               String(text || '')
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .match(/[a-z0-9]+/g) || []
+          );
      }
 
      function hasExactMatch(text, query) {
@@ -562,11 +738,7 @@
      function addPageToolbar(sectionId) {
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
-          bar.innerHTML =
-               '<label><input type="checkbox" id="hideEnglish" /> Hide English</label>' +
-               '<label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label>' +
-               '<button type="button" id="practicePageBtn">🎲 Practice this page</button>' +
-               '<button type="button" id="quizPageBtn">📝 Quiz this page</button>';
+          bar.innerHTML = '<label><input type="checkbox" id="hideEnglish" /> Hide English</label>' + '<label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label>' + '<button type="button" id="practicePageBtn">🎲 Practice this page</button>' + '<button type="button" id="quizPageBtn">📝 Quiz this page</button>';
           content.insertBefore(bar, content.firstChild);
           const hideBox = document.getElementById('hideEnglish');
           hideBox.checked = localStorage.getItem('hideEnglish') === 'true';
