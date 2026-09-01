@@ -495,6 +495,14 @@
           const pronBox = document.getElementById('hidePronunciation');
           if (enBox) enBox.checked = hideEn;
           if (pronBox) pronBox.checked = hidePron;
+
+          // Hide inline pronunciation spans such as <span class="secondary">pehn-SAHR</span>
+          // and <span class="pronunciation">OH-lah</span> when the user toggles the checkbox,
+          // while keeping the existing table-column behavior.
+          content.querySelectorAll('.secondary, .pronunciation').forEach(el => {
+               el.style.display = hidePron ? 'none' : '';
+          });
+
           content.querySelectorAll('table').forEach(table => {
                const enIdxs = [];
                const pronIdxs = [];

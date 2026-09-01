@@ -245,6 +245,9 @@ body {
 }
 
 .page-toolbar {
+     position: sticky;
+     top: 0;
+     z-index: 20;
      display: flex;
      flex-wrap: wrap;
      align-items: center;
@@ -254,6 +257,7 @@ body {
      border: 1px solid var(--border-color);
      border-radius: 8px;
      background: var(--bg-secondary);
+     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
      font-size: 0.9rem;
 }
 
@@ -917,8 +921,59 @@ html.light-mode .theme-toggle .theme-icon-dark {
 }
 
 .secondary {
-     color: #919090;
-     /* Light gray */
+     color: var(--text-secondary);
      font-size: 0.9em;
-     /* Slightly smaller */
+}
+
+.secondary-meaning {
+     color: var(--text-secondary);
+     font-size: 0.9em;
+}
+
+.practice-questions {
+     line-height: 1.8;
+}
+
+.hint {
+     color: #777;
+     font-size: 0.9em;
+     font-style: italic;
+}
+
+.answer-list li {
+     margin: 0 0 1rem;
+     padding-bottom: 0.75rem;
+     border-bottom: 1px solid #e5e5e5;
+}
+
+.answer-sentence,
+/* .pronunciation, */
+.explanation {
+     display: block;
+}
+
+.answer-sentence {
+     font-size: 1.05rem;
+}
+
+.pronunciation {
+     margin-top: 0.2rem;
+     color: #777;
+     font-size: 0.9rem;
+     font-style: italic;
+}
+
+.pronunciation::before {
+     /* content: "🔊 "; */
+     font-style: normal;
+}
+
+.explanation {
+     margin-top: 0.2rem;
+     color: #555;
+     font-size: 0.9rem;
+}
+
+.explanation::before {
+     content: "— ";
 }
