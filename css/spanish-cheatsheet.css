@@ -214,6 +214,24 @@ body {
      outline-offset: 1px;
 }
 
+.search-exact {
+     display: flex;
+     align-items: center;
+     gap: 6px;
+     margin-top: 8px;
+     font-size: 0.8rem;
+     font-weight: 500;
+     color: var(--text-muted);
+     cursor: pointer;
+}
+
+.search-exact input {
+     margin: 0;
+     width: auto;
+     flex-shrink: 0;
+     accent-color: var(--link-color);
+}
+
 .search-empty {
      margin-top: 8px;
      font-size: 0.8rem;

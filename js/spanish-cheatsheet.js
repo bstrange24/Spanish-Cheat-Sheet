@@ -275,6 +275,37 @@
           return (box && box.value ? box.value : '').trim();
      }
 
+     function isExactSearch() {
+          const box = document.getElementById('searchExact');
+          return !!(box && box.checked);
+     }
+
+     function searchWords(text) {
+          return String(text || '')
+               .toLowerCase()
+               .normalize('NFD')
+               .replace(/[\u0300-\u036f]/g, '')
+               .match(/[a-z0-9]+/g) || [];
+     }
+
+     function hasExactMatch(text, query) {
+          const qWords = searchWords(query);
+          if (!qWords.length) return false;
+          const words = searchWords(text);
+          if (qWords.length === 1) return words.includes(qWords[0]);
+          for (let i = 0; i <= words.length - qWords.length; i++) {
+               let ok = true;
+               for (let j = 0; j < qWords.length; j++) {
+                    if (words[i + j] !== qWords[j]) {
+                         ok = false;
+                         break;
+                    }
+               }
+               if (ok) return true;
+          }
+          return false;
+     }
+
      function isPronunciationHeader(text) {
           const t = (text || '').trim();
           if (/english/i.test(t)) return false;
@@ -311,11 +342,13 @@
      function applySearchHits(query) {
           content.querySelectorAll('.search-hit').forEach(el => el.classList.remove('search-hit'));
           const q = (query || '').trim().toLowerCase();
-          if (q.length < 2) return 0;
+          const exact = isExactSearch();
+          if (!q || (!exact && q.length < 2)) return 0;
           let n = 0;
           content.querySelectorAll('.say').forEach(el => {
-               const t = (el.getAttribute('data-text') || el.textContent || '').toLowerCase();
-               if (t.includes(q)) {
+               const t = el.getAttribute('data-text') || el.textContent || '';
+               const hit = exact ? hasExactMatch(t, q) : t.toLowerCase().includes(q);
+               if (hit) {
                     el.classList.add('search-hit');
                     n++;
                }
@@ -704,11 +737,12 @@
                indexMap[row.id] = row.blob;
           });
           let shown = 0;
+          const exact = isExactSearch();
           navItems.forEach(item => {
                const id = item.dataset.section;
                const label = item.textContent.toLowerCase();
                const blob = indexMap[id] || label;
-               const match = label.includes(q) || blob.includes(q);
+               const match = exact ? hasExactMatch(label, q) || hasExactMatch(blob, q) : label.includes(q) || blob.includes(q);
                item.classList.toggle('search-hidden', !match);
                if (match) shown++;
           });
@@ -798,6 +832,10 @@
      });
 
      const navSearch = document.getElementById('navSearch');
+     const searchExact = document.getElementById('searchExact');
+     if (searchExact) {
+          searchExact.checked = localStorage.getItem('searchExact') === 'true';
+     }
      if (navSearch) {
           const runSearch = function () {
                const q = navSearch.value;
@@ -816,6 +854,12 @@
                const first = document.querySelector('#nav .nav-item:not(.search-hidden)');
                if (first) navigateTo(first.dataset.section);
           });
+          if (searchExact) {
+               searchExact.addEventListener('change', function () {
+                    localStorage.setItem('searchExact', searchExact.checked ? 'true' : 'false');
+                    runSearch();
+               });
+          }
      }
 
      // ─── Category toggles ───

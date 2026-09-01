@@ -40,6 +40,10 @@
                     </div>
                     <p class="subtitle">Cheat Sheet</p>
                     <input type="search" id="navSearch" placeholder="Search pages & words…" autocomplete="off" aria-label="Search pages and words" />
+                    <label class="search-exact" for="searchExact">
+                         <input type="checkbox" id="searchExact" />
+                         Exact match
+                    </label>
                     <p id="searchEmpty" class="search-empty" hidden>No matching pages</p>
                </div>
 
@@ -47,11 +51,11 @@
                     <!-- Category 1: Pronunciation Basics -->
                     <button class="category-toggle" data-category="pronunciation"><span class="icon">▶️</span> Pronunciation Basics</button>
                     <div class="category-items" data-category="pronunciation">
-                         <button class="nav-item" data-section="pronunciation-basics/alphabet"><span class="icon">📖</span> Alphabet</button>
-                         <button class="nav-item" data-section="pronunciation-basics/vowels"><span class="icon">🔤</span> Vowels</button>
-                         <button class="nav-item" data-section="pronunciation-basics/pronunciation"><span class="icon">🔊</span> Pronunciation</button>
-                         <button class="nav-item" data-section="pronunciation-basics/diphthongs"><span class="icon">🎵</span> Diphthongs</button>
                          <button class="nav-item" data-section="pronunciation-basics/accent-stress"><span class="icon">´</span> Accent & Stress</button>
+                         <button class="nav-item" data-section="pronunciation-basics/alphabet"><span class="icon">📖</span> Alphabet</button>
+                         <button class="nav-item" data-section="pronunciation-basics/diphthongs"><span class="icon">🎵</span> Diphthongs</button>
+                         <button class="nav-item" data-section="pronunciation-basics/pronunciation"><span class="icon">🔊</span> Pronunciation</button>
+                         <button class="nav-item" data-section="pronunciation-basics/vowels"><span class="icon">🔤</span> Vowels</button>
                     </div>
 
                     <!-- Category 2: Grammar Core -->
@@ -82,20 +86,19 @@
                     <!-- Category 3: Verbs -->
                     <button class="category-toggle" data-category="verbs"><span class="icon">▶️</span> Verbs</button>
                     <div class="category-items" data-category="verbs">
-                         <button class="nav-item" data-section="verbs/verbs"><span class="icon">🏃</span> Verbs</button>
-                         <button class="nav-item" data-section="verbs/irregular-verbs"><span class="icon">🏃</span> Irregular Verbs</button>
-                         <button class="nav-item" data-section="verbs/ser-estar"><span class="icon">🔀</span> Ser - Estar</button>
-                         <button class="nav-item" data-section="verbs/ser"><span class="icon">🔀</span> Ser</button>
                          <button class="nav-item" data-section="verbs/estar"><span class="icon">🔀</span> Estar</button>
-                         <button class="nav-item" data-section="verbs/ir"><span class="icon">🔀</span> Ir</button>
-                         <button class="nav-item" data-section="verbs/hacer"><span class="icon">🔀</span> Hacer</button>
-                         <button class="nav-item" data-section="verbs/jugar"><span class="icon">🔀</span> Jugar</button>
-                         <button class="nav-item" data-section="verbs/tener"><span class="icon">🔀</span> Tener</button>
                          <button class="nav-item" data-section="verbs/gustar"><span class="icon">🔀</span> Gustar</button>
                          <button class="nav-item" data-section="verbs/haber"><span class="icon">🔀</span> Haber / Hay</button>
+                         <button class="nav-item" data-section="verbs/hacer"><span class="icon">🔀</span> Hacer</button>
+                         <button class="nav-item" data-section="verbs/ir"><span class="icon">🔀</span> Ir</button>
+                         <button class="nav-item" data-section="verbs/irregular-verbs"><span class="icon">🏃</span> Irregular Verbs</button>
+                         <button class="nav-item" data-section="verbs/jugar"><span class="icon">🔀</span> Jugar</button>
                          <button class="nav-item" data-section="verbs/poder"><span class="icon">🔀</span> Poder</button>
                          <button class="nav-item" data-section="verbs/querer"><span class="icon">🔀</span> Querer</button>
-                         <button class="nav-item" data-section="verbs/decir"><span class="icon">🔀</span> Decir</button>
+                         <button class="nav-item" data-section="verbs/ser"><span class="icon">🔀</span> Ser</button>
+                         <button class="nav-item" data-section="verbs/ser-estar"><span class="icon">🔀</span> Ser - Estar</button>
+                         <button class="nav-item" data-section="verbs/tener"><span class="icon">🔀</span> Tener</button>
+                         <button class="nav-item" data-section="verbs/verbs"><span class="icon">🏃</span> Verbs</button>
                     </div>
 
                     <!-- Category 4: Grammar Tense -->
