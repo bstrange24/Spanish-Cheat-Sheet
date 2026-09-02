@@ -31,7 +31,7 @@ def main() -> None:
     print("Done.")
     print("1) Start player server:  python scripts/start_player_server.py")
     print("2) Reload VS Code window + reopen Markdown preview")
-    print("3) Click a Spanish word or 🔊")
+    print("3) Click a Spanish word or")
 
 
 if __name__ == "__main__":

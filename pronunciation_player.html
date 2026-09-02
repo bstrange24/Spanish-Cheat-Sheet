@@ -1,261 +1,279 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spanish pronunciation</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --scrim: rgba(0, 0, 0, 0.5);
-      --card: #fff;
-      --text: #151515;
-      --muted: #666;
-      --accent: #2f6fed;
-      --good: #1a7f37;
-      --bad: #c62828;
-      --border: #d0d7de;
-      --chip: #eaf1ff;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --scrim: rgba(0, 0, 0, 0.72);
-        --card: #252526;
-        --text: #f3f3f3;
-        --muted: #aaa;
-        --accent: #6ea8fe;
-        --good: #3dd68c;
-        --bad: #ff8a80;
-        --border: #444;
-        --chip: #1e2a3a;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, "Segoe UI", Arial, sans-serif;
-      background: var(--scrim);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .popup {
-      width: min(540px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.2rem 1.35rem 1.35rem;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-    }
-    .top {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.75rem;
-      align-items: center;
-      margin-bottom: 0.65rem;
-    }
-    .chip {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      padding: 0.28rem 0.6rem;
-      border-radius: 999px;
-      background: var(--chip);
-      color: var(--accent);
-    }
-    .chip.sentence { color: var(--good); }
-    .lang { color: var(--muted); font-size: 0.88rem; }
-    .text {
-      font-size: 1.85rem;
-      font-weight: 750;
-      line-height: 1.25;
-      margin: 0.2rem 0 0.9rem;
-      word-break: break-word;
-    }
-    .text.sentence { font-size: 1.35rem; font-weight: 650; }
-    audio { width: 100%; margin: 0.25rem 0 0.85rem; }
-    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    button, a.btn {
-      appearance: none;
-      border: 1px solid var(--border);
-      background: var(--accent);
-      color: #fff;
-      font: inherit;
-      font-weight: 650;
-      border-radius: 10px;
-      padding: 0.62rem 0.95rem;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    button.secondary, a.btn.secondary {
-      background: transparent;
-      color: var(--text);
-    }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .hint {
-      margin-top: 0.95rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-    .ok { color: var(--good); }
-    .err { color: var(--bad); }
-    .words {
-      display: none;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.85rem;
-    }
-    .words.show { display: flex; }
-    .words button {
-      background: transparent;
-      color: var(--text);
-      font-weight: 500;
-      padding: 0.35rem 0.55rem;
-      font-size: 0.92rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="popup" role="dialog" aria-modal="true" aria-label="Spanish pronunciation">
-    <div class="top">
-      <span class="chip" id="modeChip">Word</span>
-      <span class="lang" id="langLabel"></span>
-    </div>
-    <div class="text" id="displayText">Loading…</div>
-    <audio id="player" controls preload="auto"></audio>
-    <div class="row">
-      <button type="button" id="playBtn">▶ Play</button>
-      <button type="button" class="secondary" id="stopBtn">Stop</button>
-      <a class="btn secondary" id="gtLink" href="#" target="_blank" rel="noopener">Google Translate</a>
-    </div>
-    <div class="words" id="wordButtons"></div>
-    <div class="hint" id="hint">Preparing natural voice…</div>
-  </div>
+     <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Spanish pronunciation</title>
+          <style>
+               :root {
+                    color-scheme: light dark;
+                    --scrim: rgba(0, 0, 0, 0.5);
+                    --card: #fff;
+                    --text: #151515;
+                    --muted: #666;
+                    --accent: #2f6fed;
+                    --good: #1a7f37;
+                    --bad: #c62828;
+                    --border: #d0d7de;
+                    --chip: #eaf1ff;
+               }
+               @media (prefers-color-scheme: dark) {
+                    :root {
+                         --scrim: rgba(0, 0, 0, 0.72);
+                         --card: #252526;
+                         --text: #f3f3f3;
+                         --muted: #aaa;
+                         --accent: #6ea8fe;
+                         --good: #3dd68c;
+                         --bad: #ff8a80;
+                         --border: #444;
+                         --chip: #1e2a3a;
+                    }
+               }
+               * {
+                    box-sizing: border-box;
+               }
+               body {
+                    margin: 0;
+                    min-height: 100vh;
+                    font-family: system-ui, 'Segoe UI', Arial, sans-serif;
+                    background: var(--scrim);
+                    color: var(--text);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+               }
+               .popup {
+                    width: min(540px, 100%);
+                    background: var(--card);
+                    border: 1px solid var(--border);
+                    border-radius: 16px;
+                    padding: 1.2rem 1.35rem 1.35rem;
+                    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+               }
+               .top {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 0.75rem;
+                    align-items: center;
+                    margin-bottom: 0.65rem;
+               }
+               .chip {
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                    padding: 0.28rem 0.6rem;
+                    border-radius: 999px;
+                    background: var(--chip);
+                    color: var(--accent);
+               }
+               .chip.sentence {
+                    color: var(--good);
+               }
+               .lang {
+                    color: var(--muted);
+                    font-size: 0.88rem;
+               }
+               .text {
+                    font-size: 1.85rem;
+                    font-weight: 750;
+                    line-height: 1.25;
+                    margin: 0.2rem 0 0.9rem;
+                    word-break: break-word;
+               }
+               .text.sentence {
+                    font-size: 1.35rem;
+                    font-weight: 650;
+               }
+               audio {
+                    width: 100%;
+                    margin: 0.25rem 0 0.85rem;
+               }
+               .row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+               }
+               button,
+               a.btn {
+                    appearance: none;
+                    border: 1px solid var(--border);
+                    background: var(--accent);
+                    color: #fff;
+                    font: inherit;
+                    font-weight: 650;
+                    border-radius: 10px;
+                    padding: 0.62rem 0.95rem;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.35rem;
+               }
+               button.secondary,
+               a.btn.secondary {
+                    background: transparent;
+                    color: var(--text);
+               }
+               button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+               }
+               .hint {
+                    margin-top: 0.95rem;
+                    color: var(--muted);
+                    font-size: 0.9rem;
+                    line-height: 1.45;
+               }
+               .ok {
+                    color: var(--good);
+               }
+               .err {
+                    color: var(--bad);
+               }
+               .words {
+                    display: none;
+                    flex-wrap: wrap;
+                    gap: 0.4rem;
+                    margin-top: 0.85rem;
+               }
+               .words.show {
+                    display: flex;
+               }
+               .words button {
+                    background: transparent;
+                    color: var(--text);
+                    font-weight: 500;
+                    padding: 0.35rem 0.55rem;
+                    font-size: 0.92rem;
+               }
+          </style>
+     </head>
+     <body>
+          <div class="popup" role="dialog" aria-modal="true" aria-label="Spanish pronunciation">
+               <div class="top">
+                    <span class="chip" id="modeChip">Word</span>
+                    <span class="lang" id="langLabel"></span>
+               </div>
+               <div class="text" id="displayText">Loading…</div>
+               <audio id="player" controls preload="auto"></audio>
+               <div class="row">
+                    <button type="button" id="playBtn">▶ Play</button>
+                    <button type="button" class="secondary" id="stopBtn">Stop</button>
+                    <a class="btn secondary" id="gtLink" href="#" target="_blank" rel="noopener">Google Translate</a>
+               </div>
+               <div class="words" id="wordButtons"></div>
+               <div class="hint" id="hint">Preparing natural voice…</div>
+          </div>
 
-  <script>
-    // Natural voice via local server /api/tts (edge-tts neural voices).
-    // Loaded in the sticky iframe (target=spanish-player) so cheat-sheet sections stay open.
-    const params = new URLSearchParams(window.location.search);
-    const raw =
-      params.get("text") ||
-      params.get("phrase") ||
-      params.get("word") ||
-      "";
-    const lang = (params.get("lang") || "es-419").toLowerCase();
-    const text = decodeURIComponent(raw).replace(/\+/g, " ").trim();
-    const isSentence = /\s/.test(text);
+          <script>
+               // Natural voice via local server /api/tts (edge-tts neural voices).
+               // Loaded in the sticky iframe (target=spanish-player) so cheat-sheet sections stay open.
+               const params = new URLSearchParams(window.location.search);
+               const raw = params.get('text') || params.get('phrase') || params.get('word') || '';
+               const lang = (params.get('lang') || 'es-419').toLowerCase();
+               const text = decodeURIComponent(raw).replace(/\+/g, ' ').trim();
+               const isSentence = /\s/.test(text);
 
-    const displayEl = document.getElementById("displayText");
-    const modeChip = document.getElementById("modeChip");
-    const langLabel = document.getElementById("langLabel");
-    const hintEl = document.getElementById("hint");
-    const player = document.getElementById("player");
-    const playBtn = document.getElementById("playBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const gtLink = document.getElementById("gtLink");
-    const wordButtons = document.getElementById("wordButtons");
+               const displayEl = document.getElementById('displayText');
+               const modeChip = document.getElementById('modeChip');
+               const langLabel = document.getElementById('langLabel');
+               const hintEl = document.getElementById('hint');
+               const player = document.getElementById('player');
+               const playBtn = document.getElementById('playBtn');
+               const stopBtn = document.getElementById('stopBtn');
+               const gtLink = document.getElementById('gtLink');
+               const wordButtons = document.getElementById('wordButtons');
 
-    const voiceName =
-      lang === "es" || lang === "es-es"
-        ? "Spain · Elvira (neural)"
-        : "Latin America · Dalia (neural)";
+               const voiceName = lang === 'es' || lang === 'es-es' ? 'Spain · Elvira (neural)' : 'Latin America · Dalia (neural)';
 
-    function setHint(msg, cls) {
-      hintEl.textContent = msg;
-      hintEl.className = "hint" + (cls ? " " + cls : "");
-    }
+               function setHint(msg, cls) {
+                    hintEl.textContent = msg;
+                    hintEl.className = 'hint' + (cls ? ' ' + cls : '');
+               }
 
-    function gtPage(w) {
-      return `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(w)}&op=translate`;
-    }
+               function gtPage(w) {
+                    return `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(w)}&op=translate`;
+               }
 
-    function ttsApiUrl(w) {
-      // Same origin as this page (local server)
-      const base = window.location.origin;
-      return `${base}/api/tts?text=${encodeURIComponent(w)}&lang=${encodeURIComponent(lang)}`;
-    }
+               function ttsApiUrl(w) {
+                    // Same origin as this page (local server)
+                    const base = window.location.origin;
+                    return `${base}/api/tts?text=${encodeURIComponent(w)}&lang=${encodeURIComponent(lang)}`;
+               }
 
-    function fallbackSpeech(w) {
-      if (!("speechSynthesis" in window)) return false;
-      const utterance = new SpeechSynthesisUtterance(w);
-      utterance.lang = lang === "es" || lang === "es-es" ? "es-ES" : "es-MX";
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-      setHint("Using browser voice fallback.", "ok");
-      return true;
-    }
+               function fallbackSpeech(w) {
+                    if (!('speechSynthesis' in window)) return false;
+                    const utterance = new SpeechSynthesisUtterance(w);
+                    utterance.lang = lang === 'es' || lang === 'es-es' ? 'es-ES' : 'es-MX';
+                    utterance.rate = 0.95;
+                    utterance.pitch = 1;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                    setHint('Using browser voice fallback.', 'ok');
+                    return true;
+               }
 
-    function loadAndPlay(w) {
-      const url = ttsApiUrl(w);
-      setHint("Loading natural voice…");
-      player.src = url;
-      player.load();
-      const p = player.play();
-      if (p && p.then) {
-        p.then(() => setHint("Playing…", "ok")).catch(() => {
-          setHint("Press Play if autoplay was blocked.", "err");
-        });
-      }
-    }
+               function loadAndPlay(w) {
+                    const url = ttsApiUrl(w);
+                    setHint('Loading natural voice…');
+                    player.src = url;
+                    player.load();
+                    const p = player.play();
+                    if (p && p.then) {
+                         p.then(() => setHint('Playing…', 'ok')).catch(() => {
+                              setHint('Press Play if autoplay was blocked.', 'err');
+                         });
+                    }
+               }
 
-    player.addEventListener("ended", () => setHint("Done. Press Play to hear again.", "ok"));
-    player.addEventListener("error", () => {
-      const fallbackUsed = fallbackSpeech(text);
-      setHint(
-        fallbackUsed
-          ? "Audio server failed, using browser voice instead."
-          : "Could not load neural audio. The deployed TTS route is blocked from Vercel.",
-        fallbackUsed ? "ok" : "err"
-      );
-    });
+               player.addEventListener('ended', () => setHint('Done. Press Play to hear again.', 'ok'));
+               player.addEventListener('error', () => {
+                    const fallbackUsed = fallbackSpeech(text);
+                    setHint(fallbackUsed ? 'Audio server failed, using browser voice instead.' : 'Could not load neural audio. The deployed TTS route is blocked from Vercel.', fallbackUsed ? 'ok' : 'err');
+               });
 
-    if (!text) {
-      displayEl.textContent = "No text provided";
-      playBtn.disabled = true;
-      setHint("Open this from a word or 🔊 link in the cheat sheet.");
-    } else {
-      displayEl.textContent = text;
-      displayEl.classList.toggle("sentence", isSentence);
-      modeChip.textContent = isSentence ? "Sentence" : "Word";
-      modeChip.classList.toggle("sentence", isSentence);
-      langLabel.textContent = voiceName;
-      gtLink.href = gtPage(text);
-      playBtn.textContent = isSentence ? "▶ Play sentence" : "▶ Play word";
+               if (!text) {
+                    displayEl.textContent = 'No text provided';
+                    playBtn.disabled = true;
+                    setHint('Open this from a word or link in the cheat sheet.');
+               } else {
+                    displayEl.textContent = text;
+                    displayEl.classList.toggle('sentence', isSentence);
+                    modeChip.textContent = isSentence ? 'Sentence' : 'Word';
+                    modeChip.classList.toggle('sentence', isSentence);
+                    langLabel.textContent = voiceName;
+                    gtLink.href = gtPage(text);
+                    playBtn.textContent = isSentence ? '▶ Play sentence' : '▶ Play word';
 
-      if (isSentence) {
-        wordButtons.classList.add("show");
-        text.split(/\s+/).filter(Boolean).forEach((w) => {
-          const bare = w.replace(/^[¡¿"']+|[?!.,;:"']+$/g, "") || w;
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "secondary";
-          b.textContent = w;
-          b.title = "Play word: " + bare;
-          b.addEventListener("click", () => loadAndPlay(bare));
-          wordButtons.appendChild(b);
-        });
-      }
+                    if (isSentence) {
+                         wordButtons.classList.add('show');
+                         text.split(/\s+/)
+                              .filter(Boolean)
+                              .forEach(w => {
+                                   const bare = w.replace(/^[¡¿"']+|[?!.,;:"']+$/g, '') || w;
+                                   const b = document.createElement('button');
+                                   b.type = 'button';
+                                   b.className = 'secondary';
+                                   b.textContent = w;
+                                   b.title = 'Play word: ' + bare;
+                                   b.addEventListener('click', () => loadAndPlay(bare));
+                                   wordButtons.appendChild(b);
+                              });
+                    }
 
-      playBtn.addEventListener("click", () => loadAndPlay(text));
-      stopBtn.addEventListener("click", () => {
-        player.pause();
-        player.currentTime = 0;
-        setHint("Stopped.");
-      });
+                    playBtn.addEventListener('click', () => loadAndPlay(text));
+                    stopBtn.addEventListener('click', () => {
+                         player.pause();
+                         player.currentTime = 0;
+                         setHint('Stopped.');
+                    });
 
-      // Auto-play natural voice
-      loadAndPlay(text);
-    }
-  </script>
-</body>
+                    // Auto-play natural voice
+                    loadAndPlay(text);
+               }
+          </script>
+     </body>
 </html>

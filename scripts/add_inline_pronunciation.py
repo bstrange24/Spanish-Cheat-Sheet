@@ -456,22 +456,27 @@ def looks_like_word_pron(pron: str, spanish: str) -> bool:
     if ENGLISH_GLOSS.search(p):
         return False
     # Ending-only labels like EH / AHS must not attach to pronouns.
-    if re.fullmatch(r"[A-Z]{1,4}", p) and len(s.split()) == 1 and s.lower() in {
-        "yo",
-        "tú",
-        "tu",
-        "él",
-        "ella",
-        "usted",
-        "nosotros",
-        "nosotras",
-        "vosotros",
-        "vosotras",
-        "ellos",
-        "ellas",
-        "ustedes",
-        "vos",
-    }:
+    if (
+        re.fullmatch(r"[A-Z]{1,4}", p)
+        and len(s.split()) == 1
+        and s.lower()
+        in {
+            "yo",
+            "tú",
+            "tu",
+            "él",
+            "ella",
+            "usted",
+            "nosotros",
+            "nosotras",
+            "vosotros",
+            "vosotras",
+            "ellos",
+            "ellas",
+            "ustedes",
+            "vos",
+        }
+    ):
         return False
     return True
 
@@ -524,7 +529,9 @@ def is_phonetic(text: str) -> bool:
         return True
     if "LatAm" in t or "Spain" in t:
         return True
-    if re.fullmatch(r"[A-Za-z][A-Za-z\- /() ]{0,80}", t) and not re.search(r"\b(the|and|for|with|have|can|was|were)\b", t, re.I):
+    if re.fullmatch(r"[A-Za-z][A-Za-z\- /() ]{0,80}", t) and not re.search(
+        r"\b(the|and|for|with|have|can|was|were)\b", t, re.I
+    ):
         return True
     return False
 
@@ -611,12 +618,16 @@ class TableHarvest(HTMLParser):
             self._cell["text"].append(data)
 
     def _consume_table(self, table: dict) -> None:
-        headers = [re.sub(r"\s+", " ", h).strip().lower() for h in table.get("headers") or []]
+        headers = [
+            re.sub(r"\s+", " ", h).strip().lower() for h in table.get("headers") or []
+        ]
 
         def col_role(h: str) -> str:
             if re.search(r"pronunciation pattern|sound pattern", h):
                 return "skip"
-            if re.search(r"\benglish\b|^meaning\b|^notes\b|^idea\b|^use\b|^ending\b|^person\b", h):
+            if re.search(
+                r"\benglish\b|^meaning\b|^notes\b|^idea\b|^use\b|^ending\b|^person\b", h
+            ):
                 return "skip"
             if "spain" in h:
                 return "skip"
@@ -643,7 +654,11 @@ class TableHarvest(HTMLParser):
                 says.extend(cell["says"])
             if not says:
                 continue
-            bits = [p.strip() for p in re.split(r"\s*/\s*", pron) if p.strip() and p.strip() != "-"]
+            bits = [
+                p.strip()
+                for p in re.split(r"\s*/\s*", pron)
+                if p.strip() and p.strip() != "-"
+            ]
             if len(says) == 1:
                 if looks_like_word_pron(pron, says[0]):
                     self.lookup.setdefault(normalize_lookup_key(says[0]), pron)
@@ -680,7 +695,7 @@ def already_has_phonetic(html: str, span_end: int) -> bool:
 def insert_after_span(html: str, span_end: int, pron: str) -> tuple[str, int]:
     snippet = f' <span class="secondary">{pron}</span>'
     after = html[span_end:]
-    # Keep 🔊 after the pronunciation (next to the Spanish word).
+    # Keep after the pronunciation (next to the Spanish word).
     return html[:span_end] + snippet + after, len(snippet)
 
 
