@@ -858,7 +858,8 @@
      function addPageToolbar(sectionId) {
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
-          bar.innerHTML = '<div class="page-toolbar-header">Page options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide English</label><label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label><button type="button" id="practicePageBtn">🎲 Practice this page</button><button type="button" id="quizPageBtn">📝 Quiz this page</button></div>';
+          // bar.innerHTML = '<div class="page-toolbar-header">Page options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide English</label><label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label><button type="button" id="practicePageBtn">🎲 Practice this page</button><button type="button" id="quizPageBtn">📝 Quiz this page</button></div>';
+          bar.innerHTML = '<div class="page-toolbar-header">Page Options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide EN</label><label><input type="checkbox" id="hidePronunciation" /> Hide PR</label><button type="button" id="practicePageBtn">🎲 Practice</button><button type="button" id="quizPageBtn">📝 Quiz</button></div>';
           content.insertBefore(bar, content.firstChild);
           const hideBox = document.getElementById('hideEnglish');
           hideBox.checked = localStorage.getItem('hideEnglish') === 'true';

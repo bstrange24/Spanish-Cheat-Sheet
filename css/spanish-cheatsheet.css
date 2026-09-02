@@ -737,7 +737,8 @@ details ul li {
      position: fixed;
      top: 12px;
      left: 12px;
-     background: var(--bg-table-hover);
+     background: var(--bg-primary);
+     border: 1px solid var(--border-color);
      border-radius: 8px;
      padding: 4px 6px;
      font-size: 1rem;
@@ -745,10 +746,12 @@ details ul li {
      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
      transition: all 0.3s;
      display: none;
+     color: var(--text-primary);
+     z-index: 35;
 }
 
 .floating-toggle:hover {
-     background: #2d2d44;
+     background: var(--bg-table-hover);
      transform: scale(1.05);
 }
 
@@ -952,39 +955,50 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      .page-toolbar {
-          position: static;
-          top: auto;
-          z-index: auto;
-          gap: 6px;
-          padding: 8px 8px;
+          position: sticky;
+          top: 8px;
+          z-index: 20;
+          gap: 4px;
+          padding: 6px 8px;
           margin: 0 8px 12px 52px;
           max-width: calc(100% - 70px);
           width: calc(100% - 70px);
-          background: var(--bg-primary);
-          backdrop-filter: blur(8px);
+          background: var(--bg-primary) !important;
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+          isolation: isolate;
+          opacity: 1;
      }
 
      .page-toolbar-header {
-          font-size: 0.62rem;
+          font-size: 0.58rem;
+          line-height: 1.1;
      }
 
      .page-toolbar-row {
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: center;
           gap: 4px;
-          justify-content: flex-start;
+          min-width: 0;
      }
 
      .page-toolbar label {
-          flex: 0 1 auto;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           min-width: 0;
-          font-size: 0.68rem;
+          font-size: 0.6rem;
           white-space: nowrap;
+          flex: 0 0 auto;
      }
 
      .page-toolbar button {
-          flex: 0 1 auto;
+          flex: 1 1 0;
           min-width: 0;
           padding: 4px 6px;
-          font-size: 0.68rem;
+          font-size: 0.6rem;
      }
 
      .see-also-links {
@@ -1030,6 +1044,15 @@ html.light-mode .theme-toggle .theme-icon-dark {
      .toggle-btn,
      .floating-toggle {
           display: block;
+     }
+
+     .floating-toggle {
+          z-index: 40;
+          background: var(--bg-primary) !important;
+          border: 1px solid var(--border-color);
+          color: var(--text-primary);
+          opacity: 1;
+          isolation: isolate;
      }
 
      #sidebar {
