@@ -884,6 +884,15 @@
           return items;
      }
 
+     const toolbar = document.querySelector('.page-toolbar');
+     if (toolbar) {
+          const onScroll = () => {
+               toolbar.classList.toggle('is-compact', window.scrollY > 80);
+          };
+          window.addEventListener('scroll', onScroll, { passive: true });
+          onScroll();
+     }
+
      function addPageToolbar(sectionId) {
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
