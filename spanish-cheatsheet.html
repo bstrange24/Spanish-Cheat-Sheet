@@ -4,9 +4,13 @@
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Spanish Cheat Sheet</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
           <link rel="stylesheet" href="./css/spanish-cheatsheet.css" />
      </head>
      <body>
+          <a class="skip-link" href="#content">Skip to content</a>
           <!-- http://127.0.0.1:8765/spanish-cheatsheet.html -->
           <!-- http://127.0.0.1:8765/spanish-practice.html -->
           <!-- ─── Floating Audio Player ─── -->
@@ -160,6 +164,10 @@
 
                <div class="sidebar-footer">
                     <span id="serverStatus">🔌 checking...</span>
+                    <div class="sidebar-study-actions" aria-label="Study actions">
+                         <button type="button" id="practicePageBtn">🎲 Practice this page</button>
+                         <button type="button" id="quizPageBtn">📝 Quiz this page</button>
+                    </div>
                     <a class="practice-link" href="spanish-practice.html" target="_blank" rel="noopener">🎤 Open Practice</a>
                </div>
           </aside>

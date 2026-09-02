@@ -1,5 +1,7 @@
 /* ─── Theme Variables ─── */
 :root {
+     --font-ui: 'DM Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
+     --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
      --bg-primary: #101820;
      --bg-secondary: #17232b;
      --bg-table: #1b2a32;
@@ -31,6 +33,10 @@
      --noun-masc: #8cccf0;
      --noun-fem: #f0a8c2;
      --noun-neuter: #9fdaa8;
+     --accent: #f0b86e;
+     --accent-soft: rgba(240, 184, 110, 0.14);
+     --focus-ring: #79d0c4;
+     --surface-raised: #20343b;
 }
 
 /* Light mode */
@@ -66,6 +72,10 @@ html.light-mode {
      --noun-masc: #176b9a;
      --noun-fem: #b24f72;
      --noun-neuter: #27754a;
+     --accent: #b4632b;
+     --accent-soft: rgba(180, 99, 43, 0.12);
+     --focus-ring: #147e78;
+     --surface-raised: #fffdf8;
 }
 
 /* ─── Reset & Base ─── */
@@ -76,13 +86,47 @@ html.light-mode {
 }
 
 body {
-     font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+     font-family: var(--font-ui);
      background: var(--bg-primary);
      color: var(--text-primary);
      line-height: 1.6;
      display: flex;
      min-height: 100vh;
      transition: background 0.3s ease, color 0.3s ease;
+}
+
+body::before {
+     content: '';
+     position: fixed;
+     inset: 0;
+     pointer-events: none;
+     background: linear-gradient(135deg, var(--accent-soft), transparent 34%);
+     opacity: 0.55;
+     z-index: -1;
+}
+
+:focus-visible {
+     outline: 3px solid var(--focus-ring);
+     outline-offset: 3px;
+}
+
+.skip-link {
+     position: fixed;
+     top: 12px;
+     left: 12px;
+     z-index: 10000;
+     padding: 10px 14px;
+     border-radius: 8px;
+     background: var(--accent);
+     color: var(--highlight-color);
+     font-weight: 700;
+     text-decoration: none;
+     transform: translateY(-180%);
+     transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+     transform: translateY(0);
 }
 
 /* ─── Category toggle buttons ─── */
@@ -300,11 +344,41 @@ body {
 }
 
 .page-toolbar-header {
+     display: flex;
+     align-items: center;
+     justify-content: flex-end;
+     gap: 12px;
      font-size: 0.7rem;
      font-weight: 700;
      letter-spacing: 0.08em;
      text-transform: uppercase;
      color: var(--text-muted);
+}
+
+.page-toolbar-title {
+     overflow: hidden;
+     color: var(--text-primary);
+     font-family: var(--font-display);
+     font-size: 1rem;
+     letter-spacing: 0;
+     text-overflow: ellipsis;
+     text-transform: none;
+     white-space: nowrap;
+}
+
+.page-toolbar-actions {
+     display: flex;
+     flex-shrink: 0;
+     gap: 6px;
+}
+
+.page-options-label {
+     margin-top: 2px;
+     color: var(--text-muted);
+     font-size: 0.7rem;
+     font-weight: 700;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
 }
 
 .page-toolbar-row {
@@ -331,6 +405,43 @@ body {
 }
 
 .page-toolbar button:hover {
+     background: var(--hover-color);
+}
+
+.page-toolbar button[aria-pressed='true'] {
+     border-color: var(--accent);
+     background: var(--accent-soft);
+     color: var(--accent);
+     font-weight: 700;
+}
+
+.progress-summary {
+     margin-left: auto;
+     color: var(--text-muted);
+     font-size: 0.78rem;
+     white-space: nowrap;
+}
+
+.sidebar-study-actions {
+     display: grid;
+     gap: 6px;
+     margin-top: 14px;
+}
+
+.sidebar-study-actions button {
+     width: 100%;
+     padding: 8px 10px;
+     border: 1px solid var(--border-color);
+     border-radius: 7px;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     cursor: pointer;
+     font: inherit;
+     font-size: 0.78rem;
+     text-align: left;
+}
+
+.sidebar-study-actions button:hover {
      background: var(--hover-color);
 }
 
@@ -420,16 +531,29 @@ body {
 }
 
 .nav-item.active {
-     background: rgba(255, 255, 255, 0.15);
+     background: var(--accent-soft);
      color: var(--text-primary);
-     box-shadow: inset 3px 0 0 #f1c40f;
+     box-shadow: inset 3px 0 0 var(--accent);
      transform: translateX(2px);
 }
 
+.nav-item.completed::after {
+     content: '✓';
+     margin-left: auto;
+     color: var(--accent);
+     font-weight: 700;
+}
+
+.nav-item.bookmarked .icon::after {
+     content: ' ★';
+     color: var(--accent);
+     font-size: 0.72rem;
+}
+
 html.light-mode .nav-item.active {
-     background: rgba(0, 0, 0, 0.08);
-     color: #1a1a2e;
-     box-shadow: inset 3px 0 0 #f1c40f;
+     background: var(--accent-soft);
+     color: var(--text-primary);
+     box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .sidebar-footer {
@@ -450,7 +574,7 @@ html.light-mode .nav-item.active {
 
 /* ─── Main Content ─── */
 #main {
-     padding: 30px 40px 100px;
+     padding: 42px 48px 100px;
      max-width: 1100px;
      flex: 1;
      /* padding: 42px 48px 110px; */
@@ -481,7 +605,7 @@ html.light-mode .nav-item.active {
 }
 
 .section h1 {
-     font-family: Georgia, 'Times New Roman', serif;
+     font-family: var(--font-display);
      font-size: clamp(2.1rem, 4vw, 3.2rem);
      line-height: 1.05;
      letter-spacing: -0.02em;
@@ -498,8 +622,8 @@ html.light-mode .nav-item.active {
 }
 
 .section-desc .highlight {
-     background: #f1c40f;
-     color: #1a1a2e;
+     background: var(--accent);
+     color: var(--highlight-color);
      padding: 2px 8px;
      border-radius: 4px;
      font-weight: 500;
@@ -593,8 +717,8 @@ thead {
 }
 
 html.light-mode thead {
-     background: #e9ecef;
-     color: #1a1a2e;
+     background: var(--thead-bg);
+     color: var(--thead-color);
 }
 
 th {
@@ -690,8 +814,9 @@ details ul li {
 }
 
 .say.playing {
-     color: #e67e22;
-     text-decoration-color: #e67e22;
+     color: var(--accent);
+     text-decoration-color: var(--accent);
+     background: var(--accent-soft);
 }
 
 /* Diphthong letters only — sits below the dotted "click to hear" line */
@@ -716,7 +841,7 @@ details ul li {
      flex-direction: column;
      align-items: center;
      gap: 4px;
-     min-width: 250px;
+     min-width: 270px;
      border: 1px solid var(--border-color);
      transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
@@ -735,6 +860,11 @@ details ul li {
      line-height: 1;
      cursor: pointer;
      display: none;
+}
+
+.audio-player-close:hover {
+     background: var(--accent-soft);
+     color: var(--accent);
 }
 
 #audioPlayerContainer:hover {
@@ -1005,13 +1135,13 @@ html.light-mode .theme-toggle .theme-icon-dark {
      #main {
           width: 100%;
           max-width: 100%;
-          padding: 24px 18px 96px;
+          padding: 28px 18px 96px;
           margin: 0;
           transition: margin-left 0.3s ease;
      }
 
      .section h1 {
-          font-size: 1.55rem;
+          font-size: 1.7rem;
           line-height: 1.2;
           margin-bottom: 8px;
      }
@@ -1054,50 +1184,96 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      .page-toolbar {
-          position: sticky;
-          top: 8px;
-          z-index: 20;
+          position: static;
           gap: 4px;
-          padding: 6px 8px;
+          padding: 9px;
           margin: 0 8px 12px 52px;
           max-width: calc(100% - 70px);
           width: calc(100% - 70px);
           background: var(--bg-primary) !important;
           border: 1px solid var(--border-color);
-          border-radius: 10px;
+          border-radius: 14px;
           box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
           isolation: isolate;
           opacity: 1;
      }
 
      .page-toolbar-header {
-          font-size: 0.58rem;
+          position: sticky;
+          top: 8px;
+          z-index: 20;
+          min-height: 42px;
+          margin: -1px -1px 0;
+          padding: 6px 8px;
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          background: var(--bg-primary);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+          font-size: 0.62rem;
           line-height: 1.1;
      }
 
+     .page-toolbar-title {
+          min-width: 0;
+          font-size: 0.9rem;
+     }
+
+     .page-toolbar-actions button {
+          width: 42px;
+          min-width: 36px;
+          min-height: 32px;
+          padding: 3px 5px;
+          font-size: 0.72rem;
+     }
+
+     .page-toolbar-actions button span {
+          display: none;
+     }
+
+     .page-options-label {
+          margin-top: 10px;
+          font-size: 0.62rem;
+     }
+
      .page-toolbar-row {
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 4px;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          align-items: stretch;
+          gap: 6px;
           min-width: 0;
      }
 
      .page-toolbar label {
-          display: inline-flex;
+          display: flex;
           align-items: center;
           gap: 4px;
           min-width: 0;
-          font-size: 0.6rem;
+          min-height: 38px;
+          padding: 0 7px;
+          border: 1px solid var(--border-color);
+          border-radius: 7px;
+          background: var(--bg-secondary);
+          font-size: 0.68rem;
           white-space: nowrap;
-          flex: 0 0 auto;
      }
 
      .page-toolbar button {
-          flex: 1 1 0;
           min-width: 0;
-          padding: 4px 6px;
-          font-size: 0.6rem;
+          min-height: 38px;
+          padding: 5px 6px;
+          font-size: 0.68rem;
+     }
+
+     .progress-summary {
+          grid-column: 1 / -1;
+          width: 100%;
+          margin-left: 0;
+          text-align: right;
+          font-size: 0.62rem;
+     }
+
+     .sidebar-study-actions button {
+          min-height: 42px;
      }
 
      .see-also-links {
@@ -1154,6 +1330,13 @@ html.light-mode .theme-toggle .theme-icon-dark {
           isolation: isolate;
      }
 
+     .floating-toggle,
+     .toggle-btn,
+     .theme-toggle {
+          min-width: 44px;
+          min-height: 44px;
+     }
+
      #sidebar {
           position: fixed;
           top: 0;
@@ -1197,7 +1380,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      .section h1 {
-          font-size: 1.35rem;
+          font-size: 1.45rem;
      }
 
      .section-desc {

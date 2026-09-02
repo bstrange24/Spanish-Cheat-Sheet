@@ -887,9 +887,55 @@
      function addPageToolbar(sectionId) {
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
-          // bar.innerHTML = '<div class="page-toolbar-header">Page options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide English</label><label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label><button type="button" id="practicePageBtn">🎲 Practice this page</button><button type="button" id="quizPageBtn">📝 Quiz this page</button></div>';
-          bar.innerHTML = '<div class="page-toolbar-header">Page Options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide EN</label><label><input type="checkbox" id="hidePronunciation" /> Hide PR</label><button type="button" id="practicePageBtn">🎲 Practice</button><button type="button" id="quizPageBtn">📝 Quiz</button></div>';
+          bar.innerHTML =
+               '<div class="page-toolbar-header"><span class="page-toolbar-actions"><button type="button" id="bookmarkPageBtn" aria-pressed="false" aria-label="Save this topic">☆<span> Save</span></button><button type="button" id="completePageBtn" aria-pressed="false" aria-label="Mark this topic complete">○<span> Done</span></button></span></div>' +
+               '<div class="page-options-label">Page Options</div><div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide EN</label><label><input type="checkbox" id="hidePronunciation" /> Hide PR</label><span class="progress-summary" id="progressSummary" aria-live="polite"></span></div>';
           content.insertBefore(bar, content.firstChild);
+          const bookmarkButton = document.getElementById('bookmarkPageBtn');
+          const completeButton = document.getElementById('completePageBtn');
+
+          function readSectionSet(key) {
+               try {
+                    const value = JSON.parse(localStorage.getItem(key) || '[]');
+                    return Array.isArray(value) ? value : [];
+               } catch {
+                    return [];
+               }
+          }
+
+          function writeSectionSet(key, values) {
+               localStorage.setItem(key, JSON.stringify(values));
+          }
+
+          function updateStudyState() {
+               const bookmarks = readSectionSet('spanishBookmarks');
+               const completed = readSectionSet('spanishCompleted');
+               const bookmarked = bookmarks.includes(sectionId);
+               const isComplete = completed.includes(sectionId);
+               bookmarkButton.textContent = bookmarked ? '★ Saved' : '☆ Save';
+               bookmarkButton.setAttribute('aria-pressed', bookmarked ? 'true' : 'false');
+               completeButton.textContent = isComplete ? '✓ Complete' : '○ Complete';
+               completeButton.setAttribute('aria-pressed', isComplete ? 'true' : 'false');
+               document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('bookmarked', bookmarks.includes(item.dataset.section));
+                    item.classList.toggle('completed', completed.includes(item.dataset.section));
+               });
+               const progress = document.getElementById('progressSummary');
+               if (progress) progress.textContent = `${completed.length} / ${navItems.length} complete`;
+          }
+
+          bookmarkButton.addEventListener('click', function () {
+               const bookmarks = readSectionSet('spanishBookmarks');
+               writeSectionSet('spanishBookmarks', bookmarks.includes(sectionId) ? bookmarks.filter(id => id !== sectionId) : bookmarks.concat(sectionId));
+               updateStudyState();
+          });
+
+          completeButton.addEventListener('click', function () {
+               const completed = readSectionSet('spanishCompleted');
+               writeSectionSet('spanishCompleted', completed.includes(sectionId) ? completed.filter(id => id !== sectionId) : completed.concat(sectionId));
+               updateStudyState();
+          });
+          updateStudyState();
           const hideBox = document.getElementById('hideEnglish');
           hideBox.checked = localStorage.getItem('hideEnglish') === 'true';
           hideBox.addEventListener('change', function () {
@@ -965,22 +1011,26 @@
                return { items: items, words: words, pairs: pairs, gloss: glossFromItems(items) };
           }
 
-          document.getElementById('practicePageBtn').addEventListener('click', function () {
-               const payload = pageStudyPayload();
-               if (!payload.words.length) {
-                    alert('No practice words on this page yet.');
-                    return;
-               }
-               launchStudy({ mode: 'practice', words: payload.words, items: payload.items, pairs: payload.pairs, gloss: payload.gloss });
-          });
-          document.getElementById('quizPageBtn').addEventListener('click', function () {
-               const payload = pageStudyPayload();
-               if (!payload.items.length) {
-                    alert('No quiz items on this page yet. Try a vocab or grammar table with English meanings.');
-                    return;
-               }
-               launchStudy({ mode: 'quiz', items: payload.items, pairs: payload.pairs, words: payload.words, gloss: payload.gloss });
-          });
+          const practiceButton = document.getElementById('practicePageBtn');
+          if (practiceButton)
+               practiceButton.onclick = function () {
+                    const payload = pageStudyPayload();
+                    if (!payload.words.length) {
+                         alert('No practice words on this page yet.');
+                         return;
+                    }
+                    launchStudy({ mode: 'practice', words: payload.words, items: payload.items, pairs: payload.pairs, gloss: payload.gloss });
+               };
+          const quizButton = document.getElementById('quizPageBtn');
+          if (quizButton)
+               quizButton.onclick = function () {
+                    const payload = pageStudyPayload();
+                    if (!payload.items.length) {
+                         alert('No quiz items on this page yet. Try a vocab or grammar table with English meanings.');
+                         return;
+                    }
+                    launchStudy({ mode: 'quiz', items: payload.items, pairs: payload.pairs, words: payload.words, gloss: payload.gloss });
+               };
      }
 
      const SECTION_ALIASES = {
@@ -1247,6 +1297,7 @@
                const items = document.querySelector(`.category-items[data-category="${category}"]`);
                this.classList.toggle('open');
                items.classList.toggle('open');
+               this.setAttribute('aria-expanded', items.classList.contains('open') ? 'true' : 'false');
                // Save state
                localStorage.setItem('category-' + category, items.classList.contains('open') ? 'open' : 'closed');
           });
@@ -1258,6 +1309,7 @@
                toggle.classList.add('open');
                document.querySelector(`.category-items[data-category="${category}"]`).classList.add('open');
           }
+          toggle.setAttribute('aria-expanded', toggle.classList.contains('open') ? 'true' : 'false');
      });
 
      // ─── Sidebar toggle ───
