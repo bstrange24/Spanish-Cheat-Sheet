@@ -514,6 +514,8 @@
      let currentSectionId = '';
      let searchIndex = null;
      let searchIndexPromise = null;
+     let searchMatches = [];
+     let currentSearchMatch = -1;
 
      function currentSearchQuery() {
           const box = document.getElementById('navSearch');
@@ -621,37 +623,64 @@
           return null;
      }
 
+     function openMatchDetails(match) {
+          if (!match) return;
+          let detail = match.closest('details');
+          while (detail) {
+               detail.open = true;
+               detail = detail.parentElement ? detail.parentElement.closest('details') : null;
+          }
+     }
+
+     function updateSearchStatus() {
+          const status = document.getElementById('searchStatus');
+          const previous = document.getElementById('searchPrevious');
+          const next = document.getElementById('searchNext');
+          const hasMatches = searchMatches.length > 0;
+          if (status) status.textContent = hasMatches ? `${currentSearchMatch + 1} of ${searchMatches.length}` : 'No matches';
+          if (previous) previous.disabled = !hasMatches;
+          if (next) next.disabled = !hasMatches;
+     }
+
+     function goToSearchMatch(index) {
+          if (!searchMatches.length) return;
+          currentSearchMatch = (index + searchMatches.length) % searchMatches.length;
+          searchMatches.forEach((match, i) => match.classList.toggle('search-current', i === currentSearchMatch));
+          const match = searchMatches[currentSearchMatch];
+          if (isMobileLayout() && sidebar && !sidebar.classList.contains('hidden')) {
+               document.body.classList.add('search-active');
+          }
+          openMatchDetails(match);
+          match.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          updateSearchStatus();
+     }
+
      function applySearchHits(query) {
           content.querySelectorAll('.search-hit').forEach(el => el.classList.remove('search-hit'));
+          content.querySelectorAll('.search-current').forEach(el => el.classList.remove('search-current'));
+          searchMatches = [];
+          currentSearchMatch = -1;
           const q = (query || '').trim().toLowerCase();
           const exact = isExactSearch();
-          if (!q || (!exact && q.length < 2)) return 0;
-          let n = 0;
+          if (!q || (!exact && q.length < 2)) {
+               document.body.classList.remove('search-active');
+               updateSearchStatus();
+               return 0;
+          }
+
+          const isMatch = text => (exact ? hasExactMatch(text, q) : normalizeSearchText(text).includes(normalizeSearchText(q)));
+          const candidates = Array.from(content.querySelectorAll('.say, td, li, p, h1, h2, h3, summary, th'));
+          const matched = candidates.filter(node => isMatch(node.getAttribute('data-text') || node.textContent || ''));
+          searchMatches = matched.filter(node => !matched.some(parent => parent !== node && parent.contains(node)));
 
           content.querySelectorAll('.say').forEach(el => {
                const t = el.getAttribute('data-text') || el.textContent || '';
-               const hit = exact ? hasExactMatch(t, q) : t.toLowerCase().includes(q);
-               if (hit) {
-                    el.classList.add('search-hit');
-                    n++;
-               }
+               if (isMatch(t)) el.classList.add('search-hit');
           });
-
-          const textMatches = content.querySelectorAll('td, li, p, h1, h2, h3, summary, th');
-          textMatches.forEach(node => {
-               const text = (node.textContent || '').toLowerCase();
-               if (!text) return;
-               if ((exact && hasExactMatch(text, q)) || (!exact && text.includes(q))) {
-                    if (node && node.scrollIntoView) {
-                         node.classList && node.classList.add('search-hit');
-                    }
-                    n++;
-               }
-          });
-
-          const first = content.querySelector('.search-hit') || findFirstTextMatch(q);
-          if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          return n;
+          searchMatches.forEach(match => match.classList.add('search-hit'));
+          updateSearchStatus();
+          if (searchMatches.length) goToSearchMatch(0);
+          return searchMatches.length;
      }
 
      function cleanStudyText(s) {
@@ -1055,7 +1084,7 @@
                const id = item.dataset.section;
                const label = item.textContent.toLowerCase();
                const blob = indexMap[id] || label;
-               const match = exact ? hasExactMatch(label, q) || hasExactMatch(blob, q) : label.includes(q) || blob.includes(q);
+               const match = exact ? hasExactMatch(label, q) || hasExactMatch(blob, q) : normalizeSearchText(label).includes(normalizeSearchText(q)) || normalizeSearchText(blob).includes(normalizeSearchText(q));
                item.classList.toggle('search-hidden', !match);
                if (match) shown++;
           });
@@ -1162,7 +1191,25 @@
                }
           };
           navSearch.addEventListener('input', runSearch);
+          const searchPrevious = document.getElementById('searchPrevious');
+          const searchNext = document.getElementById('searchNext');
+          if (searchPrevious) searchPrevious.addEventListener('click', function () {
+               goToSearchMatch(currentSearchMatch - 1);
+          });
+          if (searchNext) searchNext.addEventListener('click', function () {
+               goToSearchMatch(currentSearchMatch + 1);
+          });
           navSearch.addEventListener('keydown', function (e) {
+               if (e.key === 'ArrowDown' || (e.key === 'Enter' && e.altKey)) {
+                    e.preventDefault();
+                    goToSearchMatch(currentSearchMatch + 1);
+                    return;
+               }
+               if (e.key === 'ArrowUp' || (e.key === 'Enter' && e.shiftKey)) {
+                    e.preventDefault();
+                    goToSearchMatch(currentSearchMatch - 1);
+                    return;
+               }
                if (e.key !== 'Enter') return;
                e.preventDefault();
                const first = document.querySelector('#nav .nav-item:not(.search-hidden)');

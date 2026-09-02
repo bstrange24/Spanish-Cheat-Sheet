@@ -24,6 +24,9 @@
      --thead-color: #f7f0e4;
      --highlight-bg: #f0b86e;
      --highlight-color: #17232b;
+     --search-hit-bg: rgba(121, 208, 196, 0.12);
+     --search-hit-border: #79d0c4;
+     --search-current-border: #f0b86e;
      --diphthong-underline: #f0b86e;
      --noun-masc: #8cccf0;
      --noun-fem: #f0a8c2;
@@ -56,6 +59,9 @@ html.light-mode {
      --thead-color: #243238;
      --highlight-bg: #f0c36c;
      --highlight-color: #243238;
+     --search-hit-bg: rgba(20, 126, 120, 0.1);
+     --search-hit-border: #147e78;
+     --search-current-border: #b4632b;
      --diphthong-underline: #b4632b;
      --noun-masc: #176b9a;
      --noun-fem: #b24f72;
@@ -220,6 +226,33 @@ body {
      outline-offset: 1px;
 }
 
+.search-controls {
+     display: flex;
+     align-items: center;
+     justify-content: flex-end;
+     gap: 8px;
+     margin-top: 6px;
+     min-height: 28px;
+     color: var(--text-muted);
+     font-size: 0.75rem;
+}
+
+.search-controls button {
+     width: 28px;
+     height: 28px;
+     padding: 0;
+     border: 1px solid var(--border-color);
+     border-radius: 5px;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     cursor: pointer;
+}
+
+.search-controls button:disabled {
+     cursor: default;
+     opacity: 0.45;
+}
+
 .search-exact {
      display: flex;
      align-items: center;
@@ -302,9 +335,20 @@ body {
 }
 
 .say.search-hit {
-     background: var(--highlight-bg);
-     color: var(--highlight-color);
+     background: var(--search-hit-bg);
+     color: inherit;
      border-radius: 4px;
+}
+
+.search-hit {
+     background: var(--search-hit-bg);
+     color: inherit;
+     outline: none;
+     box-shadow: inset 3px 0 0 var(--search-hit-border);
+}
+
+.search-hit.search-current {
+     box-shadow: inset 3px 0 0 var(--search-current-border), 0 0 0 1px var(--search-current-border);
 }
 
 .see-also {
@@ -911,6 +955,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
           flex-direction: row;
           flex-wrap: wrap;
           align-items: center;
+          align-content: flex-start;
           gap: 4px;
      }
 
@@ -932,6 +977,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
           padding: 0 10px 8px;
           flex: none;
           width: 100%;
+          align-content: flex-start;
      }
 
      .nav-item {
@@ -1116,6 +1162,12 @@ html.light-mode .theme-toggle .theme-icon-dark {
           height: 100vh;
           z-index: 999;
           transform: translateX(0);
+     }
+
+     body.search-active #sidebar {
+          height: 228px;
+          max-height: 42vh;
+          overflow-y: auto;
      }
 
      #sidebar.hidden {

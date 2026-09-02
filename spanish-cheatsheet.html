@@ -41,6 +41,11 @@
                     </div>
                     <p class="subtitle">Cheat Sheet</p>
                     <input type="search" id="navSearch" placeholder="Search pages & words…" autocomplete="off" aria-label="Search pages and words" />
+                    <div class="search-controls" aria-label="Search result navigation">
+                         <button type="button" id="searchPrevious" aria-label="Previous match" title="Previous match">↑</button>
+                         <span id="searchStatus" aria-live="polite">No matches</span>
+                         <button type="button" id="searchNext" aria-label="Next match" title="Next match">↓</button>
+                    </div>
                     <label class="search-exact" for="searchExact">
                          <input type="checkbox" id="searchExact" />
                          Exact match
