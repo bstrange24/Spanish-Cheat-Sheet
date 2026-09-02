@@ -13,7 +13,7 @@
      const serverStatus = document.getElementById('serverStatus');
      const content = document.getElementById('content');
      const ttsLang = document.getElementById('ttsLang');
-     let audioHideTimer = null;
+     const audioCloseButton = document.getElementById('audioPlayerClose');
 
      function isMobileLayout() {
           return window.matchMedia('(max-width: 768px)').matches;
@@ -25,10 +25,6 @@
      }
 
      function hideAudioPlayerOnMobile() {
-          if (audioHideTimer) {
-               clearTimeout(audioHideTimer);
-               audioHideTimer = null;
-          }
           if (isMobileLayout()) {
                setAudioPlayerVisibility(false);
           }
@@ -94,20 +90,27 @@
           player.onended = function () {
                document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
                status.textContent = 'Ready';
-               audioHideTimer = window.setTimeout(function () {
-                    hideAudioPlayerOnMobile();
-               }, 500);
           };
 
           player.onpause = function () {
                if (player.ended || player.currentTime >= player.duration - 0.05) {
-                    hideAudioPlayerOnMobile();
+                    // leave the player open so the user can replay by clicking the word again
                }
           };
      }
 
+     if (audioCloseButton) {
+          audioCloseButton.addEventListener('click', function () {
+               hideAudioPlayerOnMobile();
+               document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
+          });
+     }
+
      // ─── Click handler for audio ───
      document.addEventListener('click', function (e) {
+          const close = e.target.closest('#audioPlayerClose');
+          if (close) return;
+
           const target = e.target.closest('.say');
           if (!target) return;
           e.preventDefault();

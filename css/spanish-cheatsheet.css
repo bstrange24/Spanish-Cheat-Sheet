@@ -633,12 +633,28 @@ details ul li {
      transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
+.audio-player-close {
+     position: absolute;
+     top: 8px;
+     right: 8px;
+     width: 22px;
+     height: 22px;
+     border: 1px solid var(--border-color);
+     border-radius: 50%;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     font-size: 1rem;
+     line-height: 1;
+     cursor: pointer;
+     display: none;
+}
+
 #audioPlayerContainer:hover {
      transform: scale(1.02);
 }
 
 #audioPlayer {
-     width: 100%;
+     width: 75%;
      height: 36px;
      border-radius: 6px;
      background: var(--bg-table);
@@ -721,7 +737,6 @@ details ul li {
      position: fixed;
      top: 12px;
      left: 12px;
-     z-index: 1100;
      background: var(--bg-table-hover);
      border-radius: 8px;
      padding: 4px 6px;
@@ -941,9 +956,11 @@ html.light-mode .theme-toggle .theme-icon-dark {
           top: auto;
           z-index: auto;
           gap: 6px;
-          padding: 8px 10px;
-          margin-bottom: 12px;
-          background: rgba(22, 27, 34, 0.96);
+          padding: 8px 8px;
+          margin: 0 8px 12px 52px;
+          max-width: calc(100% - 70px);
+          width: calc(100% - 70px);
+          background: var(--bg-primary);
           backdrop-filter: blur(8px);
      }
 
@@ -952,18 +969,22 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      .page-toolbar-row {
-          gap: 6px;
+          gap: 4px;
+          justify-content: flex-start;
      }
 
      .page-toolbar label {
-          flex: 1 1 calc(50% - 6px);
+          flex: 0 1 auto;
           min-width: 0;
-          font-size: 0.8rem;
+          font-size: 0.68rem;
+          white-space: nowrap;
      }
 
      .page-toolbar button {
-          flex: 1 1 calc(50% - 6px);
+          flex: 0 1 auto;
           min-width: 0;
+          padding: 4px 6px;
+          font-size: 0.68rem;
      }
 
      .see-also-links {
@@ -982,8 +1003,12 @@ html.light-mode .theme-toggle .theme-icon-dark {
           bottom: 10px;
           min-width: 0;
           width: auto;
-          padding: 8px 10px 6px;
+          padding: 18px 10px 8px;
           z-index: 30;
+     }
+
+     .audio-player-close {
+          display: block;
      }
 
      body.audio-player-visible #audioPlayerContainer {
