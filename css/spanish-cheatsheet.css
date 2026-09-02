@@ -1,65 +1,65 @@
 /* ─── Theme Variables ─── */
 :root {
-     --bg-primary: #0d1117;
-     --bg-secondary: #161b22;
-     --bg-table: #161b22;
-     --bg-table-hover: #1c2333;
-     --bg-sidebar: #0d1117;
-     --bg-sidebar-hover: #1c2333;
-     --text-primary: #f0f6fc;
-     --text-secondary: #8b949e;
-     --text-muted: #6e7681;
-     --text-inverse: #1a1a2e;
-     --border-color: #30363d;
-     --shadow-color: rgba(0, 0, 0, 0.4);
-     --hover-color: #1c2333;
-     --link-color: #58a6ff;
-     --link-hover-bg: #1c2333;
-     --link-hover-color: #79c0ff;
-     --placeholder-bg: #161b22;
-     --placeholder-border: #30363d;
-     --summary-hover: #58a6ff;
-     --say-text-decoration: #58a6ff;
-     --thead-bg: #0d1117;
-     --thead-color: #f0f6fc;
-     --highlight-bg: #d4a72c;
-     --highlight-color: #0d1117;
-     --diphthong-underline: #e4bd63;
-     --noun-masc: #7bbcff;
-     --noun-fem: #f7a8c8;
-     --noun-neuter: #7ee0a2;
+     --bg-primary: #101820;
+     --bg-secondary: #17232b;
+     --bg-table: #1b2a32;
+     --bg-table-hover: #243840;
+     --bg-sidebar: #101820;
+     --bg-sidebar-hover: #243840;
+     --text-primary: #f4efe5;
+     --text-secondary: #b8c2c0;
+     --text-muted: #81908e;
+     --text-inverse: #101820;
+     --border-color: #34484d;
+     --shadow-color: rgba(0, 0, 0, 0.28);
+     --hover-color: #243840;
+     --link-color: #79d0c4;
+     --link-hover-bg: rgba(121, 208, 196, 0.12);
+     --link-hover-color: #a2e7dd;
+     --placeholder-bg: #1b2a32;
+     --placeholder-border: #496066;
+     --summary-hover: #f0b86e;
+     --say-text-decoration: #79d0c4;
+     --thead-bg: #20343b;
+     --thead-color: #f7f0e4;
+     --highlight-bg: #f0b86e;
+     --highlight-color: #17232b;
+     --diphthong-underline: #f0b86e;
+     --noun-masc: #8cccf0;
+     --noun-fem: #f0a8c2;
+     --noun-neuter: #9fdaa8;
 }
 
 /* Light mode */
 html.light-mode {
-     --bg-primary: #f6f8fa;
-     --bg-secondary: #ffffff;
-     --bg-table: #ffffff;
-     --bg-table-hover: #f3f4f6;
-     --bg-sidebar: #24292e;
-     --bg-sidebar-hover: #2d333b;
-     --text-primary: #1f2328;
-     --text-secondary: #57606a;
-     --text-muted: #8b949e;
-     --text-inverse: #f6f8fa;
-     --border-color: #d0d7de;
-     --shadow-color: rgba(0, 0, 0, 0.08);
-     --hover-color: #f3f4f6;
-     --link-color: #0969da;
-     --link-hover-bg: #ddf4ff;
-     --link-hover-color: #0550ae;
-     --placeholder-bg: #f6f8fa;
-     --placeholder-border: #d0d7de;
-     --summary-hover: #0969da;
-     --say-text-decoration: #0969da;
-     --thead-bg: #d0d7de;
-     --thead-color: #1f2328;
-     --highlight-bg: #d4a72c;
-     --highlight-color: #1f2328;
-     --diphthong-underline: #b8860b;
-     --noun-masc: #0056b3;
-     --noun-fem: #d63384;
-     --noun-neuter: #2e7d32;
+     --bg-primary: #f2eee7;
+     --bg-secondary: #fffdf8;
+     --bg-table: #fffdf8;
+     --bg-table-hover: #f6efe4;
+     --bg-sidebar: #17232b;
+     --bg-sidebar-hover: #243840;
+     --text-primary: #243238;
+     --text-secondary: #58686b;
+     --text-muted: #829092;
+     --text-inverse: #fffdf8;
+     --border-color: #d8d2c8;
+     --shadow-color: rgba(47, 58, 58, 0.12);
+     --hover-color: #f6efe4;
+     --link-color: #147e78;
+     --link-hover-bg: #e3f2ed;
+     --link-hover-color: #075c58;
+     --placeholder-bg: #fffaf1;
+     --placeholder-border: #d8c7ad;
+     --summary-hover: #b4632b;
+     --say-text-decoration: #147e78;
+     --thead-bg: #e8e0d4;
+     --thead-color: #243238;
+     --highlight-bg: #f0c36c;
+     --highlight-color: #243238;
+     --diphthong-underline: #b4632b;
+     --noun-masc: #176b9a;
+     --noun-fem: #b24f72;
+     --noun-neuter: #27754a;
 }
 
 /* ─── Reset & Base ─── */
@@ -70,7 +70,7 @@ html.light-mode {
 }
 
 body {
-     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+     font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
      background: var(--bg-primary);
      color: var(--text-primary);
      line-height: 1.6;
@@ -407,8 +407,8 @@ html.light-mode .nav-item.active {
 /* ─── Main Content ─── */
 #main {
      flex: 1;
-     padding: 30px 40px 100px;
-     max-width: 1100px;
+     padding: 42px 48px 110px;
+     max-width: 1180px;
      margin: 0 auto;
      transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -435,8 +435,11 @@ html.light-mode .nav-item.active {
 }
 
 .section h1 {
-     font-size: 2rem;
-     margin-bottom: 4px;
+     font-family: Georgia, 'Times New Roman', serif;
+     font-size: clamp(2.1rem, 4vw, 3.2rem);
+     line-height: 1.05;
+     letter-spacing: -0.02em;
+     margin-bottom: 10px;
      color: var(--text-primary);
      transition: color 0.3s ease;
 }
@@ -473,15 +476,46 @@ html.light-mode .nav-item.active {
 
 /* ─── Details / Summary ─── */
 details {
-     margin: 12px 0;
+     margin: 18px 0;
+     padding: 0 18px 2px;
+     border: 1px solid var(--border-color);
+     border-radius: 10px;
+     background: var(--bg-secondary);
+     box-shadow: 0 8px 24px var(--shadow-color);
+     transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 details summary {
      cursor: pointer;
      font-size: 1.05rem;
-     padding: 8px 0;
+     padding: 15px 4px;
      user-select: none;
+     list-style: none;
      transition: color 0.3s ease;
+}
+
+details summary::-webkit-details-marker {
+     display: none;
+}
+
+details summary::before {
+     content: '+';
+     display: inline-grid;
+     place-items: center;
+     width: 1.45rem;
+     height: 1.45rem;
+     margin-right: 9px;
+     border: 1px solid currentColor;
+     border-radius: 50%;
+     color: var(--summary-hover);
+     font-size: 1.05rem;
+     font-weight: 400;
+     line-height: 1;
+     vertical-align: -0.15rem;
+}
+
+details[open] summary::before {
+     content: '-';
 }
 
 details summary:hover {
@@ -496,12 +530,13 @@ details[open] summary {
 table {
      width: 100%;
      border-collapse: collapse;
-     margin: 12px 0 20px;
+     margin: 16px 0 22px;
      font-size: 0.92rem;
      background: var(--bg-table);
-     box-shadow: 0 1px 4px var(--shadow-color);
+     box-shadow: 0 2px 10px var(--shadow-color);
      border-radius: 8px;
      overflow: hidden;
+     border: 1px solid var(--border-color);
      transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -517,13 +552,16 @@ html.light-mode thead {
 }
 
 th {
-     padding: 10px 14px;
+     padding: 12px 14px;
      text-align: left;
      font-weight: 600;
+     font-size: 0.76rem;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
 }
 
 td {
-     padding: 9px 14px;
+     padding: 11px 14px;
      border-bottom: 1px solid var(--border-color);
      transition: border-color 0.3s ease;
 }
@@ -535,6 +573,10 @@ tr:last-child td {
 tr:hover td {
      background: var(--bg-table-hover);
      transition: background 0.2s ease;
+}
+
+tbody tr:nth-child(even) td {
+     background: color-mix(in srgb, var(--bg-table) 94%, var(--link-color));
 }
 
 /* ─── Lists inside details ─── */
@@ -915,7 +957,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
      #main {
           width: 100%;
           max-width: 100%;
-          padding: 14px 14px 88px;
+          padding: 24px 18px 96px;
           margin: 0;
           transition: margin-left 0.3s ease;
      }
@@ -932,12 +974,21 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      details {
-          margin: 10px 0;
+          margin: 16px 0;
+          padding: 0 14px 4px;
      }
 
      details summary {
+          min-height: 52px;
+          padding: 15px 2px;
           font-size: 1rem;
           line-height: 1.4;
+     }
+
+     details summary::before {
+          width: 1.6rem;
+          height: 1.6rem;
+          margin-right: 8px;
      }
 
      table {
@@ -950,7 +1001,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
 
      th,
      td {
-          padding: 7px 8px;
+          padding: 10px 10px;
           white-space: nowrap;
      }
 
@@ -1088,7 +1139,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
 
 @media (max-width: 480px) {
      #main {
-          padding: 12px 12px 80px;
+          padding: 20px 16px 88px;
      }
 
      .section h1 {
@@ -1122,7 +1173,18 @@ html.light-mode .theme-toggle .theme-icon-dark {
 
      th,
      td {
-          padding: 6px 7px;
+          padding: 9px 9px;
+     }
+
+     details {
+          padding-right: 12px;
+          padding-left: 12px;
+     }
+
+     details summary {
+          min-height: 56px;
+          padding-top: 16px;
+          padding-bottom: 16px;
      }
 
      .page-toolbar button {
