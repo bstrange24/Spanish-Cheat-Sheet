@@ -1165,8 +1165,8 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      body.search-active #sidebar {
-          height: 228px;
-          max-height: 42vh;
+          height: auto;
+          max-height: 70vh;
           overflow-y: auto;
      }
 

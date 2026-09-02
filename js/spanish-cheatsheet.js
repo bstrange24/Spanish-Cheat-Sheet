@@ -1154,6 +1154,12 @@
           navItems.forEach(item => {
                item.classList.toggle('active', item.dataset.section === sectionId);
           });
+          const activeItem = Array.from(navItems).find(item => item.dataset.section === sectionId);
+          if (activeItem && isMobileLayout() && currentSearchQuery() && !sidebar.classList.contains('hidden')) {
+               requestAnimationFrame(function () {
+                    activeItem.scrollIntoView({ block: 'nearest' });
+               });
+          }
           // Load section
           await loadSection(sectionId);
           // Save preference
@@ -1258,12 +1264,17 @@
      const sidebar = document.getElementById('sidebar');
      const toggleBtn = document.getElementById('sidebarToggle'); // the one inside the sidebar
      const floatingToggle = document.getElementById('floatingToggle');
+     const overlay = document.getElementById('sidebar-overlay');
 
      function updateFloatingButton() {
           if (!floatingToggle) return;
           const isHidden = sidebar.classList.contains('hidden');
           floatingToggle.style.display = isHidden ? 'block' : 'none';
           document.body.classList.toggle('sidebar-collapsed', isHidden && isMobileLayout());
+          if (overlay) {
+               overlay.classList.toggle('active', !isHidden && isMobileLayout());
+               overlay.setAttribute('aria-hidden', isHidden || !isMobileLayout() ? 'true' : 'false');
+          }
      }
 
      function toggleSidebar() {
@@ -1311,7 +1322,6 @@
      // ─── Close sidebar when clicking overlay (mobile) ───
      // Add this overlay to your HTML:
      // <div id="sidebar-overlay"></div>
-     const overlay = document.getElementById('sidebar-overlay');
      if (overlay) {
           overlay.addEventListener('click', hideSidebar);
      }
