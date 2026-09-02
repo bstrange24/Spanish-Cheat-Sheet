@@ -380,34 +380,35 @@ starBtn.onclick = () => {
 };
 
 // Weak
-$('weakBtn').onclick = () => {
-     let weak = Object.entries(progress)
-          .filter(([k, c]) => c > 0)
-          .sort((a, b) => a[1] - b[1]);
-     if (extraPool && extraPool.length) {
-          const set = new Set(extraPool.map(w => w.toLowerCase()));
-          const inPool = weak.filter(([k]) => set.has(k.toLowerCase()));
-          if (inPool.length) weak = inPool;
-     }
-     weak = weak.slice(0, 15).map(x => x[0]);
-     if (!weak.length) {
+if ($('weakBtn'))
+     $('weakBtn').onclick = () => {
+          let weak = Object.entries(progress)
+               .filter(([k, c]) => c > 0)
+               .sort((a, b) => a[1] - b[1]);
           if (extraPool && extraPool.length) {
-               const k = extraPool[Math.floor(Math.random() * extraPool.length)];
-               targetInput.value = k;
-               showTargetInfo();
-               resultCard.innerHTML = `No weak scores in this pool yet. Random from pool: <strong>«${k}»</strong>`;
-               updatePlayer();
+               const set = new Set(extraPool.map(w => w.toLowerCase()));
+               const inPool = weak.filter(([k]) => set.has(k.toLowerCase()));
+               if (inPool.length) weak = inPool;
+          }
+          weak = weak.slice(0, 15).map(x => x[0]);
+          if (!weak.length) {
+               if (extraPool && extraPool.length) {
+                    const k = extraPool[Math.floor(Math.random() * extraPool.length)];
+                    targetInput.value = k;
+                    showTargetInfo();
+                    resultCard.innerHTML = `No weak scores in this pool yet. Random from pool: <strong>«${k}»</strong>`;
+                    updatePlayer();
+                    return;
+               }
+               resultCard.innerHTML = 'No weak phrases yet. Practice more!';
                return;
           }
-          resultCard.innerHTML = 'No weak phrases yet. Practice more!';
-          return;
-     }
-     const k = weak[Math.floor(Math.random() * weak.length)];
-     targetInput.value = k;
-     showTargetInfo();
-     resultCard.innerHTML = `Weak phrase: <strong>«${k}»</strong>`;
-     updatePlayer();
-};
+          const k = weak[Math.floor(Math.random() * weak.length)];
+          targetInput.value = k;
+          showTargetInfo();
+          resultCard.innerHTML = `Weak phrase: <strong>«${k}»</strong>`;
+          updatePlayer();
+     };
 
 // Record
 recordBtn.onclick = async () => {
@@ -440,114 +441,120 @@ playMyBtn.onclick = () => {
 };
 
 // Player
-$('playerBtn').onclick = () => {
-     const text = targetInput.value.trim();
-     if (!text) {
-          alert('Enter or select a phrase first');
-          return;
-     }
-     playerContainer.style.display = 'block';
-     playerVisible = true;
-     $('togglePlayerBtn').textContent = '▼ Hide';
-     updatePlayer();
-};
-
-$('togglePlayerBtn').onclick = () => {
-     playerVisible = !playerVisible;
-
-     const iframe = $('playerFrame');
-     const status = $('playerStatus');
-
-     if (playerVisible) {
-          iframe.style.display = 'block';
-          status.style.display = 'block';
+if ($('playerBtn'))
+     $('playerBtn').onclick = () => {
+          const text = targetInput.value.trim();
+          if (!text) {
+               alert('Enter or select a phrase first');
+               return;
+          }
+          playerContainer.style.display = 'block';
+          playerVisible = true;
           $('togglePlayerBtn').textContent = '▼ Hide';
-          if (targetInput.value.trim()) updatePlayer();
-     } else {
-          iframe.style.display = 'none';
-          status.style.display = 'none';
-          $('togglePlayerBtn').textContent = '▲ Show';
-     }
-};
+          updatePlayer();
+     };
 
-$('refreshPlayerBtn').onclick = updatePlayer;
-$('openPlayerBtn').onclick = openPlayerInNewTab;
-$('testPlayerBtn').onclick = testPlayerConnection;
-$('lang').addEventListener('change', updatePlayer);
+if ($('togglePlayerBtn'))
+     $('togglePlayerBtn').onclick = () => {
+          playerVisible = !playerVisible;
+
+          const iframe = $('playerFrame');
+          const status = $('playerStatus');
+
+          if (playerVisible) {
+               iframe.style.display = 'block';
+               status.style.display = 'block';
+               $('togglePlayerBtn').textContent = '▼ Hide';
+               if (targetInput.value.trim()) updatePlayer();
+          } else {
+               iframe.style.display = 'none';
+               status.style.display = 'none';
+               $('togglePlayerBtn').textContent = '▲ Show';
+          }
+     };
+
+if ($('refreshPlayerBtn')) $('refreshPlayerBtn').onclick = updatePlayer;
+if ($('openPlayerBtn')) $('openPlayerBtn').onclick = openPlayerInNewTab;
+if ($('testPlayerBtn')) $('testPlayerBtn').onclick = testPlayerConnection;
+if ($('lang')) $('lang').addEventListener('change', updatePlayer);
 
 // History & Stats
-$('historyBtn').onclick = () => {
-     const list = $('historyList');
-     if (!history.length) list.innerHTML = '<p>No history yet.</p>';
-     else {
-          list.innerHTML = history
-               .slice()
-               .reverse()
-               .map(h => `<div class="history-item"><strong>${h.phrase}</strong> — ${(h.score * 100).toFixed(0)}% <span style="color:var(--muted)">${new Date(h.date).toLocaleString()}</span></div>`)
-               .join('');
-     }
-     $('historyModal').classList.add('open');
-};
+if ($('historyBtn'))
+     $('historyBtn').onclick = () => {
+          const list = $('historyList');
+          if (!history.length) list.innerHTML = '<p>No history yet.</p>';
+          else {
+               list.innerHTML = history
+                    .slice()
+                    .reverse()
+                    .map(h => `<div class="history-item"><strong>${h.phrase}</strong> — ${(h.score * 100).toFixed(0)}% <span style="color:var(--muted)">${new Date(h.date).toLocaleString()}</span></div>`)
+                    .join('');
+          }
+          $('historyModal').classList.add('open');
+     };
 
-$('statsBtn').onclick = () => {
-     const entries = Object.entries(progress).sort((a, b) => b[1] - a[1]);
-     const most =
-          entries
-               .slice(0, 8)
-               .map(([k, v]) => `${k}: ${v}×`)
-               .join('<br>') || 'None';
-     const least =
-          entries
-               .slice(-8)
-               .reverse()
-               .map(([k, v]) => `${k}: ${v}×`)
-               .join('<br>') || 'None';
-     $('statsContent').innerHTML = `
+if ($('statsBtn'))
+     $('statsBtn').onclick = () => {
+          const entries = Object.entries(progress).sort((a, b) => b[1] - a[1]);
+          const most =
+               entries
+                    .slice(0, 8)
+                    .map(([k, v]) => `${k}: ${v}×`)
+                    .join('<br>') || 'None';
+          const least =
+               entries
+                    .slice(-8)
+                    .reverse()
+                    .map(([k, v]) => `${k}: ${v}×`)
+                    .join('<br>') || 'None';
+          $('statsContent').innerHTML = `
         <p><strong>Most practiced</strong><br>${most}</p>
         <p><strong>Least practiced</strong><br>${least}</p>
         <p>Favorites: ${favorites.length}</p>
         <p>Total unique phrases: ${Object.keys(progress).length}</p>
     `;
-     $('statsModal').classList.add('open');
-};
+          $('statsModal').classList.add('open');
+     };
 
 // Export / Import
-$('exportBtn').onclick = () => {
-     const data = { progress, favorites, history, streakData, srs };
-     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-     const a = document.createElement('a');
-     a.href = URL.createObjectURL(blob);
-     a.download = 'spanish-progress.json';
-     a.click();
-};
-
-$('importBtn').onclick = () => {
-     const inp = document.createElement('input');
-     inp.type = 'file';
-     inp.accept = '.json';
-     inp.onchange = e => {
-          const f = e.target.files[0];
-          if (!f) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-               try {
-                    const data = JSON.parse(reader.result);
-                    if (data.progress) progress = data.progress;
-                    if (data.favorites) favorites = data.favorites;
-                    if (data.history) history = data.history;
-                    if (data.streakData) streakData = data.streakData;
-                    if (data.srs) srs = data.srs;
-                    saveAll();
-                    updateStreak();
-                    alert('Progress imported successfully!');
-               } catch {
-                    alert('Invalid file');
-               }
-          };
-          reader.readAsText(f);
+if ($('exportBtn'))
+     $('exportBtn').onclick = () => {
+          const data = { progress, favorites, history, streakData, srs };
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'spanish-progress.json';
+          a.click();
      };
-     inp.click();
-};
+
+if ($('importBtn'))
+     $('importBtn').onclick = () => {
+          const inp = document.createElement('input');
+          inp.type = 'file';
+          inp.accept = '.json';
+          inp.onchange = e => {
+               const f = e.target.files[0];
+               if (!f) return;
+               const reader = new FileReader();
+               reader.onload = () => {
+                    try {
+                         const data = JSON.parse(reader.result);
+                         if (data.progress) progress = data.progress;
+                         if (data.favorites) favorites = data.favorites;
+                         if (data.history) history = data.history;
+                         if (data.streakData) streakData = data.streakData;
+                         if (data.srs) srs = data.srs;
+                         saveAll();
+                         updateStreak();
+                         alert('Progress imported successfully!');
+                    } catch {
+                         alert('Invalid file');
+                    }
+               };
+               reader.readAsText(f);
+          };
+          inp.click();
+     };
 
 function updateStreakDisplay() {
      $('streakDisplay').textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
@@ -556,30 +563,32 @@ function updateStreakDisplay() {
 updateStreakDisplay();
 
 // Reset & Clear
-$('resetBtn').onclick = () => {
-     if (confirm('Reset ALL progress, favorites, history, streak and cards?')) {
-          progress = {};
-          favorites = [];
-          history = [];
-          streakData = { count: 0, last: null, today: 0 };
-          srs = {};
-          saveAll();
-          updateStreakDisplay();
-          if ($('studyCard')) $('studyCard').style.display = 'none';
-          resultCard.innerHTML = '<span class="good">Everything reset.</span>';
-     }
-};
+if ($('resetBtn'))
+     $('resetBtn').onclick = () => {
+          if (confirm('Reset ALL progress, favorites, history, streak and cards?')) {
+               progress = {};
+               favorites = [];
+               history = [];
+               streakData = { count: 0, last: null, today: 0 };
+               srs = {};
+               saveAll();
+               updateStreakDisplay();
+               if ($('studyCard')) $('studyCard').style.display = 'none';
+               resultCard.innerHTML = '<span class="good">Everything reset.</span>';
+          }
+     };
 
-$('clearBtn').onclick = () => {
-     targetInput.value = '';
-     targetCard.style.display = 'none';
-     resultCard.innerHTML = 'Results will appear here…';
-     playerFrame.src = '';
-     playerStatus.innerHTML = '⏳ No word selected';
-     playerStatus.className = 'player-status';
-     if (recognition) recognition.stop();
-     synth.cancel();
-};
+if ($('clearBtn'))
+     $('clearBtn').onclick = () => {
+          targetInput.value = '';
+          targetCard.style.display = 'none';
+          resultCard.innerHTML = 'Results will appear here…';
+          playerFrame.src = '';
+          playerStatus.innerHTML = '⏳ No word selected';
+          playerStatus.className = 'player-status';
+          if (recognition) recognition.stop();
+          synth.cancel();
+     };
 
 // ===================== IMPROVED SPEECH RECOGNITION =====================
 let recognition = null;
@@ -666,8 +675,8 @@ document.querySelectorAll('.modal').forEach(m => {
 });
 
 // Initialize
-playerContainer.style.display = 'block';
-$('togglePlayerBtn').textContent = '▼ Hide';
+if (playerContainer) playerContainer.style.display = 'none';
+if ($('togglePlayerBtn')) $('togglePlayerBtn').textContent = '▼ Hide';
 playerStatus.innerHTML = '⏳ Select a word to load the player';
 
 if (!SpeechRecognition) {
@@ -1369,6 +1378,14 @@ if ($('top1000Btn')) {
                     extraPool = words;
                     if ($('category')) $('category').value = 'all';
                     resultCard.innerHTML = `Focused on <strong>${label}</strong> (${words.length} items from the cheat sheet).`;
+                    if ($('pagePoolStatus')) {
+                         $('pagePoolStatus').textContent = `${label}: ${words.length} words loaded from the Cheat Sheet page. Use Give me a phrase to choose one.`;
+                         $('pagePoolStatus').hidden = false;
+                    }
+                    const firstWord = words[Math.floor(Math.random() * words.length)];
+                    targetInput.value = firstWord;
+                    showTargetInfo();
+                    resultCard.innerHTML = `Ready: <strong>«${firstWord}»</strong> from <strong>${label}</strong>. Click Hear or Speak to practice it.`;
                }
           } catch (err) {
                console.warn('Could not read page practice pool', err);

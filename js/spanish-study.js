@@ -79,6 +79,38 @@
           }
      }
 
+     function loadPageContext() {
+          const params = new URLSearchParams(window.location.search);
+          if (!(params.get('from') === 'page' || params.get('mode') === 'quiz' || params.get('pool') === 'page')) return;
+
+          try {
+               const launch = JSON.parse(localStorage.getItem('sp_launch') || 'null');
+               if (launch && typeof launch === 'object') {
+                    if (Array.isArray(launch.items) && launch.items.length) {
+                         sessionStorage.setItem('sp_page_quiz', JSON.stringify({ sectionId: launch.sectionId || '', label: launch.label || '', items: launch.items }));
+                    }
+                    if (Array.isArray(launch.pairs)) sessionStorage.setItem('sp_page_pairs', JSON.stringify(launch.pairs));
+                    if (Array.isArray(launch.words) && launch.words.length) sessionStorage.setItem('sp_page_pool', JSON.stringify(launch.words));
+                    if (launch.label) sessionStorage.setItem('sp_page_label', launch.label);
+                    localStorage.removeItem('sp_launch');
+               }
+          } catch (err) {}
+
+          try {
+               const words = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+               const label = sessionStorage.getItem('sp_page_label') || 'this page';
+               if (Array.isArray(words) && words.length) {
+                    extraPool = words;
+                    if ($('category')) $('category').value = 'all';
+                    if ($('difficulty')) $('difficulty').value = 'all';
+                    if ($('pagePoolStatus')) {
+                         $('pagePoolStatus').textContent = `${label}: ${words.length} words loaded from the Cheat Sheet page. Use any study mode to practice them.`;
+                         $('pagePoolStatus').hidden = false;
+                    }
+               }
+          } catch (err) {}
+     }
+
      function dictPairsFromPool() {
           const keys = typeof getFilteredKeys === 'function' ? getFilteredKeys() : Object.keys(typeof DICT === 'object' ? DICT : {});
           const pairs = [];
@@ -532,10 +564,7 @@
           if (q.mode === 'mcq') {
                html += q.options.map(opt => `<button type="button" class="quiz-choice" data-study="choose" data-value="${esc(opt)}">${esc(opt)}</button>`).join('');
           } else {
-               html +=
-                    `<input type="text" id="studyInput" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer" />` +
-                    accentBarHtml() +
-                    `<div class="study-actions"><button type="button" data-study="check" style="background:#0ea5e9;color:white">Check</button></div>`;
+               html += `<input type="text" id="studyInput" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer" />` + accentBarHtml() + `<div class="study-actions"><button type="button" data-study="check" style="background:#0ea5e9;color:white">Check</button></div>`;
           }
           html += `<div id="studyFeedback" class="study-feedback"></div>`;
           studyBody.innerHTML = html;
@@ -555,9 +584,7 @@
           const fb = $('studyFeedback');
           const miss = !ok && q.sectionId ? ` • ${sectionLink(q.sectionId)}` : '';
           if (fb) {
-               fb.innerHTML = ok
-                    ? `<span class="good">✅ Correct.</span>${note}${yoNote}`
-                    : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>«${esc(q.answer)}»</strong>${yoNote}${miss}`;
+               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>«${esc(q.answer)}»</strong>${yoNote}${miss}`;
           }
 
           if (q.mode === 'mcq') {
@@ -919,6 +946,20 @@
           else if (study.mode === 'cards') startCards();
      }
 
+     function startWeakReview() {
+          const weak = Object.entries(typeof progress === 'object' && progress ? progress : {})
+               .filter(([key, count]) => count > 0 && dictEntry(key))
+               .sort((a, b) => a[1] - b[1])
+               .slice(0, 30)
+               .map(([key]) => key);
+          if (!weak.length) {
+               if (typeof resultCard !== 'undefined' && resultCard) resultCard.innerHTML = '<span class="bad">Practice a few phrases first, then Weak words will build a review set here.</span>';
+               return;
+          }
+          extraPool = weak;
+          startCards();
+     }
+
      studyBody.addEventListener('mousedown', function (e) {
           const btn = e.target.closest('[data-study="accent"]');
           if (!btn) return;
@@ -973,7 +1014,9 @@
      if ($('quizBtn')) $('quizBtn').onclick = startQuizFromButton;
      if ($('dictationBtn')) $('dictationBtn').onclick = startDictation;
      if ($('cardsBtn')) $('cardsBtn').onclick = startCards;
+     if ($('weakBtn')) $('weakBtn').onclick = startWeakReview;
 
+     loadPageContext();
      const params = new URLSearchParams(window.location.search);
      const mode = params.get('mode');
      if (mode === 'quiz') startQuizFromButton();

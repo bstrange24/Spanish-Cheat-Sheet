@@ -1033,7 +1033,8 @@
                     console.warn('Could not save study launch', err);
                }
                const q = opts.mode === 'quiz' ? 'mode=quiz&from=page' : 'pool=page&from=page';
-               window.open('spanish-practice.html?' + q, '_blank', 'noopener');
+               const destination = opts.mode === 'quiz' ? 'spanish-study.html' : 'spanish-practice.html';
+               window.open(destination + '?' + q, '_blank', 'noopener');
           }
 
           function pageStudyPayload() {
