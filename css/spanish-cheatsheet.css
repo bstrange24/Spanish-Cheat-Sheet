@@ -937,9 +937,9 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      .page-toolbar {
-          position: sticky;
-          top: 10px;
-          z-index: 30;
+          position: static;
+          top: auto;
+          z-index: auto;
           gap: 6px;
           padding: 8px 10px;
           margin-bottom: 12px;
@@ -983,6 +983,7 @@ html.light-mode .theme-toggle .theme-icon-dark {
           min-width: 0;
           width: auto;
           padding: 8px 10px 6px;
+          z-index: 30;
      }
 
      body.audio-player-visible #audioPlayerContainer {
@@ -990,11 +991,11 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      body.sidebar-collapsed .page-toolbar {
-          margin-top: 54px;
+          margin-top: 0;
      }
 
      body.sidebar-collapsed #content {
-          padding-top: 4px;
+          padding-top: 0;
      }
 
      #audioPlayer {

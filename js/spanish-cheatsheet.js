@@ -13,6 +13,7 @@
      const serverStatus = document.getElementById('serverStatus');
      const content = document.getElementById('content');
      const ttsLang = document.getElementById('ttsLang');
+     let audioHideTimer = null;
 
      function isMobileLayout() {
           return window.matchMedia('(max-width: 768px)').matches;
@@ -21,6 +22,16 @@
      function setAudioPlayerVisibility(forceVisible) {
           const shouldShow = forceVisible || !isMobileLayout();
           document.body.classList.toggle('audio-player-visible', shouldShow);
+     }
+
+     function hideAudioPlayerOnMobile() {
+          if (audioHideTimer) {
+               clearTimeout(audioHideTimer);
+               audioHideTimer = null;
+          }
+          if (isMobileLayout()) {
+               setAudioPlayerVisibility(false);
+          }
      }
 
      function getTtsLang() {
@@ -83,6 +94,15 @@
           player.onended = function () {
                document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
                status.textContent = 'Ready';
+               audioHideTimer = window.setTimeout(function () {
+                    hideAudioPlayerOnMobile();
+               }, 500);
+          };
+
+          player.onpause = function () {
+               if (player.ended || player.currentTime >= player.duration - 0.05) {
+                    hideAudioPlayerOnMobile();
+               }
           };
      }
 
