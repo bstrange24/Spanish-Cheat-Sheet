@@ -406,9 +406,11 @@ html.light-mode .nav-item.active {
 
 /* ─── Main Content ─── */
 #main {
+     padding: 30px 40px 100px;
+     max-width: 1100px;
      flex: 1;
-     padding: 42px 48px 110px;
-     max-width: 1180px;
+     /* padding: 42px 48px 110px; */
+     /* max-width: 1180px; */
      margin: 0 auto;
      transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -502,8 +504,8 @@ details summary::before {
      content: '+';
      display: inline-grid;
      place-items: center;
-     width: 1.45rem;
-     height: 1.45rem;
+     width: 1.0rem;
+     height: 1.0rem;
      margin-right: 9px;
      border: 1px solid currentColor;
      border-radius: 50%;
@@ -986,8 +988,8 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      details summary::before {
-          width: 1.6rem;
-          height: 1.6rem;
+          width: 1.0rem;
+          height: 1.0rem;
           margin-right: 8px;
      }
 
@@ -1266,5 +1268,5 @@ html.light-mode .theme-toggle .theme-icon-dark {
 }
 
 .explanation::before {
-     content: "— ";
+     content: "-";
 }
