@@ -879,27 +879,74 @@ html.light-mode .theme-toggle .theme-icon-dark {
      }
 
      #main {
-          padding: 16px;
+          width: 100%;
+          max-width: 100%;
+          padding: 14px 14px 88px;
+          margin: 0;
+          transition: margin-left 0.3s ease;
      }
 
      .section h1 {
-          font-size: 1.5rem;
+          font-size: 1.55rem;
+          line-height: 1.2;
+          margin-bottom: 8px;
+     }
+
+     .section-desc {
+          font-size: 0.94rem;
+          margin-bottom: 18px;
+     }
+
+     details {
+          margin: 10px 0;
+     }
+
+     details summary {
+          font-size: 1rem;
+          line-height: 1.4;
      }
 
      table {
+          display: block;
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
           font-size: 0.78rem;
      }
 
      th,
      td {
-          padding: 6px 8px;
+          padding: 7px 8px;
+          white-space: nowrap;
+     }
+
+     .page-toolbar {
+          gap: 8px;
+          padding: 8px 10px;
+          margin-bottom: 12px;
+     }
+
+     .page-toolbar button {
+          flex: 1 1 calc(50% - 8px);
+          min-width: 0;
+     }
+
+     .see-also-links {
+          gap: 6px;
+     }
+
+     .see-also-link {
+          padding: 6px 10px;
+          font-size: 0.8rem;
      }
 
      #audioPlayerContainer {
+          left: 12px;
+          right: 12px;
           bottom: 10px;
-          right: 10px;
-          min-width: 140px;
-          padding: 8px 10px 4px;
+          min-width: 0;
+          width: auto;
+          padding: 8px 10px 6px;
      }
 
      #audioPlayer {
@@ -940,11 +987,53 @@ html.light-mode .theme-toggle .theme-icon-dark {
      #sidebar-overlay.active {
           display: block;
      }
+}
 
-     /* Main content shifts when sidebar is hidden */
+@media (max-width: 480px) {
      #main {
-          transition: margin-left 0.3s ease;
-          margin-left: 0;
+          padding: 12px 12px 80px;
+     }
+
+     .section h1 {
+          font-size: 1.35rem;
+     }
+
+     .section-desc {
+          font-size: 0.88rem;
+     }
+
+     #nav {
+          padding: 0 8px 6px;
+     }
+
+     .nav-item {
+          padding: 7px 10px;
+          font-size: 0.76rem;
+     }
+
+     .sidebar-header {
+          padding: 0 12px 8px;
+     }
+
+     .sidebar-header h2 {
+          font-size: 1.05rem;
+     }
+
+     #navSearch {
+          font-size: 0.85rem;
+     }
+
+     th,
+     td {
+          padding: 6px 7px;
+     }
+
+     .page-toolbar button {
+          flex-basis: 100%;
+     }
+
+     .say {
+          padding: 0 2px;
      }
 }
 
