@@ -14,6 +14,15 @@
      const content = document.getElementById('content');
      const ttsLang = document.getElementById('ttsLang');
 
+     function isMobileLayout() {
+          return window.matchMedia('(max-width: 768px)').matches;
+     }
+
+     function setAudioPlayerVisibility(forceVisible) {
+          const shouldShow = forceVisible || !isMobileLayout();
+          document.body.classList.toggle('audio-player-visible', shouldShow);
+     }
+
      function getTtsLang() {
           const allowed = { 'es-419': true, es: true };
           const fromUi = ttsLang && ttsLang.value;
@@ -82,6 +91,7 @@
           const target = e.target.closest('.say');
           if (!target) return;
           e.preventDefault();
+          setAudioPlayerVisibility(true);
           let text = target.getAttribute('data-text') || target.textContent.trim();
           text = text.replace(/[🔊📢🎵▶️⏸️]/g, '').trim();
           if (text) {
@@ -561,12 +571,40 @@
           });
      }
 
+     function normalizeSearchText(text) {
+          return String(text || '')
+               .toLowerCase()
+               .normalize('NFD')
+               .replace(/[\u0300-\u036f]/g, '')
+               .replace(/[^a-z0-9\s]/g, ' ')
+               .replace(/\s+/g, ' ')
+               .trim();
+     }
+
+     function findFirstTextMatch(query) {
+          const q = normalizeSearchText(query);
+          if (!q) return null;
+          const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+          let node;
+          while ((node = walker.nextNode())) {
+               const text = node.nodeValue || '';
+               const clean = normalizeSearchText(text);
+               if (clean && clean.includes(q)) {
+                    const parent = node.parentElement;
+                    if (parent && parent.offsetParent !== null) return parent;
+                    return parent || content;
+               }
+          }
+          return null;
+     }
+
      function applySearchHits(query) {
           content.querySelectorAll('.search-hit').forEach(el => el.classList.remove('search-hit'));
           const q = (query || '').trim().toLowerCase();
           const exact = isExactSearch();
           if (!q || (!exact && q.length < 2)) return 0;
           let n = 0;
+
           content.querySelectorAll('.say').forEach(el => {
                const t = el.getAttribute('data-text') || el.textContent || '';
                const hit = exact ? hasExactMatch(t, q) : t.toLowerCase().includes(q);
@@ -575,7 +613,20 @@
                     n++;
                }
           });
-          const first = content.querySelector('.search-hit');
+
+          const textMatches = content.querySelectorAll('td, li, p, h1, h2, h3, summary, th');
+          textMatches.forEach(node => {
+               const text = (node.textContent || '').toLowerCase();
+               if (!text) return;
+               if ((exact && hasExactMatch(text, q)) || (!exact && text.includes(q))) {
+                    if (node && node.scrollIntoView) {
+                         node.classList && node.classList.add('search-hit');
+                    }
+                    n++;
+               }
+          });
+
+          const first = content.querySelector('.search-hit') || findFirstTextMatch(q);
           if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
           return n;
      }
@@ -784,7 +835,7 @@
      function addPageToolbar(sectionId) {
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
-          bar.innerHTML = '<label><input type="checkbox" id="hideEnglish" /> Hide English</label>' + '<label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label>' + '<button type="button" id="practicePageBtn">🎲 Practice this page</button>' + '<button type="button" id="quizPageBtn">📝 Quiz this page</button>';
+          bar.innerHTML = '<div class="page-toolbar-header">Page options</div>' + '<div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide English</label><label><input type="checkbox" id="hidePronunciation" /> Hide Pronunciation</label><button type="button" id="practicePageBtn">🎲 Practice this page</button><button type="button" id="quizPageBtn">📝 Quiz this page</button></div>';
           content.insertBefore(bar, content.firstChild);
           const hideBox = document.getElementById('hideEnglish');
           hideBox.checked = localStorage.getItem('hideEnglish') === 'true';
@@ -913,14 +964,13 @@
                     return fetch('sections/' + id + '.html')
                          .then(r => (r.ok ? r.text() : ''))
                          .then(html => {
-                              const texts = [];
-                              const re = /data-text="([^"]+)"/g;
-                              let m;
-                              while ((m = re.exec(html))) texts.push(m[1]);
+                              const parser = new DOMParser();
+                              const doc = parser.parseFromString(html, 'text/html');
+                              const bodyText = (doc.body ? doc.body.textContent : html).replace(/\s+/g, ' ').trim();
                               return {
                                    id,
                                    label,
-                                   blob: (label + ' ' + texts.join(' ')).toLowerCase(),
+                                   blob: (label + ' ' + bodyText).toLowerCase(),
                               };
                          })
                          .catch(() => ({ id, label, blob: label.toLowerCase() }));
@@ -1071,7 +1121,16 @@
                if (e.key !== 'Enter') return;
                e.preventDefault();
                const first = document.querySelector('#nav .nav-item:not(.search-hidden)');
-               if (first) navigateTo(first.dataset.section);
+               if (first) {
+                    const q = navSearch.value.trim();
+                    navigateTo(first.dataset.section).then(function () {
+                         if (q) {
+                              requestAnimationFrame(function () {
+                                   applySearchHits(q);
+                              });
+                         }
+                    });
+               }
           });
           if (searchExact) {
                searchExact.addEventListener('change', function () {
@@ -1108,8 +1167,9 @@
 
      function updateFloatingButton() {
           if (!floatingToggle) return;
-          // Show floating button ONLY when sidebar is hidden
-          floatingToggle.style.display = sidebar.classList.contains('hidden') ? 'block' : 'none';
+          const isHidden = sidebar.classList.contains('hidden');
+          floatingToggle.style.display = isHidden ? 'block' : 'none';
+          document.body.classList.toggle('sidebar-collapsed', isHidden && isMobileLayout());
      }
 
      function toggleSidebar() {
@@ -1148,6 +1208,11 @@
      } else {
           updateFloatingButton(); // make sure floating button starts hidden
      }
+     setAudioPlayerVisibility(false);
+     window.addEventListener('resize', function () {
+          setAudioPlayerVisibility(false);
+          updateFloatingButton();
+     });
 
      // ─── Close sidebar when clicking overlay (mobile) ───
      // Add this overlay to your HTML:
