@@ -888,11 +888,41 @@
           const bar = document.createElement('div');
           bar.className = 'page-toolbar';
           bar.innerHTML =
-               '<div class="page-toolbar-header"><span class="page-toolbar-actions"><button type="button" id="bookmarkPageBtn" aria-pressed="false" aria-label="Save this topic">☆<span> Save</span></button><button type="button" id="completePageBtn" aria-pressed="false" aria-label="Mark this topic complete">○<span> Done</span></button></span></div>' +
-               '<div class="page-options-label">Page Options</div><div class="page-toolbar-row"><label><input type="checkbox" id="hideEnglish" /> Hide EN</label><label><input type="checkbox" id="hidePronunciation" /> Hide PR</label><span class="progress-summary" id="progressSummary" aria-live="polite"></span></div>';
+               '<div class="page-options">' +
+               '<div class="page-options-head">' +
+               '<div class="page-options-label">Page options</div>' +
+               '<span class="progress-summary" id="progressSummary" aria-live="polite"></span>' +
+               '</div>' +
+               '<div class="page-toolbar-row">' +
+               '<label class="page-option-chip" for="hideEnglish">' +
+               '<input type="checkbox" id="hideEnglish" />' +
+               '<span>Hide EN</span>' +
+               '</label>' +
+               '<label class="page-option-chip" for="hidePronunciation">' +
+               '<input type="checkbox" id="hidePronunciation" />' +
+               '<span>Hide PR</span>' +
+               '</label>' +
+               '<button type="button" id="bookmarkPageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Save this topic">' +
+               '<span class="page-tool-icon" aria-hidden="true">☆</span>' +
+               '<span class="page-tool-label">Save</span>' +
+               '</button>' +
+               '<button type="button" id="completePageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Mark this topic complete">' +
+               '<span class="page-tool-icon" aria-hidden="true">○</span>' +
+               '<span class="page-tool-label">Done</span>' +
+               '</button>' +
+               '</div>' +
+               '</div>';
           content.insertBefore(bar, content.firstChild);
           const bookmarkButton = document.getElementById('bookmarkPageBtn');
           const completeButton = document.getElementById('completePageBtn');
+
+          function setToolButton(button, pressed, iconHtml, label) {
+               button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+               const iconEl = button.querySelector('.page-tool-icon');
+               const labelEl = button.querySelector('.page-tool-label');
+               if (iconEl) iconEl.innerHTML = iconHtml;
+               if (labelEl) labelEl.textContent = label;
+          }
 
           function readSectionSet(key) {
                try {
@@ -907,15 +937,18 @@
                localStorage.setItem(key, JSON.stringify(values));
           }
 
+          const ICON_SAVE = '<svg class="page-tool-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.47 5.01 5.53.8-4 3.9.94 5.5L12 16.9 7.06 18.8l.94-5.5-4-3.9 5.53-.8L12 3.6z"/></svg>';
+          const ICON_SAVED = '<svg class="page-tool-svg is-filled" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.47 5.01 5.53.8-4 3.9.94 5.5L12 16.9 7.06 18.8l.94-5.5-4-3.9 5.53-.8L12 3.6z"/></svg>';
+          const ICON_DONE = '<svg class="page-tool-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>';
+          const ICON_COMPLETE = '<svg class="page-tool-svg is-filled" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 12.2l3 3.1 6-6.4"/><circle cx="12" cy="12" r="8"/></svg>';
+
           function updateStudyState() {
                const bookmarks = readSectionSet('spanishBookmarks');
                const completed = readSectionSet('spanishCompleted');
                const bookmarked = bookmarks.includes(sectionId);
                const isComplete = completed.includes(sectionId);
-               bookmarkButton.textContent = bookmarked ? '★ Saved' : '☆ Save';
-               bookmarkButton.setAttribute('aria-pressed', bookmarked ? 'true' : 'false');
-               completeButton.textContent = isComplete ? '✓ Complete' : '○ Complete';
-               completeButton.setAttribute('aria-pressed', isComplete ? 'true' : 'false');
+               setToolButton(bookmarkButton, bookmarked, bookmarked ? ICON_SAVED : ICON_SAVE, bookmarked ? 'Saved' : 'Save');
+               setToolButton(completeButton, isComplete, isComplete ? ICON_COMPLETE : ICON_DONE, 'Done');
                document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.toggle('bookmarked', bookmarks.includes(item.dataset.section));
                     item.classList.toggle('completed', completed.includes(item.dataset.section));
