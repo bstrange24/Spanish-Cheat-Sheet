@@ -1193,12 +1193,14 @@
           navSearch.addEventListener('input', runSearch);
           const searchPrevious = document.getElementById('searchPrevious');
           const searchNext = document.getElementById('searchNext');
-          if (searchPrevious) searchPrevious.addEventListener('click', function () {
-               goToSearchMatch(currentSearchMatch - 1);
-          });
-          if (searchNext) searchNext.addEventListener('click', function () {
-               goToSearchMatch(currentSearchMatch + 1);
-          });
+          if (searchPrevious)
+               searchPrevious.addEventListener('click', function () {
+                    goToSearchMatch(currentSearchMatch - 1);
+               });
+          if (searchNext)
+               searchNext.addEventListener('click', function () {
+                    goToSearchMatch(currentSearchMatch + 1);
+               });
           navSearch.addEventListener('keydown', function (e) {
                if (e.key === 'ArrowDown' || (e.key === 'Enter' && e.altKey)) {
                     e.preventDefault();
