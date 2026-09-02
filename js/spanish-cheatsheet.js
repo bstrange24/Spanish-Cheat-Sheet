@@ -281,67 +281,67 @@
      }
 
      const SEE_ALSO = {
-          alphabet: [
-               { id: 'vowels', label: 'Vowels' },
-               { id: 'pronunciation', label: 'Pronunciation' },
-               { id: 'accent-stress', label: 'Accent & Stress' },
+          'pronunciation-basics/alphabet': [
+               { id: 'pronunciation-basics/vowels', label: 'Vowels' },
+               { id: 'pronunciation-basics/pronunciation', label: 'Pronunciation' },
+               { id: 'pronunciation-basics/accent-stress', label: 'Accent & Stress' },
           ],
-          vowels: [
-               { id: 'diphthongs', label: 'Diphthongs' },
-               { id: 'accent-stress', label: 'Accent & Stress' },
+          'pronunciation-basics/vowels': [
+               { id: 'pronunciation-basics/diphthongs', label: 'Diphthongs' },
+               { id: 'pronunciation-basics/accent-stress', label: 'Accent & Stress' },
           ],
-          pronunciation: [
-               { id: 'alphabet', label: 'Alphabet' },
-               { id: 'diphthongs', label: 'Diphthongs' },
-               { id: 'accent-stress', label: 'Accent & Stress' },
+          'pronunciation-basics/pronunciation': [
+               { id: 'pronunciation-basics/alphabet', label: 'Alphabet' },
+               { id: 'pronunciation-basics/diphthongs', label: 'Diphthongs' },
+               { id: 'pronunciation-basics/accent-stress', label: 'Accent & Stress' },
           ],
-          diphthongs: [
-               { id: 'vowels', label: 'Vowels' },
-               { id: 'accent-stress', label: 'Accent & Stress' },
+          'pronunciation-basics/diphthongs': [
+               { id: 'pronunciation-basics/vowels', label: 'Vowels' },
+               { id: 'pronunciation-basics/accent-stress', label: 'Accent & Stress' },
           ],
-          'accent-stress': [
-               { id: 'diphthongs', label: 'Diphthongs' },
-               { id: 'question-words', label: 'Question Words' },
+          'pronunciation-basics/accent-stress': [
+               { id: 'pronunciation-basics/diphthongs', label: 'Diphthongs' },
+               { id: 'grammar-core/question-words', label: 'Question Words' },
           ],
-          verbs: [
-               { id: 'irregular-verbs', label: 'Irregular Verbs' },
+          'verbs/verbs': [
+               { id: 'verbs/irregular-verbs', label: 'Irregular Verbs' },
                { id: 'tense/tense-conjugations', label: 'Tense Conjugations' },
           ],
-          'irregular-verbs': [
-               { id: 'verbs', label: 'Verbs' },
-               { id: 'poder', label: 'Poder' },
-               { id: 'querer', label: 'Querer' },
-               { id: 'decir', label: 'Decir' },
+          'verbs/irregular-verbs': [
+               { id: 'verbs/verbs', label: 'Verbs' },
+               { id: 'verbs/poder', label: 'Poder' },
+               { id: 'verbs/querer', label: 'Querer' },
+               { id: 'verbs/decir', label: 'Decir' },
           ],
-          'ser-estar': [
-               { id: 'hacer', label: 'Hacer' },
-               { id: 'tener', label: 'Tener' },
-               { id: 'weather', label: 'Weather' },
+          'verbs/ser-estar': [
+               { id: 'verbs/hacer', label: 'Hacer' },
+               { id: 'verbs/tener', label: 'Tener' },
+               { id: 'vocabulary/weather', label: 'Weather' },
           ],
-          hacer: [
-               { id: 'ser-estar', label: 'Ser - Estar' },
-               { id: 'weather', label: 'Weather' },
+          'verbs/hacer': [
+               { id: 'verbs/ser-estar', label: 'Ser - Estar' },
+               { id: 'vocabulary/weather', label: 'Weather' },
           ],
-          tener: [
-               { id: 'obligation', label: 'Obligation' },
-               { id: 'ser-estar', label: 'Ser - Estar' },
+          'verbs/tener': [
+               { id: 'grammar-core/obligation', label: 'Obligation' },
+               { id: 'verbs/ser-estar', label: 'Ser - Estar' },
           ],
-          nouns: [
-               { id: 'gender', label: 'Gender' },
-               { id: 'plural-rules', label: 'Plural Rules' },
+          'grammar-core/nouns': [
+               { id: 'grammar-core/gender', label: 'Gender' },
+               { id: 'grammar-core/plural-rules', label: 'Plural Rules' },
           ],
-          gender: [
-               { id: 'nouns', label: 'Nouns' },
-               { id: 'adjectives', label: 'Adjectives' },
+          'grammar-core/gender': [
+               { id: 'grammar-core/nouns', label: 'Nouns' },
+               { id: 'grammar-core/adjectives', label: 'Adjectives' },
           ],
-          'plural-rules': [
-               { id: 'nouns', label: 'Nouns' },
-               { id: 'gender', label: 'Gender' },
+          'grammar-core/plural-rules': [
+               { id: 'grammar-core/nouns', label: 'Nouns' },
+               { id: 'grammar-core/gender', label: 'Gender' },
           ],
-          pronouns: [
-               { id: 'pronoun-placement', label: 'Pronoun Placement' },
-               { id: 'gustar', label: 'Gustar' },
-               { id: 'tu-usted-vos', label: 'Tú / Usted / Vos' },
+          'grammar-core/pronouns': [
+               { id: 'grammar-core/pronoun-placement', label: 'Pronoun Placement' },
+               { id: 'verbs/gustar', label: 'Gustar' },
+               { id: 'grammar-core/tu-usted-vos', label: 'Tú / Usted / Vos' },
           ],
           conjunctions: [
                { id: 'adverbs', label: 'Adverbs' },
@@ -954,8 +954,29 @@
           });
      }
 
+     const SECTION_ALIASES = {
+          decir: 'verbs/decir',
+          'ser-estar': 'verbs/ser-estar',
+          'tu-usted-vos': 'grammar-core/tu-usted-vos',
+     };
+
+     function canonicalSectionId(sectionId) {
+          if (SECTION_ALIASES[sectionId]) return SECTION_ALIASES[sectionId];
+          const exact = Array.from(navItems).find(item => item.dataset.section === sectionId);
+          if (exact) return exact.dataset.section;
+          const matches = Array.from(navItems).filter(item => item.dataset.section.endsWith('/' + sectionId));
+          return matches.length === 1 ? matches[0].dataset.section : sectionId;
+     }
+
+     function getSeeAlso(sectionId) {
+          const canonicalId = canonicalSectionId(sectionId);
+          if (SEE_ALSO[canonicalId]) return SEE_ALSO[canonicalId];
+          const legacyKey = Object.keys(SEE_ALSO).find(key => canonicalSectionId(key) === canonicalId);
+          return legacyKey ? SEE_ALSO[legacyKey] : undefined;
+     }
+
      function addSeeAlso(sectionId) {
-          const links = SEE_ALSO[sectionId];
+          const links = getSeeAlso(sectionId);
           if (!links || !links.length || content.querySelector('.see-also')) return;
           const wrap = document.createElement('details');
           wrap.className = 'see-also';
@@ -970,7 +991,7 @@
                const btn = document.createElement('button');
                btn.type = 'button';
                btn.className = 'see-also-link';
-               btn.dataset.section = link.id;
+               btn.dataset.section = canonicalSectionId(link.id);
                btn.textContent = link.label;
                row.appendChild(btn);
           });
