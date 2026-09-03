@@ -1435,3 +1435,40 @@ tbody tr:nth-child(even) td {
           padding: 0 2px;
      }
 }
+
+.page-tool-svg {
+     width: 20px;
+     height: 20px;
+     fill: none;
+     stroke: currentColor;
+     stroke-width: 2;
+     stroke-linecap: round;
+     stroke-linejoin: round;
+     vertical-align: middle;
+}
+
+.page-tool-svg.is-filled {
+     fill: currentColor;
+     stroke: currentColor;
+}
+
+/* Optional: color the icons */
+#bookmarkButton .page-tool-svg {
+     color: #6b7280;
+     /* gray */
+}
+
+#bookmarkButton .page-tool-svg.is-filled {
+     color: #f59e0b;
+     /* amber/gold for saved */
+}
+
+#completeButton .page-tool-svg {
+     color: #6b7280;
+     /* gray */
+}
+
+#completeButton .page-tool-svg.is-filled {
+     color: #10b981;
+     /* green for completed */
+}
