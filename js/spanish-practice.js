@@ -283,6 +283,7 @@ function showTargetInfo() {
           targetCard.style.display = 'none';
           return;
      }
+     if (!$('targetText') || !$('phoneticGuide') || !$('meaningGuide')) return;
 
      $('targetText').textContent = phrase;
      const entry = dictEntry(phrase);
@@ -1344,6 +1345,7 @@ if ($('top1000Btn')) {
 }
 
 (function applyPracticeParams() {
+     if (document.body.classList.contains('study-page')) return;
      const params = new URLSearchParams(window.location.search);
      const fromPage = params.get('from') === 'page' || params.get('mode') === 'quiz' || params.get('pool') === 'page';
      if (fromPage) {

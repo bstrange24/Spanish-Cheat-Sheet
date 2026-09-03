@@ -118,10 +118,18 @@ body {
 }
 
 .page-pool-status {
+     display: inline-flex;
+     align-items: center;
+     max-width: 100%;
      margin: -4px 0 14px;
+     padding: 6px 10px;
+     border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+     border-radius: 999px;
+     background: color-mix(in srgb, var(--accent) 7%, var(--card));
      color: var(--accent);
      font-size: 0.86rem;
      font-weight: 600;
+     line-height: 1.3;
 }
 
 .study-goal {

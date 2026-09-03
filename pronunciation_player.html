@@ -199,8 +199,8 @@
                }
 
                function ttsApiUrl(w) {
-                    // Same origin as this page (local server)
-                    const base = window.location.origin;
+                    // File URLs need the local player server; deployed pages use their own API origin.
+                    const base = window.location.protocol === 'file:' ? 'http://127.0.0.1:8765' : window.location.origin;
                     return `${base}/api/tts?text=${encodeURIComponent(w)}&lang=${encodeURIComponent(lang)}`;
                }
 
