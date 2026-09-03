@@ -1,5 +1,6 @@
 /* ─── Theme Variables ─── */
-:root {
+/* OG */
+/* :root {
      --font-ui: 'DM Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
      --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
      --bg-primary: #101820;
@@ -75,6 +76,111 @@ html.light-mode {
      --accent-soft: rgba(180, 99, 43, 0.12);
      --focus-ring: #147e78;
      --surface-raised: #fffdf8;
+} */
+
+:root {
+     --font-ui: 'DM Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
+     --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+     --bg-primary: #080f1d;
+     --bg-secondary: #101c32;
+     --bg-table: #14233d;
+     --bg-table-hover: #1b3152;
+     --bg-sidebar: #080f1d;
+     --bg-sidebar-hover: #14233d;
+
+     --text-primary: #edf4ff;
+     --text-secondary: #a9b9ce;
+     --text-muted: #71849d;
+     --text-inverse: #080f1d;
+
+     --border-color: #263c5a;
+     --shadow-color: rgba(0, 0, 0, 0.4);
+
+     --hover-color: #14233d;
+
+     --link-color: #60a5fa;
+     --link-hover-bg: rgba(96, 165, 250, 0.12);
+     --link-hover-color: #93c5fd;
+
+     --placeholder-bg: #14233d;
+     --placeholder-border: #38516f;
+
+     --summary-hover: #fbbf24;
+     --say-text-decoration: #60a5fa;
+
+     --thead-bg: #1a2d49;
+     --thead-color: #edf4ff;
+
+     --highlight-bg: #fbbf24;
+     --highlight-color: #101c32;
+
+     --search-hit-bg: rgba(96, 165, 250, 0.12);
+     --search-hit-border: #3b82f6;
+     --search-current-border: #fbbf24;
+
+     --diphthong-underline: #fbbf24;
+
+     --noun-masc: #60a5fa;
+     --noun-fem: #f472b6;
+     --noun-neuter: #4ade80;
+
+     --accent: #fbbf24;
+     --accent-soft: rgba(251, 191, 36, 0.14);
+
+     --focus-ring: #60a5fa;
+     --surface-raised: #1a2d49;
+}
+
+html.light-mode {
+     --bg-primary: #eef3f9;
+     --bg-secondary: #ffffff;
+     --bg-table: #ffffff;
+     --bg-table-hover: #e8f0f8;
+     --bg-sidebar: #101c32;
+     --bg-sidebar-hover: #1a2d49;
+
+     --text-primary: #101c32;
+     --text-secondary: #52657d;
+     --text-muted: #7c8da2;
+     --text-inverse: #ffffff;
+
+     --border-color: #d0dbe7;
+     --shadow-color: rgba(16, 28, 50, 0.12);
+
+     --hover-color: #e8f0f8;
+
+     --link-color: #1d5fa7;
+     --link-hover-bg: #e0efff;
+     --link-hover-color: #12477e;
+
+     --placeholder-bg: #f7fafd;
+     --placeholder-border: #c6d3e1;
+
+     --summary-hover: #b45309;
+     --say-text-decoration: #1d5fa7;
+
+     --thead-bg: #e1eaf4;
+     --thead-color: #101c32;
+
+     --highlight-bg: #f5c451;
+     --highlight-color: #101c32;
+
+     --search-hit-bg: rgba(29, 95, 167, 0.1);
+     --search-hit-border: #1d5fa7;
+     --search-current-border: #b45309;
+
+     --diphthong-underline: #b45309;
+
+     --noun-masc: #1769a7;
+     --noun-fem: #b23d69;
+     --noun-neuter: #28764c;
+
+     --accent: #b45309;
+     --accent-soft: rgba(180, 83, 9, 0.12);
+
+     --focus-ring: #2563eb;
+     --surface-raised: #ffffff;
 }
 
 /* ─── Reset & Base ─── */

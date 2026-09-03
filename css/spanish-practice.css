@@ -1,3 +1,5 @@
+/* 
+OG
 :root {
      --bg: #f1f5f9;
      --card: #ffffff;
@@ -24,6 +26,35 @@
      --danger: #f87171;
      --tips-bg: #134e4a;
      --tips-border: #2dd4bf;
+} */
+
+/* Nave Blue */
+:root {
+     --bg: #eef3f9;
+     --card: #ffffff;
+     --text: #101c32;
+     --muted: #52657d;
+     --border: #d0dbe7;
+     --accent: #1d4ed8;
+     --success: #059669;
+     --warning: #b45309;
+     --danger: #dc2626;
+     --tips-bg: #e8f0f8;
+     --tips-border: #1d4ed8;
+}
+
+[data-theme='dark'] {
+     --bg: #080f1d;
+     --card: #101c32;
+     --text: #edf4ff;
+     --muted: #a9b9ce;
+     --border: #263c5a;
+     --accent: #4f8cff;
+     --success: #34d399;
+     --warning: #fbbf24;
+     --danger: #f87171;
+     --tips-bg: #14233d;
+     --tips-border: #4f8cff;
 }
 
 * {
