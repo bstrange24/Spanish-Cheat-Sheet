@@ -4,7 +4,7 @@
      function getAudioBaseUrl() {
           const host = window.location.hostname;
           const isLocal = host === 'localhost' || host === '127.0.0.1';
-          return isLocal ? 'http://127.0.0.1:8765' : window.location.origin;
+          return window.location.protocol === 'file:' || isLocal ? 'http://127.0.0.1:8765' : window.location.origin;
      }
 
      // ─── DOM refs ───
@@ -77,16 +77,20 @@
 
      // ─── Play audio ───
      function playAudio(text, lang) {
-          if (!text || !text.trim()) return;
+          if (!player || !status || !text || !text.trim()) return;
           text = text.trim();
           lang = lang || getTtsLang();
           const url = getAudioBaseUrl() + '/api/tts?text=' + encodeURIComponent(text) + '&lang=' + encodeURIComponent(lang);
           player.src = url;
+          player.load();
           status.textContent = '🔊 ' + (text.length > 30 ? text.substring(0, 30) + '…' : text);
-          player.play().catch(err => {
-               console.warn('Playback blocked:', err);
-               status.textContent = '⚠️ Click play button';
-          });
+          const playback = player.play();
+          if (playback && typeof playback.catch === 'function') {
+               playback.catch(err => {
+                    if (err && err.name !== 'AbortError') console.warn('Playback blocked:', err);
+                    status.textContent = '⚠️ Click play button';
+               });
+          }
           player.onended = function () {
                document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
                status.textContent = 'Ready';
