@@ -817,6 +817,10 @@ html.light-mode .theme-toggle .theme-icon-dark {
      accent-color: var(--accent);
 }
 
+.page-option-label-mobile {
+     display: none;
+}
+
 /* ─── Details / tables / words ─── */
 details {
      margin: 18px 0;
@@ -1320,6 +1324,14 @@ tbody tr:nth-child(even) td {
           min-height: 40px;
           padding: 0 7px;
           font-size: 0.72rem;
+     }
+
+     .page-option-label-full {
+          display: none;
+     }
+
+     .page-option-label-mobile {
+          display: inline;
      }
 
      .see-also-links {

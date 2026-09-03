@@ -568,10 +568,19 @@
      function applyColumnHides() {
           const hideEn = localStorage.getItem('hideEnglish') === 'true';
           const hidePron = localStorage.getItem('hidePronunciation') === 'true';
+          const hideExamples = localStorage.getItem('hideExamples') === 'true';
           const enBox = document.getElementById('hideEnglish');
           const pronBox = document.getElementById('hidePronunciation');
+          const examplesBox = document.getElementById('hideExamples');
           if (enBox) enBox.checked = hideEn;
           if (pronBox) pronBox.checked = hidePron;
+          if (examplesBox) examplesBox.checked = hideExamples;
+
+          content.querySelectorAll('details').forEach(detail => {
+               const summary = detail.querySelector('summary');
+               const isExampleSection = summary && /example sentences/i.test(summary.textContent || '');
+               if (isExampleSection) detail.style.display = hideExamples ? 'none' : '';
+          });
 
           // Hide inline pronunciation spans such as <span class="secondary">pehn-SAHR</span>
           // and <span class="pronunciation">OH-lah</span> when the user toggles the checkbox,
@@ -915,6 +924,11 @@
                '<input type="checkbox" id="hidePronunciation" />' +
                '<span>Hide PR</span>' +
                '</label>' +
+               '<label class="page-option-chip" for="hideExamples">' +
+               '<input type="checkbox" id="hideExamples" />' +
+               '<span class="page-option-label-full">Hide Examples</span>' +
+               '<span class="page-option-label-mobile">Hide EX</span>' +
+               '</label>' +
                '<button type="button" id="bookmarkPageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Save this topic">' +
                '<span class="page-tool-icon" aria-hidden="true">☆</span>' +
                '<span class="page-tool-label">Save</span>' +
@@ -992,6 +1006,12 @@
           hidePronBox.checked = localStorage.getItem('hidePronunciation') === 'true';
           hidePronBox.addEventListener('change', function () {
                localStorage.setItem('hidePronunciation', this.checked ? 'true' : 'false');
+               applyColumnHides();
+          });
+          const hideExamplesBox = document.getElementById('hideExamples');
+          hideExamplesBox.checked = localStorage.getItem('hideExamples') === 'true';
+          hideExamplesBox.addEventListener('change', function () {
+               localStorage.setItem('hideExamples', this.checked ? 'true' : 'false');
                applyColumnHides();
           });
           function collectPageWords() {
