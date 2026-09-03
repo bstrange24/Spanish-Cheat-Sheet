@@ -912,22 +912,25 @@
           bar.innerHTML =
                '<div class="page-options">' +
                '<div class="page-options-head">' +
-               '<div class="page-options-label">Page options</div>' +
+               '<button type="button" id="pageOptionsToggle" class="page-options-toggle" aria-expanded="true" aria-controls="pageToolbarControls" aria-label="Collapse page options">' +
+               '<span class="page-options-label">Page options</span>' +
+               '<span class="page-options-toggle-icon" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="m4 6 4 4 4-4"></path></svg></span>' +
+               '</button>' +
                '<span class="progress-summary" id="progressSummary" aria-live="polite"></span>' +
                '</div>' +
-               '<div class="page-toolbar-row">' +
+               '<div class="page-toolbar-row" id="pageToolbarControls">' +
                '<label class="page-option-chip" for="hideEnglish">' +
                '<input type="checkbox" id="hideEnglish" />' +
-               '<span>Hide EN</span>' +
+               '<span>Hide English</span>' +
                '</label>' +
                '<label class="page-option-chip" for="hidePronunciation">' +
                '<input type="checkbox" id="hidePronunciation" />' +
-               '<span>Hide PR</span>' +
+               '<span>Hide Pronunciation</span>' +
                '</label>' +
                '<label class="page-option-chip" for="hideExamples">' +
                '<input type="checkbox" id="hideExamples" />' +
                '<span class="page-option-label-full">Hide Examples</span>' +
-               '<span class="page-option-label-mobile">Hide EX</span>' +
+               '<span class="page-option-label-mobile">Hide Examples</span>' +
                '</label>' +
                '<button type="button" id="bookmarkPageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Save this topic">' +
                '<span class="page-tool-icon" aria-hidden="true">☆</span>' +
@@ -942,6 +945,22 @@
           content.insertBefore(bar, content.firstChild);
           const bookmarkButton = document.getElementById('bookmarkPageBtn');
           const completeButton = document.getElementById('completePageBtn');
+          const optionsToggle = document.getElementById('pageOptionsToggle');
+          const optionsControls = document.getElementById('pageToolbarControls');
+
+          function setOptionsCollapsed(collapsed) {
+               optionsControls.hidden = collapsed;
+               optionsToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+               optionsToggle.setAttribute('aria-label', collapsed ? 'Expand page options' : 'Collapse page options');
+               optionsToggle.querySelector('.page-options-toggle-icon').classList.toggle('is-collapsed', collapsed);
+          }
+
+          setOptionsCollapsed(localStorage.getItem('pageOptionsCollapsed') === 'true');
+          optionsToggle.addEventListener('click', function () {
+               const collapsed = optionsToggle.getAttribute('aria-expanded') === 'true';
+               localStorage.setItem('pageOptionsCollapsed', collapsed ? 'true' : 'false');
+               setOptionsCollapsed(collapsed);
+          });
 
           function setToolButton(button, pressed, iconHtml, label) {
                button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
