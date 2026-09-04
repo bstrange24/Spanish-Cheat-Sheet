@@ -10,6 +10,7 @@ let audioChunks = [];
 let playerVisible = true;
 let playerTimeout;
 let micPermissionGranted = false;
+let conjugationState = { correct: 0, attempted: 0 };
 
 // ===================== DOM =====================
 const $ = id => document.getElementById(id);
@@ -291,12 +292,13 @@ function showTargetInfo() {
      const showPh = $('showPhonetic').checked;
      const testMode = $('testMode').checked;
 
+     const showApproximate = showPh && !testMode;
      if (entry) {
-          $('phoneticGuide').innerHTML = showPh ? `Approximate: <em>${entry.approx}</em>` : '';
-          $('phoneticGuide').style.display = showPh ? 'block' : 'none';
+          $('phoneticGuide').innerHTML = showApproximate ? `Approximate: <em>${entry.approx}</em>` : '';
+          $('phoneticGuide').style.display = showApproximate ? 'block' : 'none';
      } else {
-          $('phoneticGuide').innerHTML = showPh ? 'Approximate: <em>(not in dictionary)</em>' : '';
-          $('phoneticGuide').style.display = showPh ? 'block' : 'none';
+          $('phoneticGuide').innerHTML = showApproximate ? 'Approximate: <em>(not in dictionary)</em>' : '';
+          $('phoneticGuide').style.display = showApproximate ? 'block' : 'none';
      }
      $('meaningGuide').innerHTML = meaningLineHtml(phrase, false);
 
@@ -324,6 +326,300 @@ function showTargetInfo() {
      playerTimeout = setTimeout(updatePlayer, 300);
 }
 
+// ===================== CONJUGATION PRACTICE =====================
+const CONJUGATION_PRONOUNS = [
+     ['yo', 'yo'],
+     ['tu', 'tú'],
+     ['el', 'él / ella / usted'],
+     ['nosotros', 'nosotros / nosotras'],
+     ['vosotros', 'vosotros / vosotras'],
+     ['ellos', 'ellos / ellas / ustedes'],
+];
+const CONJUGATION_TENSES = [
+     ['present', 'Present'],
+     ['preterite', 'Preterite'],
+     ['imperfect', 'Imperfect'],
+     ['future', 'Future'],
+     ['conditional', 'Conditional'],
+];
+const CONJUGATION_IRREGULARS = {
+     ser: { present: ['soy', 'eres', 'es', 'somos', 'sois', 'son'], preterite: ['fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron'], imperfect: ['era', 'eras', 'era', 'éramos', 'erais', 'eran'], future: ['seré', 'serás', 'será', 'seremos', 'seréis', 'serán'], conditional: ['sería', 'serías', 'sería', 'seríamos', 'seríais', 'serían'] },
+     estar: { present: ['estoy', 'estás', 'está', 'estamos', 'estáis', 'están'], preterite: ['estuve', 'estuviste', 'estuvo', 'estuvimos', 'estuvisteis', 'estuvieron'] },
+     tener: { present: ['tengo', 'tienes', 'tiene', 'tenemos', 'tenéis', 'tienen'], preterite: ['tuve', 'tuviste', 'tuvo', 'tuvimos', 'tuvisteis', 'tuvieron'], future: ['tendré', 'tendrás', 'tendrá', 'tendremos', 'tendréis', 'tendrán'], conditional: ['tendría', 'tendrías', 'tendría', 'tendríamos', 'tendríais', 'tendrían'] },
+     hacer: { present: ['hago', 'haces', 'hace', 'hacemos', 'hacéis', 'hacen'], preterite: ['hice', 'hiciste', 'hizo', 'hicimos', 'hicisteis', 'hicieron'], future: ['haré', 'harás', 'hará', 'haremos', 'haréis', 'harán'], conditional: ['haría', 'harías', 'haría', 'haríamos', 'haríais', 'harían'] },
+     ir: { present: ['voy', 'vas', 'va', 'vamos', 'vais', 'van'], preterite: ['fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron'], imperfect: ['iba', 'ibas', 'iba', 'íbamos', 'ibais', 'iban'], future: ['iré', 'irás', 'irá', 'iremos', 'iréis', 'irán'], conditional: ['iría', 'irías', 'iría', 'iríamos', 'iríais', 'irían'] },
+     poder: { present: ['puedo', 'puedes', 'puede', 'podemos', 'podéis', 'pueden'], preterite: ['pude', 'pudiste', 'pudo', 'pudimos', 'pudisteis', 'pudieron'], future: ['podré', 'podrás', 'podrá', 'podremos', 'podréis', 'podrán'], conditional: ['podría', 'podrías', 'podría', 'podríamos', 'podríais', 'podrían'] },
+};
+let conjugationVerbs = [];
+let conjugationPresentForms = {};
+let conjugationStemChanges = {};
+const CONJUGATION_STEM_CHANGE_OVERRIDES = {
+     acostar: 'o→ue',
+     despertar: 'e→ie',
+     entender: 'e→ie',
+     preferir: 'e→ie',
+     sentir: 'e→ie',
+     servir: 'e→i',
+     vestir: 'e→i',
+};
+const CONJUGATION_ENDINGS = {
+     present: { ar: ['o', 'as', 'a', 'amos', 'áis', 'an'], er: ['o', 'es', 'e', 'emos', 'éis', 'en'], ir: ['o', 'es', 'e', 'imos', 'ís', 'en'] },
+     preterite: { ar: ['é', 'aste', 'ó', 'amos', 'asteis', 'aron'], er: ['í', 'iste', 'ió', 'imos', 'isteis', 'ieron'], ir: ['í', 'iste', 'ió', 'imos', 'isteis', 'ieron'] },
+     imperfect: { ar: ['aba', 'abas', 'aba', 'ábamos', 'abais', 'aban'], er: ['ía', 'ías', 'ía', 'íamos', 'íais', 'ían'], ir: ['ía', 'ías', 'ía', 'íamos', 'íais', 'ían'] },
+};
+
+function conjugateVerb(verb, tense) {
+     if (verb.irregular && verb.irregular[tense]) return verb.irregular[tense];
+     if (tense === 'present' && verb.present) return verb.present;
+     const ending = verb.infinitive.slice(-2);
+     if (tense === 'future' || tense === 'conditional') {
+          const suffixes = tense === 'future' ? ['é', 'ás', 'á', 'emos', 'éis', 'án'] : ['ía', 'ías', 'ía', 'íamos', 'íais', 'ían'];
+          return suffixes.map(suffix => verb.infinitive + suffix);
+     }
+     const stem = verb.infinitive.slice(0, -2);
+     const forms = CONJUGATION_ENDINGS[tense][ending].map(suffix => stem + suffix);
+     if (tense === 'present' && verb.stemChange) {
+          const changedStem = applyStemChange(stem, verb.stemChange);
+          [0, 1, 2, 5].forEach(index => {
+               forms[index] = changedStem + CONJUGATION_ENDINGS[tense][ending][index];
+          });
+     }
+     if (tense === 'present' && verb.yoForm) forms[0] = verb.yoForm;
+     return forms;
+}
+
+function applyStemChange(stem, change) {
+     const [from, to] = change.split('→');
+     const position = stem.lastIndexOf(from);
+     return position >= 0 ? stem.slice(0, position) + to + stem.slice(position + from.length) : stem;
+}
+
+async function loadConjugationVerbs() {
+     const status = $('conjugationVerbStatus');
+     try {
+          const response = await fetch('sections/verbs/verbs.html');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const html = await response.text();
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          try {
+               const irregularResponse = await fetch('sections/verbs/irregular-verbs.html');
+               if (irregularResponse.ok) {
+                    const irregularDoc = new DOMParser().parseFromString(await irregularResponse.text(), 'text/html');
+                    irregularDoc.querySelectorAll('table').forEach(table => {
+                         const headers = Array.from(table.querySelectorAll('thead th')).map(cell => cell.textContent.replace(/\s+/g, ' ').trim().toLowerCase());
+                         if (headers.length !== 7 && headers.length !== 8) return;
+                         if (headers[0] !== 'verb') return;
+                         if (headers.length === 8) {
+                              const heading = table.previousElementSibling?.textContent.replace(/\s+/g, ' ').trim() || '';
+                              const change = heading.match(/([eou])\s*→\s*([ieou]+)/i)?.[0]?.replace(/\s+/g, '') || '';
+                              table.querySelectorAll('tbody tr').forEach(row => {
+                                   const cells = row.querySelectorAll('td');
+                                   const infinitive = cells[0]?.querySelector('[data-text]')?.getAttribute('data-text')?.toLowerCase();
+                                   if (infinitive && change) conjugationStemChanges[infinitive] = change;
+                              });
+                         }
+                         table.querySelectorAll('tbody tr').forEach(row => {
+                              const cells = row.querySelectorAll('td');
+                              const forms = Array.from(cells).map(cell => cell.querySelector('[data-text]')?.getAttribute('data-text') || cell.textContent.trim());
+                              const infinitive = forms[0]?.toLowerCase();
+                              if (infinitive && forms.length === 8) conjugationPresentForms[infinitive] = forms.slice(1).map(form => form.toLowerCase());
+                         });
+                    });
+                    irregularDoc.querySelectorAll('p').forEach(paragraph => {
+                         const text = paragraph.textContent.replace(/\s+/g, ' ').trim();
+                         const match = text.match(/^More\s+([eou])\s*→\s*([ieou]+)\s+verbs:/i);
+                         if (!match) return;
+                         const change = `${match[1]}→${match[2]}`.toLowerCase();
+                         paragraph.querySelectorAll('[data-text]').forEach(node => {
+                              const infinitive = node.getAttribute('data-text').trim().toLowerCase();
+                              if (/(ar|er|ir)$/.test(infinitive)) conjugationStemChanges[infinitive] = change;
+                         });
+                    });
+               }
+          } catch (error) {
+               console.warn('Could not load irregular present-tense forms', error);
+          }
+          const rows = Array.from(doc.querySelectorAll('table tbody tr'));
+          const seen = new Set();
+          conjugationVerbs = rows
+               .map(row => {
+                    const cells = row.querySelectorAll('td');
+                    const infinitive = (cells[0]?.querySelector('[data-text]')?.getAttribute('data-text') || cells[0]?.textContent || '').trim().toLowerCase();
+                    const meaning = (cells[2]?.textContent || '').replace(/\s+/g, ' ').trim();
+                    const yoForm = (cells[3]?.querySelector('[data-text]')?.getAttribute('data-text') || cells[3]?.textContent || '').trim().toLowerCase();
+                    if (!infinitive || !/(ar|er|ir)$/.test(infinitive) || seen.has(infinitive)) return null;
+                    seen.add(infinitive);
+                    return { infinitive, meaning: meaning || 'verb', yoForm, present: conjugationPresentForms[infinitive], stemChange: conjugationStemChanges[infinitive] || CONJUGATION_STEM_CHANGE_OVERRIDES[infinitive], irregular: CONJUGATION_IRREGULARS[infinitive] };
+               })
+               .filter(Boolean);
+          if (!conjugationVerbs.length) throw new Error('No verbs found');
+          status.textContent = `${conjugationVerbs.length} verbs loaded from verbs.html`;
+          status.className = 'conjugation-source-status loaded';
+          renderConjugationVerbOptions();
+     } catch (error) {
+          status.textContent = 'Could not load verbs.html. Start the local server to use conjugation practice.';
+          status.className = 'conjugation-source-status error';
+          $('newConjugationBtn').disabled = true;
+          $('randomConjugationVerbBtn').disabled = true;
+          console.warn('Could not load conjugation verbs', error);
+     }
+}
+
+function renderConjugationVerbOptions() {
+     const verbSelect = $('conjugationVerb');
+     verbSelect.innerHTML = conjugationVerbs.map((verb, index) => `<option value="${index}">${verb.infinitive} (${verb.meaning.replace(/</g, '&lt;').replace(/>/g, '&gt;')})</option>`).join('');
+     verbSelect.disabled = false;
+     $('newConjugationBtn').disabled = false;
+     $('randomConjugationVerbBtn').disabled = false;
+     renderConjugationPrompt();
+}
+
+function setupConjugation() {
+     const verbSelect = $('conjugationVerb');
+     const tenseSelect = $('conjugationTense');
+     const pronounSelect = $('conjugationPronoun');
+     if (!verbSelect || !tenseSelect || !pronounSelect) return;
+
+     verbSelect.disabled = true;
+     tenseSelect.innerHTML = CONJUGATION_TENSES.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+     pronounSelect.innerHTML = CONJUGATION_PRONOUNS.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+
+     function currentPrompt() {
+          const verb = conjugationVerbs[Number(verbSelect.value)];
+          if (!verb) return null;
+          const tense = CONJUGATION_TENSES.find(item => item[0] === tenseSelect.value);
+          const pronoun = CONJUGATION_PRONOUNS.find(item => item[0] === pronounSelect.value);
+          const forms = conjugateVerb(verb, tenseSelect.value);
+          const index = CONJUGATION_PRONOUNS.findIndex(item => item[0] === pronounSelect.value);
+          return { verb, tense: tense[1], pronoun: pronoun[1], answer: forms[index] };
+     }
+
+     function renderPrompt() {
+          const prompt = currentPrompt();
+          if (!prompt) return;
+          $('conjugationPrompt').innerHTML = `<strong>${prompt.pronoun}</strong> <span>${prompt.verb.infinitive}</span> <small>(${prompt.tense})</small>`;
+          $('conjugationAnswer').value = '';
+          $('conjugationFeedback').textContent = 'Choose your answer.';
+          $('conjugationFeedback').className = 'conjugation-feedback';
+          $('conjugationAnswer').focus();
+     }
+
+     // Replace the randomizeVerb function with this:
+     function randomizeVerb() {
+          if (!conjugationVerbs.length) return;
+          let next = Math.floor(Math.random() * conjugationVerbs.length);
+          if (conjugationVerbs.length > 1 && next === Number(verbSelect.value)) next = (next + 1) % conjugationVerbs.length;
+          verbSelect.value = String(next);
+
+          // Randomize pronoun and/or tense if checkboxes are checked
+          if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
+               randomizeSelect(pronounSelect);
+          }
+          if ($('conjugationRandomTense').checked && tenseSelect.options.length > 1) {
+               randomizeSelect(tenseSelect);
+          }
+
+          renderPrompt();
+     }
+
+     function randomizeSelect(select) {
+          const current = select.value;
+          let next = Math.floor(Math.random() * select.options.length);
+          if (select.options.length > 1 && select.options[next].value === current) next = (next + 1) % select.options.length;
+          select.value = select.options[next].value;
+     }
+
+     function advanceConjugationPrompt() {
+          if ($('conjugationAutoAdvance').checked) {
+               // Randomize verb, and also randomize pronoun/tense if checked
+               randomizeVerb(); // This now handles everything
+          } else {
+               // If auto-advance is off but we still want to randomize when clicking "New prompt"
+               if ($('conjugationRandomPronoun').checked) randomizeSelect(pronounSelect);
+               if ($('conjugationRandomTense').checked) randomizeSelect(tenseSelect);
+               renderPrompt();
+          }
+     }
+
+     function checkAnswer(revealOnly) {
+          const prompt = currentPrompt();
+          if (!prompt) return;
+          const answer = $('conjugationAnswer').value.trim();
+          if (!revealOnly && !answer) {
+               $('conjugationFeedback').textContent = 'Type an answer first.';
+               return;
+          }
+          if (!revealOnly) {
+               conjugationState.attempted++;
+               const correct = normalize(answer) === normalize(prompt.answer);
+               if (correct) conjugationState.correct++;
+               $('conjugationFeedback').textContent = correct ? 'Correct.' : `Not quite. The answer is ${prompt.answer}.`;
+               $('conjugationFeedback').className = `conjugation-feedback ${correct ? 'good' : 'bad'}`;
+               if (correct && ($('conjugationAutoAdvance').checked || $('conjugationRandomPronoun').checked || $('conjugationRandomTense').checked)) {
+                    setTimeout(advanceConjugationPrompt, 700);
+               }
+          } else {
+               $('conjugationFeedback').textContent = `Answer: ${prompt.answer}`;
+               $('conjugationFeedback').className = 'conjugation-feedback';
+          }
+          $('conjugationProgress').textContent = `${conjugationState.correct} correct / ${conjugationState.attempted} attempted`;
+     }
+
+     verbSelect.addEventListener('change', function () {
+          // When user selects a new verb, randomize pronoun and/or tense if checkboxes are checked
+          if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
+               randomizeSelect(pronounSelect);
+          }
+          if ($('conjugationRandomTense').checked && tenseSelect.options.length > 1) {
+               randomizeSelect(tenseSelect);
+          }
+          renderPrompt();
+     });
+
+     tenseSelect.addEventListener('change', renderPrompt);
+     pronounSelect.addEventListener('change', renderPrompt);
+     window.renderConjugationPrompt = renderPrompt;
+     $('newConjugationBtn').onclick = renderPrompt;
+     $('randomConjugationVerbBtn').onclick = randomizeVerb;
+     $('checkConjugationBtn').onclick = () => checkAnswer(false);
+     $('revealConjugationBtn').onclick = () => checkAnswer(true);
+     $('hearConjugationBtn').onclick = () => {
+          const utterance = new SpeechSynthesisUtterance(currentPrompt().answer);
+          utterance.lang = $('lang').value;
+          utterance.rate = parseFloat($('ttsRate').value);
+          synth.cancel();
+          synth.speak(utterance);
+     };
+     $('conjugationAnswer').addEventListener('keydown', event => {
+          if (event.key === 'Enter') checkAnswer(false);
+     });
+     loadConjugationVerbs();
+}
+
+function renderConjugationPrompt() {
+     if (window.renderConjugationPrompt) window.renderConjugationPrompt();
+}
+
+function setupPracticeTabs() {
+     const pronunciationTab = $('pronunciationTab');
+     const conjugationTab = $('conjugationTab');
+     const pronunciationPanel = $('pronunciationPanel');
+     const conjugationPanel = $('conjugationPanel');
+     if (!pronunciationTab || !conjugationTab) return;
+     function selectTab(tab) {
+          const conjugation = tab === conjugationTab;
+          pronunciationTab.classList.toggle('active', !conjugation);
+          conjugationTab.classList.toggle('active', conjugation);
+          pronunciationTab.setAttribute('aria-selected', String(!conjugation));
+          conjugationTab.setAttribute('aria-selected', String(conjugation));
+          pronunciationPanel.hidden = conjugation;
+          conjugationPanel.hidden = !conjugation;
+     }
+     pronunciationTab.onclick = () => selectTab(pronunciationTab);
+     conjugationTab.onclick = () => selectTab(conjugationTab);
+     setupConjugation();
+}
+
 // ===================== EVENTS =====================
 let debounce;
 targetInput.addEventListener('input', () => {
@@ -334,6 +630,7 @@ targetInput.addEventListener('input', () => {
 $('showPhonetic').addEventListener('change', showTargetInfo);
 $('testMode').addEventListener('change', showTargetInfo);
 $('ttsRate').addEventListener('input', e => ($('rateValue').textContent = e.target.value));
+setupPracticeTabs();
 
 // Theme
 function setTheme(t) {
@@ -366,7 +663,6 @@ randomBtn.onclick = () => {
      targetInput.value = k;
      showTargetInfo();
      resultCard.innerHTML = `Loaded: <strong>«${k}»</strong>`;
-     updatePlayer();
 };
 
 // Star
@@ -398,7 +694,6 @@ if ($('weakBtn'))
                     targetInput.value = k;
                     showTargetInfo();
                     resultCard.innerHTML = `No weak scores in this pool yet. Random from pool: <strong>«${k}»</strong>`;
-                    updatePlayer();
                     return;
                }
                resultCard.innerHTML = 'No weak phrases yet. Practice more!';
@@ -408,7 +703,6 @@ if ($('weakBtn'))
           targetInput.value = k;
           showTargetInfo();
           resultCard.innerHTML = `Weak phrase: <strong>«${k}»</strong>`;
-          updatePlayer();
      };
 
 // Record

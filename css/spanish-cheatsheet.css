@@ -531,6 +531,10 @@ body::before {
      text-decoration: none;
 }
 
+.irregular-verb {
+     color: var(--summary-hover);
+}
+
 .practice-link:hover {
      color: var(--link-hover-color);
      text-decoration: underline;

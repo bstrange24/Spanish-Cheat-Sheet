@@ -99,6 +99,137 @@ body {
      border-color: var(--accent);
 }
 
+.practice-tabs {
+     display: flex;
+     gap: 4px;
+     margin: 0 0 22px;
+     border-bottom: 1px solid var(--border);
+}
+
+.practice-tab {
+     padding: 9px 13px 10px;
+     border-bottom: 2px solid transparent;
+     border-radius: 0;
+     background: transparent;
+     color: var(--muted);
+}
+
+.practice-tab:hover,
+.practice-tab.active {
+     color: var(--accent);
+     border-bottom-color: var(--accent);
+}
+
+.practice-panel[hidden] {
+     display: none;
+}
+
+.conjugation-filters {
+     display: grid;
+     grid-template-columns: repeat(3, 1fr);
+     gap: 12px;
+     margin-bottom: 14px;
+}
+
+.conjugation-filters select {
+     margin-bottom: 0;
+}
+
+.conjugation-settings {
+     display: flex;
+     align-items: center;
+     align-self: end;
+     flex-wrap: wrap;
+     gap: 8px 14px;
+     grid-column: 1 / -1;
+     padding-top: 10px;
+     border-top: 1px solid var(--border);
+     color: var(--muted);
+     font-size: 0.9rem;
+}
+
+.conjugation-settings label {
+     margin: 0;
+     font-weight: 500;
+}
+
+.conjugation-actions {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 8px;
+     justify-content: flex-end;
+}
+
+.conjugation-source-status {
+     min-height: 20px;
+     margin-top: 5px;
+     color: var(--muted);
+     font-size: 0.78rem;
+}
+
+.conjugation-source-status.loaded {
+     color: var(--success);
+}
+
+.conjugation-source-status.error {
+     color: var(--danger);
+}
+
+.conjugation-actions button:disabled,
+.conjugation-filters select:disabled {
+     cursor: wait;
+     opacity: 0.6;
+}
+
+.conjugation-card {
+     max-width: 620px;
+}
+
+.conjugation-prompt {
+     display: flex;
+     align-items: baseline;
+     flex-wrap: wrap;
+     gap: 8px;
+     margin-bottom: 18px;
+     font-size: 1.35rem;
+}
+
+.conjugation-prompt span {
+     color: var(--accent);
+     font-weight: 700;
+}
+
+.conjugation-prompt small {
+     color: var(--muted);
+     font-size: 0.85rem;
+}
+
+.conjugation-check {
+     background: var(--success);
+     color: white;
+}
+
+.conjugation-feedback {
+     min-height: 24px;
+     color: var(--muted);
+}
+
+.conjugation-feedback.good {
+     color: var(--success);
+     font-weight: 700;
+}
+
+.conjugation-feedback.bad {
+     color: var(--danger);
+     font-weight: 700;
+}
+
+.conjugation-progress {
+     color: var(--muted);
+     font-size: 0.9rem;
+     font-weight: 600;
+}
+
 .practice-intro {
      display: flex;
      align-items: end;
@@ -260,6 +391,19 @@ body {
 
      .page-nav {
           overflow-x: auto;
+     }
+
+     .conjugation-filters {
+          grid-template-columns: 1fr;
+     }
+
+     .conjugation-settings {
+          align-items: flex-start;
+          flex-direction: column;
+     }
+
+     .conjugation-actions {
+          justify-content: flex-start;
      }
 }
 

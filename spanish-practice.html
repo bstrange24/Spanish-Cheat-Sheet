@@ -27,122 +27,178 @@
                <a href="spanish-cheatsheet.html">Cheat sheet</a>
           </nav>
 
-          <section class="practice-intro">
-               <div>
-                    <span class="eyebrow">Pronunciation lab</span>
-                    <h2>One phrase at a time.</h2>
-                    <p>Choose a prompt, listen to a natural model, and speak it back. Your score will appear below.</p>
+          <div class="practice-tabs" role="tablist" aria-label="Practice modes">
+               <button type="button" id="pronunciationTab" class="practice-tab active" role="tab" aria-selected="true" aria-controls="pronunciationPanel">Pronunciation</button>
+               <button type="button" id="conjugationTab" class="practice-tab" role="tab" aria-selected="false" aria-controls="conjugationPanel">Conjugation</button>
+          </div>
+
+          <section id="pronunciationPanel" class="practice-panel" role="tabpanel" aria-labelledby="pronunciationTab">
+               <section class="practice-intro">
+                    <div>
+                         <span class="eyebrow">Pronunciation lab</span>
+                         <h2>One phrase at a time.</h2>
+                         <p>Choose a prompt, listen to a natural model, and speak it back. Your score will appear below.</p>
+                    </div>
+                    <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
+               </section>
+
+               <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)">
+                    <span id="goalDisplay">Today: 0 / 10</span>
                </div>
-               <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
+
+               <label for="lang">Spanish variant</label>
+               <select id="lang">
+                    <option value="es-ES">Spain (es-ES)</option>
+                    <option value="es-MX" selected>Mexico (es-MX)</option>
+                    <option value="es-US">United States (es-US)</option>
+                    <option value="es-AR">Argentina (es-AR)</option>
+               </select>
+
+               <label for="target">Spanish word or sentence</label>
+               <input type="text" id="target" placeholder="Type or click 🎲 Random" />
+
+               <div class="filters">
+                    <div>
+                         <label for="difficulty">Difficulty</label>
+                         <select id="difficulty" style="width: auto; margin: 0; padding: 6px 10px">
+                              <option value="all">All</option>
+                              <option value="beginner">Beginner</option>
+                              <option value="intermediate">Intermediate</option>
+                              <option value="advanced">Advanced</option>
+                         </select>
+                    </div>
+                    <div>
+                         <label for="category">Category</label>
+                         <select id="category" style="width: auto; margin: 0; padding: 6px 10px">
+                              <option value="all">All</option>
+                              <option value="greetings">Greetings</option>
+                              <option value="food">Food</option>
+                              <option value="verbs">Verbs</option>
+                              <option value="everyday">Everyday</option>
+                              <option value="travel">Travel</option>
+                              <option value="family">Family</option>
+                              <option value="body">Body</option>
+                              <option value="house">House</option>
+                              <option value="weather">Weather</option>
+                              <option value="shopping">Shopping</option>
+                              <option value="clothing">Clothing</option>
+                              <option value="animals">Animals</option>
+                              <option value="emotions">Emotions</option>
+                              <option value="work">Work & School</option>
+                              <option value="numbers">Numbers</option>
+                              <option value="time">Time</option>
+                         </select>
+                    </div>
+                    <label><input type="checkbox" id="onlyVerbs" /> Only verbs</label>
+                    <label><input type="checkbox" id="testMode" /> Test Mode (hide meaning &amp; approximate)</label>
+                    <label><input type="checkbox" id="autoAdvance" /> Auto-advance</label>
+                    <label style="margin: 0"><input type="checkbox" id="showPhonetic" checked /> Show phonetic</label>
+               </div>
+
+               <div class="settings-row">
+                    <label style="margin: 0; white-space: nowrap">TTS Speed</label>
+                    <input type="range" id="ttsRate" min="0.5" max="1.2" step="0.05" value="0.85" style="flex: 1; margin: 0" />
+                    <span id="rateValue">0.85</span>
+                    <!-- <label style="margin: 0"><input type="checkbox" id="showPhonetic" checked /> Show phonetic</label> -->
+               </div>
+
+               <div class="btn-row practice-actions">
+                    <button id="speakBtn">🔊 Hear</button>
+                    <button id="listenBtn">🎤 Speak</button>
+                    <button id="tryAgainBtn">🔄 Again</button>
+                    <button id="starBtn">⭐ Star</button>
+                    <button id="weakBtn">📉 Weak</button>
+                    <button id="recordBtn">⏺ Record me</button>
+                    <button id="playMyBtn" disabled>▶ My voice</button>
+                    <button id="playerBtn">🎧 Player</button>
+                    <button id="clearBtn">Clear</button>
+               </div>
+
+               <div class="info" style="margin-bottom: 12px">Shortcuts: <kbd>Space</kbd> Speak • <kbd>R</kbd> Random • <kbd>H</kbd> Hear • <kbd>T</kbd> Test Mode • <kbd>S</kbd> Star</div>
+
+               <!-- Target Card -->
+               <div class="card" id="targetCard" style="display: none">
+                    <div>
+                         <strong>Target:</strong> <span id="targetText"></span>
+                         <span id="starIndicator" style="margin-left: 8px"></span>
+                    </div>
+                    <div class="phonetic" id="phoneticGuide"></div>
+                    <div class="meaning" id="meaningGuide"></div>
+                    <details class="tips">
+                         <summary>▶ Phonetic tips</summary>
+                         <div id="phoneticTipsContent"></div>
+                    </details>
+                    <div class="progress" id="phraseProgress"></div>
+               </div>
+
+               <!-- Result Card -->
+               <div class="card result-card" id="resultCard">Your pronunciation feedback will appear here.</div>
+               <div class="page-pool-status" id="pagePoolStatus" hidden></div>
+
+               <!-- Player Container -->
+               <div class="card" id="playerContainer" style="display: none">
+                    <div class="player-controls">
+                         <strong>🎧 Pronunciation Player</strong>
+                         <div class="player-buttons">
+                              <button id="openPlayerBtn">🔗 Open in new tab</button>
+                              <button id="testPlayerBtn">🔍 Test Connection</button>
+                              <button id="refreshPlayerBtn">🔄 Refresh</button>
+                              <button id="togglePlayerBtn">▼ Hide</button>
+                         </div>
+                    </div>
+                    <div id="playerStatus" class="player-status">⏳ Loading player...</div>
+                    <iframe id="playerFrame" src=""></iframe>
+                    <div style="font-size: 0.8rem; color: var(--muted); margin-top: 6px">Powered by <code id="playerUrlDisplay">http://127.0.0.1:8765/pronunciation_player.html</code></div>
+               </div>
           </section>
 
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)">
-               <span id="goalDisplay">Today: 0 / 10</span>
-          </div>
+          <section id="conjugationPanel" class="practice-panel" role="tabpanel" aria-labelledby="conjugationTab" hidden>
+               <section class="practice-intro">
+                    <div>
+                         <span class="eyebrow">Conjugation lab</span>
+                         <h2>Build the right verb form.</h2>
+                         <p>Choose a verb, tense, and pronoun. Type the form you think belongs there, then check your answer.</p>
+                    </div>
+                    <div class="conjugation-actions">
+                         <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random verb</button>
+                    </div>
+               </section>
 
-          <label for="lang">Spanish variant</label>
-          <select id="lang">
-               <option value="es-ES">Spain (es-ES)</option>
-               <option value="es-MX" selected>Mexico (es-MX)</option>
-               <option value="es-US">United States (es-US)</option>
-               <option value="es-AR">Argentina (es-AR)</option>
-          </select>
-
-          <label for="target">Spanish word or sentence</label>
-          <input type="text" id="target" placeholder="Type or click 🎲 Random" />
-
-          <div class="filters">
-               <div>
-                    <label for="difficulty">Difficulty</label>
-                    <select id="difficulty" style="width: auto; margin: 0; padding: 6px 10px">
-                         <option value="all">All</option>
-                         <option value="beginner">Beginner</option>
-                         <option value="intermediate">Intermediate</option>
-                         <option value="advanced">Advanced</option>
-                    </select>
-               </div>
-               <div>
-                    <label for="category">Category</label>
-                    <select id="category" style="width: auto; margin: 0; padding: 6px 10px">
-                         <option value="all">All</option>
-                         <option value="greetings">Greetings</option>
-                         <option value="food">Food</option>
-                         <option value="verbs">Verbs</option>
-                         <option value="everyday">Everyday</option>
-                         <option value="travel">Travel</option>
-                         <option value="family">Family</option>
-                         <option value="body">Body</option>
-                         <option value="house">House</option>
-                         <option value="weather">Weather</option>
-                         <option value="shopping">Shopping</option>
-                         <option value="clothing">Clothing</option>
-                         <option value="animals">Animals</option>
-                         <option value="emotions">Emotions</option>
-                         <option value="work">Work & School</option>
-                         <option value="numbers">Numbers</option>
-                         <option value="time">Time</option>
-                    </select>
-               </div>
-               <label><input type="checkbox" id="onlyVerbs" /> Only verbs</label>
-               <label><input type="checkbox" id="testMode" /> Test Mode (hide meaning)</label>
-               <label><input type="checkbox" id="autoAdvance" /> Auto-advance</label>
-          </div>
-
-          <div class="settings-row">
-               <label style="margin: 0; white-space: nowrap">TTS Speed</label>
-               <input type="range" id="ttsRate" min="0.5" max="1.2" step="0.05" value="0.85" style="flex: 1; margin: 0" />
-               <span id="rateValue">0.85</span>
-               <label style="margin: 0"><input type="checkbox" id="showPhonetic" checked /> Show phonetic</label>
-          </div>
-
-          <div class="btn-row practice-actions">
-               <button id="speakBtn">🔊 Hear</button>
-               <button id="listenBtn">🎤 Speak</button>
-               <button id="tryAgainBtn">🔄 Again</button>
-               <button id="starBtn">⭐ Star</button>
-               <button id="weakBtn">📉 Weak</button>
-               <button id="recordBtn">⏺ Record me</button>
-               <button id="playMyBtn" disabled>▶ My voice</button>
-               <button id="playerBtn">🎧 Player</button>
-               <button id="clearBtn">Clear</button>
-          </div>
-
-          <div class="info" style="margin-bottom: 12px">Shortcuts: <kbd>Space</kbd> Speak • <kbd>R</kbd> Random • <kbd>H</kbd> Hear • <kbd>T</kbd> Test Mode • <kbd>S</kbd> Star</div>
-
-          <!-- Target Card -->
-          <div class="card" id="targetCard" style="display: none">
-               <div>
-                    <strong>Target:</strong> <span id="targetText"></span>
-                    <span id="starIndicator" style="margin-left: 8px"></span>
-               </div>
-               <div class="phonetic" id="phoneticGuide"></div>
-               <div class="meaning" id="meaningGuide"></div>
-               <details class="tips">
-                    <summary>▶ Phonetic tips</summary>
-                    <div id="phoneticTipsContent"></div>
-               </details>
-               <div class="progress" id="phraseProgress"></div>
-          </div>
-
-          <!-- Result Card -->
-          <div class="card result-card" id="resultCard">Your pronunciation feedback will appear here.</div>
-          <div class="page-pool-status" id="pagePoolStatus" hidden></div>
-
-          <!-- Player Container -->
-          <div class="card" id="playerContainer" style="display: none">
-               <div class="player-controls">
-                    <strong>🎧 Pronunciation Player</strong>
-                    <div class="player-buttons">
-                         <button id="openPlayerBtn">🔗 Open in new tab</button>
-                         <button id="testPlayerBtn">🔍 Test Connection</button>
-                         <button id="refreshPlayerBtn">🔄 Refresh</button>
-                         <button id="togglePlayerBtn">▼ Hide</button>
+               <div class="conjugation-filters">
+                    <div>
+                         <label for="conjugationVerb">Verb</label>
+                         <select id="conjugationVerb"></select>
+                         <div id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html...</div>
+                    </div>
+                    <div>
+                         <label for="conjugationTense">Tense</label>
+                         <select id="conjugationTense"></select>
+                    </div>
+                    <div>
+                         <label for="conjugationPronoun">Pronoun</label>
+                         <select id="conjugationPronoun"></select>
+                    </div>
+                    <div class="conjugation-settings">
+                         <label><input type="checkbox" id="conjugationAutoAdvance" checked /> Auto-advance to random verb</label>
+                         <label><input type="checkbox" id="conjugationRandomPronoun" /> Randomize pronoun</label>
+                         <label><input type="checkbox" id="conjugationRandomTense" /> Randomize tense</label>
                     </div>
                </div>
-               <div id="playerStatus" class="player-status">⏳ Loading player...</div>
-               <iframe id="playerFrame" src=""></iframe>
-               <div style="font-size: 0.8rem; color: var(--muted); margin-top: 6px">Powered by <code id="playerUrlDisplay">http://127.0.0.1:8765/pronunciation_player.html</code></div>
-          </div>
+
+               <div class="card conjugation-card">
+                    <div class="conjugation-prompt" id="conjugationPrompt"></div>
+                    <label for="conjugationAnswer">Your answer</label>
+                    <input type="text" id="conjugationAnswer" autocomplete="off" autocapitalize="none" />
+                    <div class="btn-row">
+                         <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
+                         <button type="button" id="revealConjugationBtn">Reveal</button>
+                         <button type="button" id="hearConjugationBtn">Hear answer</button>
+                         <button type="button" id="newConjugationBtn" class="secondary-action" disabled>New prompt</button>
+                    </div>
+                    <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
+               </div>
+               <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
+          </section>
 
           <script src="./js/spanish-practice.js"></script>
      </body>
