@@ -121,6 +121,22 @@ function dictEntry(k) {
      return DICT[k] || DICT[k.toLowerCase()] || DICT[normalize(k)] || null;
 }
 
+// ===================== ACCENT BAR =====================
+function insertConjugationAccent(char, upper) {
+     const input = $('conjugationAnswer');
+     if (!input || input.disabled || !char) return;
+     let ch = char;
+     if (upper && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
+     const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+     const end = input.selectionEnd == null ? start : input.selectionEnd;
+     input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+     const pos = start + ch.length;
+     try {
+          input.setSelectionRange(pos, pos);
+     } catch (err) {}
+     input.focus();
+}
+
 function pageGloss(phrase) {
      try {
           const map = JSON.parse(sessionStorage.getItem('sp_page_gloss') || '{}');
@@ -370,7 +386,12 @@ const CONJUGATION_ENDINGS = {
 
 function conjugateVerb(verb, tense) {
      if (verb.irregular && verb.irregular[tense]) return verb.irregular[tense];
-     if (tense === 'present' && verb.present) return verb.present;
+     if (tense === 'present' && verb.present) {
+          if (verb.present.length === 7) {
+               verb.present.shift();
+          }
+          return verb.present;
+     }
      const ending = verb.infinitive.slice(-2);
      if (tense === 'future' || tense === 'conditional') {
           const suffixes = tense === 'future' ? ['é', 'ás', 'á', 'emos', 'éis', 'án'] : ['ía', 'ías', 'ía', 'íamos', 'íais', 'ían'];
@@ -386,6 +407,64 @@ function conjugateVerb(verb, tense) {
      }
      if (tense === 'present' && verb.yoForm) forms[0] = verb.yoForm;
      return forms;
+}
+
+// ===================== CONJUGATION AUDIO & DISPLAY =====================
+function speakConjugationAnswer(answer, lang) {
+     if (!answer) return;
+     const utterance = new SpeechSynthesisUtterance(answer);
+     utterance.lang = lang || $('lang').value || 'es-MX';
+     utterance.rate = parseFloat($('ttsRate').value) || 0.85;
+     synth.cancel();
+     synth.speak(utterance);
+}
+
+function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, showAnswer) {
+     const promptDiv = $('conjugationPrompt');
+     if (!promptDiv) return;
+
+     const tenseLabel = CONJUGATION_TENSES.find(t => t[0] === tenseKey)?.[1] || tenseKey;
+     const pronounLabel = CONJUGATION_PRONOUNS.find(p => p[0] === pronounKey)?.[1] || pronounKey;
+
+     // Get the translated meaning for this specific conjugation
+     const translation = getConjugationTranslation(verb, tenseKey, pronounKey);
+
+     let answerHtml = '';
+     if (showAnswer && answer) {
+          answerHtml = `
+            <div style="font-size: 1.2rem; color: var(--good, #22c55e); margin-top: 4px;">
+                → ${answer}
+            </div>
+        `;
+     }
+
+     promptDiv.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <strong>${pronounLabel}</strong>
+                <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
+                <button type="button" id="conjugationHearInfinitiveBtn" 
+                        style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
+                        title="Hear the infinitive">
+                    🔊
+                </button>
+                <small style="color: var(--muted);">(${tenseLabel})</small>
+            </div>
+            <div style="color: var(--muted); font-size: 0.95rem;">
+                ${translation}
+            </div>
+            ${answerHtml}
+        </div>
+    `;
+
+     // Add event listener to the hear infinitive button
+     const hearBtn = document.getElementById('conjugationHearInfinitiveBtn');
+     if (hearBtn) {
+          hearBtn.addEventListener('click', function (e) {
+               e.stopPropagation();
+               speakConjugationAnswer(verb.infinitive);
+          });
+     }
 }
 
 function applyStemChange(stem, change) {
@@ -474,6 +553,189 @@ function renderConjugationVerbOptions() {
      renderConjugationPrompt();
 }
 
+// ===================== CONJUGATION TRANSLATIONS =====================
+// ===================== CONJUGATION TRANSLATIONS =====================
+function getConjugationTranslation(verb, tenseKey, pronounKey) {
+     const infinitive = verb.infinitive;
+     const meaning = verb.meaning || '';
+
+     // Remove "to " from the meaning to get the base
+     let baseMeaning = meaning.replace(/^to /i, '').trim();
+
+     // Special case for "hide" -> "hid" in past tense
+     const irregularPastTenses = {
+          hide: 'hid',
+          write: 'wrote',
+          speak: 'spoke',
+          break: 'broke',
+          choose: 'chose',
+          drive: 'drove',
+          eat: 'ate',
+          fall: 'fell',
+          give: 'gave',
+          go: 'went',
+          know: 'knew',
+          run: 'ran',
+          see: 'saw',
+          take: 'took',
+          think: 'thought',
+          buy: 'bought',
+          bring: 'brought',
+          catch: 'caught',
+          teach: 'taught',
+          build: 'built',
+          send: 'sent',
+          spend: 'spent',
+          lose: 'lost',
+          mean: 'meant',
+          sleep: 'slept',
+          feel: 'felt',
+          keep: 'kept',
+          leave: 'left',
+          meet: 'met',
+          read: 'read',
+          say: 'said',
+          tell: 'told',
+          understand: 'understood',
+          win: 'won',
+          hold: 'held',
+          sit: 'sat',
+          stand: 'stood',
+          tell: 'told',
+          get: 'got',
+          forget: 'forgot',
+          have: 'had',
+          make: 'made',
+          pay: 'paid',
+          sell: 'sold',
+          wear: 'wore',
+          find: 'found',
+          hear: 'heard',
+          know: 'knew',
+     };
+
+     // Get past tense form
+     function getPastTense(word) {
+          if (irregularPastTenses[word]) return irregularPastTenses[word];
+          if (word.endsWith('e')) return word + 'd';
+          if (word.endsWith('y')) return word.slice(0, -1) + 'ied';
+          // For verbs ending in consonant-vowel-consonant, double the last consonant
+          if (/[bcdfghjklmnpqrstvwxyz][aeiou][bcdfghjklmnpqrstvwxyz]$/.test(word)) {
+               return word + word.slice(-1) + 'ed';
+          }
+          return word + 'ed';
+     }
+
+     // Get third person singular (he/she/it) form
+     function getThirdPerson(word) {
+          if (word.endsWith('s') || word.endsWith('sh') || word.endsWith('ch') || word.endsWith('x') || word.endsWith('z')) {
+               return word + 'es';
+          }
+          if (word.endsWith('y') && !/[aeiou]/.test(word.slice(-2, -1))) {
+               return word.slice(0, -1) + 'ies';
+          }
+          return word + 's';
+     }
+
+     // Pronoun translations
+     const pronounMap = {
+          yo: 'I',
+          tu: 'you',
+          el: 'he / she / you',
+          nosotros: 'we',
+          vosotros: 'you (plural)',
+          ellos: 'they / you (plural)',
+     };
+
+     const pronounDisplay = pronounMap[pronounKey] || pronounKey;
+
+     // For each tense, build the translation
+     switch (tenseKey) {
+          case 'present':
+               if (pronounKey === 'yo') {
+                    return `I ${baseMeaning}`;
+               } else if (pronounKey === 'tu') {
+                    return `you ${baseMeaning}`;
+               } else if (pronounKey === 'el') {
+                    return `he / she / you ${getThirdPerson(baseMeaning)}`;
+               } else if (pronounKey === 'nosotros') {
+                    return `we ${baseMeaning}`;
+               } else if (pronounKey === 'vosotros') {
+                    return `you all (plural) ${baseMeaning}`;
+               } else if (pronounKey === 'ellos') {
+                    return `they ${baseMeaning}`;
+               }
+               break;
+
+          case 'preterite':
+               const pastForm = getPastTense(baseMeaning);
+               if (pronounKey === 'yo') {
+                    return `I ${pastForm}`;
+               } else if (pronounKey === 'tu') {
+                    return `you ${pastForm}`;
+               } else if (pronounKey === 'el') {
+                    return `he / she ${pastForm}`;
+               } else if (pronounKey === 'nosotros') {
+                    return `we ${pastForm}`;
+               } else if (pronounKey === 'vosotros') {
+                    return `you (plural) ${pastForm}`;
+               } else if (pronounKey === 'ellos') {
+                    return `they ${pastForm}`;
+               }
+               break;
+
+          case 'imperfect':
+               if (pronounKey === 'yo') {
+                    return `I used to ${baseMeaning}`;
+               } else if (pronounKey === 'tu') {
+                    return `you used to ${baseMeaning}`;
+               } else if (pronounKey === 'el') {
+                    return `he / she used to ${baseMeaning}`;
+               } else if (pronounKey === 'nosotros') {
+                    return `we used to ${baseMeaning}`;
+               } else if (pronounKey === 'vosotros') {
+                    return `you (plural) used to ${baseMeaning}`;
+               } else if (pronounKey === 'ellos') {
+                    return `they used to ${baseMeaning}`;
+               }
+               break;
+
+          case 'future':
+               if (pronounKey === 'yo') {
+                    return `I will ${baseMeaning}`;
+               } else if (pronounKey === 'tu') {
+                    return `you will ${baseMeaning}`;
+               } else if (pronounKey === 'el') {
+                    return `he / she will ${baseMeaning}`;
+               } else if (pronounKey === 'nosotros') {
+                    return `we will ${baseMeaning}`;
+               } else if (pronounKey === 'vosotros') {
+                    return `you (plural) will ${baseMeaning}`;
+               } else if (pronounKey === 'ellos') {
+                    return `they will ${baseMeaning}`;
+               }
+               break;
+
+          case 'conditional':
+               if (pronounKey === 'yo') {
+                    return `I would ${baseMeaning}`;
+               } else if (pronounKey === 'tu') {
+                    return `you would ${baseMeaning}`;
+               } else if (pronounKey === 'el') {
+                    return `he / she would ${baseMeaning}`;
+               } else if (pronounKey === 'nosotros') {
+                    return `we would ${baseMeaning}`;
+               } else if (pronounKey === 'vosotros') {
+                    return `you (plural) would ${baseMeaning}`;
+               } else if (pronounKey === 'ellos') {
+                    return `they would ${baseMeaning}`;
+               }
+               break;
+     }
+
+     return meaning;
+}
+
 function setupConjugation() {
      const verbSelect = $('conjugationVerb');
      const tenseSelect = $('conjugationTense');
@@ -491,17 +753,36 @@ function setupConjugation() {
           const pronoun = CONJUGATION_PRONOUNS.find(item => item[0] === pronounSelect.value);
           const forms = conjugateVerb(verb, tenseSelect.value);
           const index = CONJUGATION_PRONOUNS.findIndex(item => item[0] === pronounSelect.value);
-          return { verb, tense: tense[1], pronoun: pronoun[1], answer: forms[index] };
+          return {
+               verb: verb,
+               tense: tense ? tense[1] : '',
+               tenseKey: tenseSelect.value,
+               pronoun: pronoun ? pronoun[1] : '',
+               pronounKey: pronounSelect.value,
+               answer: forms ? forms[index] : '',
+          };
      }
 
      function renderPrompt() {
           const prompt = currentPrompt();
           if (!prompt) return;
-          $('conjugationPrompt').innerHTML = `<strong>${prompt.pronoun}</strong> <span>${prompt.verb.infinitive}</span> <small>(${prompt.tense})</small>`;
+
+          // Display the prompt with infinitive and meaning, but NO answer yet
+          displayConjugationPromptWithAnswer(
+               prompt.verb,
+               prompt.tenseKey,
+               prompt.pronounKey,
+               null, // No answer shown yet
+               false // Don't show answer
+          );
+
           $('conjugationAnswer').value = '';
-          $('conjugationFeedback').textContent = 'Choose your answer.';
+          $('conjugationFeedback').textContent = 'Type the conjugated form.';
           $('conjugationFeedback').className = 'conjugation-feedback';
           $('conjugationAnswer').focus();
+
+          // Enable accent bar
+          enableConjugationAccentBar();
      }
 
      // Replace the randomizeVerb function with this:
@@ -545,23 +826,56 @@ function setupConjugation() {
           const prompt = currentPrompt();
           if (!prompt) return;
           const answer = $('conjugationAnswer').value.trim();
+
           if (!revealOnly && !answer) {
                $('conjugationFeedback').textContent = 'Type an answer first.';
                return;
           }
+
           if (!revealOnly) {
                conjugationState.attempted++;
                const correct = normalize(answer) === normalize(prompt.answer);
                if (correct) conjugationState.correct++;
-               $('conjugationFeedback').textContent = correct ? 'Correct.' : `Not quite. The answer is ${prompt.answer}.`;
+
+               // Show the prompt with the answer revealed
+               displayConjugationPromptWithAnswer(
+                    prompt.verb,
+                    prompt.tenseKey,
+                    prompt.pronounKey,
+                    prompt.answer, // Show the answer
+                    true // Show answer
+               );
+
+               // Play audio of the correct answer
+               speakConjugationAnswer(prompt.answer);
+
+               // Feedback
+               const feedbackMsg = correct ? '✅ Correct!' : `❌ Not quite. The answer is «${prompt.answer}»`;
+               $('conjugationFeedback').textContent = feedbackMsg;
                $('conjugationFeedback').className = `conjugation-feedback ${correct ? 'good' : 'bad'}`;
+
+               // Disable accent bar after checking
+               disableConjugationAccentBar();
+
+               // Auto-advance if correct and auto-advance is enabled
                if (correct && ($('conjugationAutoAdvance').checked || $('conjugationRandomPronoun').checked || $('conjugationRandomTense').checked)) {
-                    setTimeout(advanceConjugationPrompt, 700);
+                    setTimeout(advanceConjugationPrompt, 1500);
                }
           } else {
+               // Reveal mode - show answer and play audio
+               displayConjugationPromptWithAnswer(
+                    prompt.verb,
+                    prompt.tenseKey,
+                    prompt.pronounKey,
+                    prompt.answer, // Show the answer
+                    true // Show answer
+               );
                $('conjugationFeedback').textContent = `Answer: ${prompt.answer}`;
                $('conjugationFeedback').className = 'conjugation-feedback';
+               speakConjugationAnswer(prompt.answer);
+               disableConjugationAccentBar();
           }
+
           $('conjugationProgress').textContent = `${conjugationState.correct} correct / ${conjugationState.attempted} attempted`;
      }
 
@@ -593,6 +907,28 @@ function setupConjugation() {
      $('conjugationAnswer').addEventListener('keydown', event => {
           if (event.key === 'Enter') checkAnswer(false);
      });
+
+     // Add accent bar functionality
+     const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
+     accentKeys.forEach(btn => {
+          btn.addEventListener('mousedown', function (e) {
+               e.preventDefault();
+               const char = this.getAttribute('data-char') || '';
+               insertConjugationAccent(char, e.shiftKey);
+          });
+     });
+
+     function disableConjugationAccentBar() {
+          document.querySelectorAll('#conjugationPanel .accent-key').forEach(function (btn) {
+               btn.disabled = true;
+          });
+     }
+
+     function enableConjugationAccentBar() {
+          document.querySelectorAll('#conjugationPanel .accent-key').forEach(function (btn) {
+               btn.disabled = false;
+          });
+     }
      loadConjugationVerbs();
 }
 
