@@ -178,6 +178,16 @@
                          <label for="conjugationPronoun">Pronoun</label>
                          <select id="conjugationPronoun"></select>
                     </div>
+                    <!-- Add this new div for language selector -->
+                    <div>
+                         <label for="conjugationLang">Spanish variant</label>
+                         <select id="conjugationLang">
+                              <option value="es-ES">Spain (es-ES)</option>
+                              <option value="es-MX" selected>Mexico (es-MX)</option>
+                              <option value="es-US">United States (es-US)</option>
+                              <option value="es-AR">Argentina (es-AR)</option>
+                         </select>
+                    </div>
                     <div class="conjugation-settings">
                          <label><input type="checkbox" id="conjugationAutoAdvance" checked /> Auto-advance to random verb</label>
                          <label><input type="checkbox" id="conjugationRandomPronoun" /> Randomize pronoun</label>

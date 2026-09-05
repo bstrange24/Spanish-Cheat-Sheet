@@ -30,6 +30,17 @@ const playerStatus = $('playerStatus');
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const synth = window.speechSynthesis;
 
+// Ensure voices are loaded
+if (synth) {
+     // Preload voices
+     if (synth.getVoices().length === 0) {
+          synth.onvoiceschanged = function () {
+               // Voices are now loaded
+               console.log('Voices loaded:', synth.getVoices().length);
+          };
+     }
+}
+
 // ===================== HELPERS =====================
 function normalize(t) {
      return t
@@ -413,26 +424,62 @@ function conjugateVerb(verb, tense) {
 function speakConjugationAnswer(answer, lang) {
      if (!answer) return;
 
-     // Cancel any ongoing speech
      if (synth) {
           try {
                synth.cancel();
-          } catch (e) {
-               // Ignore errors on mobile
-          }
+          } catch (e) {}
      }
 
-     // Small delay to ensure cancel completes
      setTimeout(() => {
           try {
                const utterance = new SpeechSynthesisUtterance(answer);
-               utterance.lang = lang || $('lang').value || 'es-MX';
-               utterance.rate = parseFloat($('ttsRate').value) || 0.85;
-               utterance.volume = 1;
+               // Use conjugationLang if it exists, otherwise fall back to the main lang selector
+               const langSelect = $('conjugationLang') || $('lang');
+               const langCode = lang || (langSelect ? langSelect.value : 'es-MX');
+               utterance.lang = langCode;
 
-               // For mobile, use a lower rate if needed
+               // Get rate from the main TTS control
+               const rateControl = $('ttsRate');
+               utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+               utterance.volume = 1;
+               utterance.pitch = 1;
+
+               // Get available voices and select the best Spanish voice
+               const voices = synth.getVoices();
+               if (voices && voices.length > 0) {
+                    let spanishVoice = null;
+
+                    // Try exact match first
+                    spanishVoice = voices.find(v => v.lang === langCode && v.localService === false);
+
+                    // Try any Spanish voice
+                    if (!spanishVoice) {
+                         spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
+                    }
+
+                    // Try Google voices
+                    if (!spanishVoice) {
+                         spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
+                    }
+
+                    // Try any Spanish voice
+                    if (!spanishVoice) {
+                         spanishVoice = voices.find(v => v.lang.startsWith('es-'));
+                    }
+
+                    // Last resort
+                    if (!spanishVoice) {
+                         spanishVoice = voices.find(v => v.name.toLowerCase().includes('spanish'));
+                    }
+
+                    if (spanishVoice) {
+                         utterance.voice = spanishVoice;
+                    }
+               }
+
+               // For mobile, use a lower rate
                if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent)) {
-                    utterance.rate = Math.min(utterance.rate, 0.9);
+                    utterance.rate = Math.min(utterance.rate, 0.8);
                }
 
                synth.speak(utterance);
@@ -485,7 +532,29 @@ function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, 
      if (hearBtn) {
           hearBtn.addEventListener('click', function (e) {
                e.stopPropagation();
-               speakConjugationAnswer(verb.infinitive);
+               // Use the conjugation language
+               const langSelect = $('conjugationLang') || $('lang');
+               const langCode = langSelect ? langSelect.value : 'es-MX';
+               const utterance = new SpeechSynthesisUtterance(verb.infinitive);
+               utterance.lang = langCode;
+
+               const rateControl = $('ttsRate');
+               utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+               utterance.volume = 1;
+               utterance.pitch = 1;
+
+               // Get voice
+               const voices = synth.getVoices();
+               if (voices && voices.length > 0) {
+                    let spanishVoice = voices.find(v => v.lang === langCode && v.localService === false);
+                    if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
+                    if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
+                    if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-'));
+                    if (spanishVoice) utterance.voice = spanishVoice;
+               }
+
+               synth.cancel();
+               synth.speak(utterance);
           });
      }
 }
@@ -979,9 +1048,27 @@ function setupConjugation() {
      $('checkConjugationBtn').onclick = () => checkAnswer(false);
      $('revealConjugationBtn').onclick = () => checkAnswer(true);
      $('hearConjugationBtn').onclick = () => {
-          const utterance = new SpeechSynthesisUtterance(currentPrompt().answer);
-          utterance.lang = $('lang').value;
-          utterance.rate = parseFloat($('ttsRate').value);
+          const prompt = currentPrompt();
+          if (!prompt || !prompt.answer) return;
+          const langSelect = $('conjugationLang') || $('lang');
+          const langCode = langSelect ? langSelect.value : 'es-MX';
+
+          const utterance = new SpeechSynthesisUtterance(prompt.answer);
+          utterance.lang = langCode;
+
+          const rateControl = $('ttsRate');
+          utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+
+          // Get voice
+          const voices = synth.getVoices();
+          if (voices && voices.length > 0) {
+               let spanishVoice = voices.find(v => v.lang === langCode && v.localService === false);
+               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
+               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
+               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-'));
+               if (spanishVoice) utterance.voice = spanishVoice;
+          }
+
           synth.cancel();
           synth.speak(utterance);
      };
