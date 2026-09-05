@@ -1,9 +1,4 @@
 // ===================== STATE =====================
-let progress = JSON.parse(localStorage.getItem('sp_progress') || '{}');
-let favorites = JSON.parse(localStorage.getItem('sp_favorites') || '[]');
-let history = JSON.parse(localStorage.getItem('sp_history') || '[]');
-let streakData = JSON.parse(localStorage.getItem('sp_streak') || '{"count":0,"last":null,"today":0}');
-let srs = JSON.parse(localStorage.getItem('sp_srs') || '{}');
 let myRecording = null;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -11,9 +6,9 @@ let playerVisible = true;
 let playerTimeout;
 let micPermissionGranted = false;
 let conjugationState = { correct: 0, attempted: 0 };
+let extraPool = null;
 
 // ===================== DOM =====================
-const $ = id => document.getElementById(id);
 const targetInput = $('target');
 const targetCard = $('targetCard');
 const resultCard = $('resultCard');
@@ -28,31 +23,7 @@ const playerContainer = $('playerContainer');
 const playerStatus = $('playerStatus');
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const synth = window.speechSynthesis;
 
-// Ensure voices are loaded
-if (synth) {
-     // Preload voices
-     if (synth.getVoices().length === 0) {
-          synth.onvoiceschanged = function () {
-               // Voices are now loaded
-               console.log('Voices loaded:', synth.getVoices().length);
-          };
-     }
-}
-
-// ===================== HELPERS =====================
-function normalize(t) {
-     return t
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[¿?¡!.,;:""''']/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-}
-
-// Improved text normalization for Spanish
 function improvedNormalize(text) {
      return text
           .toLowerCase()
@@ -60,10 +31,10 @@ function improvedNormalize(text) {
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/[¿?¡!.,;:""''«»()\[\]{}]/g, '')
           .replace(/\s+/g, ' ')
-          .replace(/ñ/g, 'n') // Convert ñ to n for matching
-          .replace(/ll/g, 'y') // Convert ll to y for matching
-          .replace(/rr/g, 'r') // Convert rr to r for matching
-          .replace(/ch/g, 'c') // Convert ch to c for matching
+          .replace(/ñ/g, 'n')
+          .replace(/ll/g, 'y')
+          .replace(/rr/g, 'r')
+          .replace(/ch/g, 'c')
           .trim();
 }
 
@@ -93,27 +64,13 @@ function editDistance(s1, s2) {
      return costs[s2.length];
 }
 
-// Dynamic thresholds based on phrase complexity
 function getDynamicThresholds(target) {
      const wordCount = target.split(/\s+/).length;
-     const charCount = target.length;
-
-     // Adjust thresholds based on complexity
      let baseThreshold = 0.75;
-
-     if (wordCount === 1) {
-          baseThreshold = 0.9; // Stricter for single words
-     } else if (wordCount <= 3) {
-          baseThreshold = 0.85; // Moderate for short phrases
-     } else {
-          baseThreshold = 0.7; // Lenient for longer phrases
-     }
-
-     // Adjust for special characters
-     if (/[ñáéíóúü]/.test(target)) {
-          baseThreshold -= 0.05; // More lenient for accented words
-     }
-
+     if (wordCount === 1) baseThreshold = 0.9;
+     else if (wordCount <= 3) baseThreshold = 0.85;
+     else baseThreshold = 0.7;
+     if (/[ñáéíóúü]/.test(target)) baseThreshold -= 0.05;
      return {
           similarity: baseThreshold,
           phonetic: baseThreshold - 0.15,
@@ -125,27 +82,9 @@ function isVerb(e) {
      return e.meaning.toLowerCase().startsWith('to ');
 }
 
-let extraPool = null;
-
 function dictEntry(k) {
      if (!k) return null;
      return DICT[k] || DICT[k.toLowerCase()] || DICT[normalize(k)] || null;
-}
-
-// ===================== ACCENT BAR =====================
-function insertConjugationAccent(char, upper) {
-     const input = $('conjugationAnswer');
-     if (!input || input.disabled || !char) return;
-     let ch = char;
-     if (upper && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
-     const start = input.selectionStart == null ? input.value.length : input.selectionStart;
-     const end = input.selectionEnd == null ? start : input.selectionEnd;
-     input.value = input.value.slice(0, start) + ch + input.value.slice(end);
-     const pos = start + ch.length;
-     try {
-          input.setSelectionRange(pos, pos);
-     } catch (err) {}
-     input.focus();
 }
 
 function pageGloss(phrase) {
@@ -201,35 +140,20 @@ function getFilteredKeys() {
      });
 }
 
-function saveAll() {
-     localStorage.setItem('sp_progress', JSON.stringify(progress));
-     localStorage.setItem('sp_favorites', JSON.stringify(favorites));
-     localStorage.setItem('sp_history', JSON.stringify(history));
-     localStorage.setItem('sp_streak', JSON.stringify(streakData));
-     localStorage.setItem('sp_srs', JSON.stringify(srs));
-}
-
-function updateStreak() {
-     const today = new Date().toDateString();
-     if (streakData.last !== today) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          if (streakData.last === yesterday.toDateString()) {
-               streakData.count++;
-          } else {
-               streakData.count = 1;
-          }
-          streakData.last = today;
-          streakData.today = 0;
-     }
-     streakData.today++;
-     $('streakDisplay').textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
-     $('goalDisplay').textContent = `Today: ${streakData.today} / 10`;
-     saveAll();
-}
-
-function closeModal(id) {
-     $(id).classList.remove('open');
+// ===================== ACCENT BAR =====================
+function insertConjugationAccent(char, upper) {
+     const input = $('conjugationAnswer');
+     if (!input || input.disabled || !char) return;
+     let ch = char;
+     if (upper && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
+     const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+     const end = input.selectionEnd == null ? start : input.selectionEnd;
+     input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+     const pos = start + ch.length;
+     try {
+          input.setSelectionRange(pos, pos);
+     } catch (err) {}
+     input.focus();
 }
 
 // ===================== PLAYER FUNCTIONS =====================
@@ -362,6 +286,7 @@ const CONJUGATION_PRONOUNS = [
      ['vosotros', 'vosotros / vosotras'],
      ['ellos', 'ellos / ellas / ustedes'],
 ];
+
 const CONJUGATION_TENSES = [
      ['present', 'Present'],
      ['preterite', 'Preterite'],
@@ -369,6 +294,7 @@ const CONJUGATION_TENSES = [
      ['future', 'Future'],
      ['conditional', 'Conditional'],
 ];
+
 const CONJUGATION_IRREGULARS = {
      ser: { present: ['soy', 'eres', 'es', 'somos', 'sois', 'son'], preterite: ['fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron'], imperfect: ['era', 'eras', 'era', 'éramos', 'erais', 'eran'], future: ['seré', 'serás', 'será', 'seremos', 'seréis', 'serán'], conditional: ['sería', 'serías', 'sería', 'seríamos', 'seríais', 'serían'] },
      estar: { present: ['estoy', 'estás', 'está', 'estamos', 'estáis', 'están'], preterite: ['estuve', 'estuviste', 'estuvo', 'estuvimos', 'estuvisteis', 'estuvieron'] },
@@ -377,9 +303,11 @@ const CONJUGATION_IRREGULARS = {
      ir: { present: ['voy', 'vas', 'va', 'vamos', 'vais', 'van'], preterite: ['fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron'], imperfect: ['iba', 'ibas', 'iba', 'íbamos', 'ibais', 'iban'], future: ['iré', 'irás', 'irá', 'iremos', 'iréis', 'irán'], conditional: ['iría', 'irías', 'iría', 'iríamos', 'iríais', 'irían'] },
      poder: { present: ['puedo', 'puedes', 'puede', 'podemos', 'podéis', 'pueden'], preterite: ['pude', 'pudiste', 'pudo', 'pudimos', 'pudisteis', 'pudieron'], future: ['podré', 'podrás', 'podrá', 'podremos', 'podréis', 'podrán'], conditional: ['podría', 'podrías', 'podría', 'podríamos', 'podríais', 'podrían'] },
 };
+
 let conjugationVerbs = [];
 let conjugationPresentForms = {};
 let conjugationStemChanges = {};
+
 const CONJUGATION_STEM_CHANGE_OVERRIDES = {
      acostar: 'o→ue',
      despertar: 'e→ie',
@@ -389,6 +317,7 @@ const CONJUGATION_STEM_CHANGE_OVERRIDES = {
      servir: 'e→i',
      vestir: 'e→i',
 };
+
 const CONJUGATION_ENDINGS = {
      present: { ar: ['o', 'as', 'a', 'amos', 'áis', 'an'], er: ['o', 'es', 'e', 'emos', 'éis', 'en'], ir: ['o', 'es', 'e', 'imos', 'ís', 'en'] },
      preterite: { ar: ['é', 'aste', 'ó', 'amos', 'asteis', 'aron'], er: ['í', 'iste', 'ió', 'imos', 'isteis', 'ieron'], ir: ['í', 'iste', 'ió', 'imos', 'isteis', 'ieron'] },
@@ -418,118 +347,6 @@ function conjugateVerb(verb, tense) {
      }
      if (tense === 'present' && verb.yoForm) forms[0] = verb.yoForm;
      return forms;
-}
-
-// ===================== AUDIO SERVER HELPERS =====================
-function getAudioBaseUrl() {
-     const host = window.location.hostname;
-     const isLocal = host === 'localhost' || host === '127.0.0.1';
-     return window.location.protocol === 'file:' || isLocal ? 'http://127.0.0.1:8765' : window.location.origin;
-}
-
-function playAudioFromServer(text, lang, callback) {
-     if (!text) return;
-
-     const baseUrl = getAudioBaseUrl();
-     const langCode = lang || 'es-MX';
-     const url = `${baseUrl}/api/tts?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(langCode)}`;
-
-     // Cancel any ongoing audio
-     if (window._currentAudio) {
-          window._currentAudio.pause();
-          window._currentAudio = null;
-     }
-
-     const audio = new Audio(url);
-     window._currentAudio = audio;
-
-     audio.onended = function () {
-          if (callback) callback();
-     };
-
-     audio.onerror = function () {
-          console.warn('Audio server failed, falling back to browser TTS');
-          // Fallback to browser TTS
-          fallbackBrowserTTS(text, langCode);
-     };
-
-     audio.play().catch(function (err) {
-          console.warn('Audio playback error:', err);
-          fallbackBrowserTTS(text, langCode);
-     });
-}
-
-function fallbackBrowserTTS(text, langCode) {
-     if (!synth) return;
-     try {
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = langCode || 'es-MX';
-          utterance.rate = 0.85;
-          utterance.volume = 1;
-          utterance.pitch = 1;
-          synth.cancel();
-          synth.speak(utterance);
-     } catch (e) {
-          console.warn('Fallback TTS error:', e);
-     }
-}
-
-// ===================== CONJUGATION AUDIO & DISPLAY =====================
-function speakConjugationAnswer(answer, lang) {
-     if (!answer) return;
-     const langSelect = $('conjugationLang') || $('lang');
-     const langCode = lang || (langSelect ? langSelect.value : 'es-MX');
-     playAudioFromServer(answer, langCode);
-}
-
-function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, showAnswer) {
-     const promptDiv = $('conjugationPrompt');
-     if (!promptDiv) return;
-
-     const tenseLabel = CONJUGATION_TENSES.find(t => t[0] === tenseKey)?.[1] || tenseKey;
-     const pronounLabel = CONJUGATION_PRONOUNS.find(p => p[0] === pronounKey)?.[1] || pronounKey;
-
-     // Get the translated meaning for this specific conjugation
-     const translation = getConjugationTranslation(verb, tenseKey, pronounKey);
-
-     let answerHtml = '';
-     if (showAnswer && answer) {
-          answerHtml = `
-            <div style="font-size: 1.2rem; color: var(--good, #22c55e); margin-top: 4px;">
-                → ${answer}
-            </div>
-        `;
-     }
-
-     promptDiv.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <strong>${pronounLabel}</strong>
-                <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
-                <button type="button" id="conjugationHearInfinitiveBtn" 
-                        style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
-                        title="Hear the infinitive">
-                    🔊
-                </button>
-                <small style="color: var(--muted);">(${tenseLabel})</small>
-            </div>
-            <div style="color: var(--muted); font-size: 0.95rem;">
-                ${translation}
-            </div>
-            ${answerHtml}
-        </div>
-    `;
-
-     // Add event listener to the hear infinitive button
-     const hearBtn = document.getElementById('conjugationHearInfinitiveBtn');
-     if (hearBtn) {
-          hearBtn.addEventListener('click', function (e) {
-               e.stopPropagation();
-               const langSelect = $('conjugationLang') || $('lang');
-               const langCode = langSelect ? langSelect.value : 'es-MX';
-               playAudioFromServer(verb.infinitive, langCode);
-          });
-     }
 }
 
 function applyStemChange(stem, change) {
@@ -619,15 +436,10 @@ function renderConjugationVerbOptions() {
 }
 
 // ===================== CONJUGATION TRANSLATIONS =====================
-// ===================== CONJUGATION TRANSLATIONS =====================
 function getConjugationTranslation(verb, tenseKey, pronounKey) {
-     const infinitive = verb.infinitive;
      const meaning = verb.meaning || '';
-
-     // Remove "to " from the meaning to get the base
      let baseMeaning = meaning.replace(/^to /i, '').trim();
 
-     // Special case for "hide" -> "hid" in past tense
      const irregularPastTenses = {
           hide: 'hid',
           write: 'wrote',
@@ -666,7 +478,6 @@ function getConjugationTranslation(verb, tenseKey, pronounKey) {
           hold: 'held',
           sit: 'sat',
           stand: 'stood',
-          tell: 'told',
           get: 'got',
           forget: 'forgot',
           have: 'had',
@@ -676,22 +487,18 @@ function getConjugationTranslation(verb, tenseKey, pronounKey) {
           wear: 'wore',
           find: 'found',
           hear: 'heard',
-          know: 'knew',
      };
 
-     // Get past tense form
      function getPastTense(word) {
           if (irregularPastTenses[word]) return irregularPastTenses[word];
           if (word.endsWith('e')) return word + 'd';
           if (word.endsWith('y')) return word.slice(0, -1) + 'ied';
-          // For verbs ending in consonant-vowel-consonant, double the last consonant
           if (/[bcdfghjklmnpqrstvwxyz][aeiou][bcdfghjklmnpqrstvwxyz]$/.test(word)) {
                return word + word.slice(-1) + 'ed';
           }
           return word + 'ed';
      }
 
-     // Get third person singular (he/she/it) form
      function getThirdPerson(word) {
           if (word.endsWith('s') || word.endsWith('sh') || word.endsWith('ch') || word.endsWith('x') || word.endsWith('z')) {
                return word + 'es';
@@ -702,105 +509,58 @@ function getConjugationTranslation(verb, tenseKey, pronounKey) {
           return word + 's';
      }
 
-     // Pronoun translations
-     const pronounMap = {
-          yo: 'I',
-          tu: 'you',
-          el: 'he / she / you',
-          nosotros: 'we',
-          vosotros: 'you (plural)',
-          ellos: 'they / you (plural)',
-     };
-
-     const pronounDisplay = pronounMap[pronounKey] || pronounKey;
-
-     // For each tense, build the translation
      switch (tenseKey) {
           case 'present':
-               if (pronounKey === 'yo') {
-                    return `I ${baseMeaning}`;
-               } else if (pronounKey === 'tu') {
-                    return `you ${baseMeaning}`;
-               } else if (pronounKey === 'el') {
-                    return `he / she / you ${getThirdPerson(baseMeaning)}`;
-               } else if (pronounKey === 'nosotros') {
-                    return `we ${baseMeaning}`;
-               } else if (pronounKey === 'vosotros') {
-                    return `you all (plural) ${baseMeaning}`;
-               } else if (pronounKey === 'ellos') {
-                    return `they ${baseMeaning}`;
-               }
+               if (pronounKey === 'yo') return `I ${baseMeaning}`;
+               if (pronounKey === 'tu') return `you ${baseMeaning}`;
+               if (pronounKey === 'el') return `he / she / you ${getThirdPerson(baseMeaning)}`;
+               if (pronounKey === 'nosotros') return `we ${baseMeaning}`;
+               if (pronounKey === 'vosotros') return `you all (plural) ${baseMeaning}`;
+               if (pronounKey === 'ellos') return `they ${baseMeaning}`;
                break;
 
           case 'preterite':
                const pastForm = getPastTense(baseMeaning);
-               if (pronounKey === 'yo') {
-                    return `I ${pastForm}`;
-               } else if (pronounKey === 'tu') {
-                    return `you ${pastForm}`;
-               } else if (pronounKey === 'el') {
-                    return `he / she ${pastForm}`;
-               } else if (pronounKey === 'nosotros') {
-                    return `we ${pastForm}`;
-               } else if (pronounKey === 'vosotros') {
-                    return `you (plural) ${pastForm}`;
-               } else if (pronounKey === 'ellos') {
-                    return `they ${pastForm}`;
-               }
+               if (pronounKey === 'yo') return `I ${pastForm}`;
+               if (pronounKey === 'tu') return `you ${pastForm}`;
+               if (pronounKey === 'el') return `he / she ${pastForm}`;
+               if (pronounKey === 'nosotros') return `we ${pastForm}`;
+               if (pronounKey === 'vosotros') return `you (plural) ${pastForm}`;
+               if (pronounKey === 'ellos') return `they ${pastForm}`;
                break;
 
           case 'imperfect':
-               if (pronounKey === 'yo') {
-                    return `I used to ${baseMeaning}`;
-               } else if (pronounKey === 'tu') {
-                    return `you used to ${baseMeaning}`;
-               } else if (pronounKey === 'el') {
-                    return `he / she used to ${baseMeaning}`;
-               } else if (pronounKey === 'nosotros') {
-                    return `we used to ${baseMeaning}`;
-               } else if (pronounKey === 'vosotros') {
-                    return `you (plural) used to ${baseMeaning}`;
-               } else if (pronounKey === 'ellos') {
-                    return `they used to ${baseMeaning}`;
-               }
+               if (pronounKey === 'yo') return `I used to ${baseMeaning}`;
+               if (pronounKey === 'tu') return `you used to ${baseMeaning}`;
+               if (pronounKey === 'el') return `he / she used to ${baseMeaning}`;
+               if (pronounKey === 'nosotros') return `we used to ${baseMeaning}`;
+               if (pronounKey === 'vosotros') return `you (plural) used to ${baseMeaning}`;
+               if (pronounKey === 'ellos') return `they used to ${baseMeaning}`;
                break;
 
           case 'future':
-               if (pronounKey === 'yo') {
-                    return `I will ${baseMeaning}`;
-               } else if (pronounKey === 'tu') {
-                    return `you will ${baseMeaning}`;
-               } else if (pronounKey === 'el') {
-                    return `he / she will ${baseMeaning}`;
-               } else if (pronounKey === 'nosotros') {
-                    return `we will ${baseMeaning}`;
-               } else if (pronounKey === 'vosotros') {
-                    return `you (plural) will ${baseMeaning}`;
-               } else if (pronounKey === 'ellos') {
-                    return `they will ${baseMeaning}`;
-               }
+               if (pronounKey === 'yo') return `I will ${baseMeaning}`;
+               if (pronounKey === 'tu') return `you will ${baseMeaning}`;
+               if (pronounKey === 'el') return `he / she will ${baseMeaning}`;
+               if (pronounKey === 'nosotros') return `we will ${baseMeaning}`;
+               if (pronounKey === 'vosotros') return `you (plural) will ${baseMeaning}`;
+               if (pronounKey === 'ellos') return `they will ${baseMeaning}`;
                break;
 
           case 'conditional':
-               if (pronounKey === 'yo') {
-                    return `I would ${baseMeaning}`;
-               } else if (pronounKey === 'tu') {
-                    return `you would ${baseMeaning}`;
-               } else if (pronounKey === 'el') {
-                    return `he / she would ${baseMeaning}`;
-               } else if (pronounKey === 'nosotros') {
-                    return `we would ${baseMeaning}`;
-               } else if (pronounKey === 'vosotros') {
-                    return `you (plural) would ${baseMeaning}`;
-               } else if (pronounKey === 'ellos') {
-                    return `they would ${baseMeaning}`;
-               }
+               if (pronounKey === 'yo') return `I would ${baseMeaning}`;
+               if (pronounKey === 'tu') return `you would ${baseMeaning}`;
+               if (pronounKey === 'el') return `he / she would ${baseMeaning}`;
+               if (pronounKey === 'nosotros') return `we would ${baseMeaning}`;
+               if (pronounKey === 'vosotros') return `you (plural) would ${baseMeaning}`;
+               if (pronounKey === 'ellos') return `they would ${baseMeaning}`;
                break;
      }
 
      return meaning;
 }
 
+// ===================== CONJUGATION SETUP =====================
 function setupConjugation() {
      const verbSelect = $('conjugationVerb');
      const tenseSelect = $('conjugationTense');
@@ -828,12 +588,52 @@ function setupConjugation() {
           };
      }
 
+     function displayConjugationPrompt(verb, tenseKey, pronounKey, answer, showAnswer) {
+          const promptDiv = $('conjugationPrompt');
+          if (!promptDiv) return;
+
+          const tenseLabel = CONJUGATION_TENSES.find(t => t[0] === tenseKey)?.[1] || tenseKey;
+          const pronounLabel = CONJUGATION_PRONOUNS.find(p => p[0] === pronounKey)?.[1] || pronounKey;
+          const translation = getConjugationTranslation(verb, tenseKey, pronounKey);
+
+          let answerHtml = '';
+          if (showAnswer && answer) {
+               answerHtml = `<div style="font-size: 1.2rem; color: var(--good, #22c55e); margin-top: 4px;">→ ${answer}</div>`;
+          }
+
+          promptDiv.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <strong>${pronounLabel}</strong>
+                    <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
+                    <button type="button" id="conjugationHearInfinitiveBtn" 
+                            style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
+                            title="Hear the infinitive">
+                        🔊
+                    </button>
+                    <small style="color: var(--muted);">(${tenseLabel})</small>
+                </div>
+                <div style="color: var(--muted); font-size: 0.95rem;">${translation}</div>
+                ${answerHtml}
+            </div>
+        `;
+
+          const hearBtn = document.getElementById('conjugationHearInfinitiveBtn');
+          if (hearBtn) {
+               hearBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const langSelect = $('conjugationLang') || $('lang');
+                    const langCode = langSelect ? langSelect.value : 'es-MX';
+                    playAudioFromServer(verb.infinitive, langCode);
+               });
+          }
+     }
+
      function renderPrompt() {
           const prompt = currentPrompt();
           if (!prompt) return;
 
-          // Display the prompt with infinitive and meaning, but NO answer yet
-          displayConjugationPromptWithAnswer(prompt.verb, prompt.tenseKey, prompt.pronounKey, null, false);
+          displayConjugationPrompt(prompt.verb, prompt.tenseKey, prompt.pronounKey, null, false);
 
           const input = $('conjugationAnswer');
           input.value = '';
@@ -843,20 +643,17 @@ function setupConjugation() {
           input.focus();
           enableConjugationAccentBar();
 
-          // Auto-play the infinitive when a new verb loads
           const langSelect = $('conjugationLang') || $('lang');
           const langCode = langSelect ? langSelect.value : 'es-MX';
           playAudioFromServer(prompt.verb.infinitive, langCode);
      }
 
-     // Replace the randomizeVerb function with this:
      function randomizeVerb() {
           if (!conjugationVerbs.length) return;
           let next = Math.floor(Math.random() * conjugationVerbs.length);
           if (conjugationVerbs.length > 1 && next === Number(verbSelect.value)) next = (next + 1) % conjugationVerbs.length;
           verbSelect.value = String(next);
 
-          // Randomize pronoun and/or tense if checkboxes are checked
           if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
                randomizeSelect(pronounSelect);
           }
@@ -875,16 +672,13 @@ function setupConjugation() {
      }
 
      function advanceConjugationPrompt() {
-          // Reset input state
           const input = $('conjugationAnswer');
           input.disabled = false;
           input.value = '';
 
           if ($('conjugationAutoAdvance').checked) {
-               // Randomize verb, and also randomize pronoun/tense if checked
-               randomizeVerb(); // This now handles everything
+               randomizeVerb();
           } else {
-               // If auto-advance is off but we still want to randomize when clicking "New prompt"
                if ($('conjugationRandomPronoun').checked) randomizeSelect(pronounSelect);
                if ($('conjugationRandomTense').checked) randomizeSelect(tenseSelect);
                renderPrompt();
@@ -910,19 +704,12 @@ function setupConjugation() {
 
                if (correct) conjugationState.correct++;
 
-               // Show the prompt with the answer revealed
-               displayConjugationPromptWithAnswer(
-                    prompt.verb,
-                    prompt.tenseKey,
-                    prompt.pronounKey,
-                    prompt.answer, // Show the answer
-                    true // Show answer
-               );
+               displayConjugationPrompt(prompt.verb, prompt.tenseKey, prompt.pronounKey, prompt.answer, true);
 
-               // Play audio of the correct answer
-               speakConjugationAnswer(prompt.answer);
+               const langSelect = $('conjugationLang') || $('lang');
+               const langCode = langSelect ? langSelect.value : 'es-MX';
+               playAudioFromServer(prompt.answer, langCode);
 
-               // Enhanced feedback
                let feedbackMsg = '';
                let feedbackClass = '';
 
@@ -930,11 +717,9 @@ function setupConjugation() {
                     feedbackMsg = '✅ Correct!';
                     feedbackClass = 'good';
                } else {
-                    // Check for common mistakes
                     if (normalizedAnswer.length > 0) {
-                         // Check if it's a close match (typo)
-                         const similarity = calculateSimilarity(normalizedAnswer, normalizedCorrect);
-                         if (similarity > 0.7) {
+                         const sim = calculateSimilarity(normalizedAnswer, normalizedCorrect);
+                         if (sim > 0.7) {
                               feedbackMsg = `❌ Close! The correct answer is «${prompt.answer}»`;
                          } else {
                               feedbackMsg = `❌ Not quite. The correct answer is «${prompt.answer}»`;
@@ -945,41 +730,36 @@ function setupConjugation() {
                     feedbackClass = 'bad';
                }
 
-               // Show the feedback with extra details
                $('conjugationFeedback').innerHTML = `
-            <div class="${feedbackClass}" style="padding: 8px; border-radius: 6px;">
-                <strong>${feedbackMsg}</strong>
-                ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: «${answer}»</span>` : ''}
-                ${!correct && normalizedAnswer.length > 0 ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>` : ''}
-            </div>
-        `;
+                <div class="${feedbackClass}" style="padding: 8px; border-radius: 6px;">
+                    <strong>${feedbackMsg}</strong>
+                    ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: «${answer}»</span>` : ''}
+                    ${!correct && normalizedAnswer.length > 0 ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>` : ''}
+                </div>
+            `;
                $('conjugationFeedback').className = 'conjugation-feedback';
 
-               // Disable accent bar after checking
                disableConjugationAccentBar();
-
-               // Disable input after checking
                const input = $('conjugationAnswer');
                input.disabled = true;
 
-               // Auto-advance ONLY if correct and auto-advance is enabled
                if (correct && $('conjugationAutoAdvance').checked) {
                     setTimeout(advanceConjugationPrompt, 1500);
                } else if (correct && ($('conjugationRandomPronoun').checked || $('conjugationRandomTense').checked)) {
                     setTimeout(advanceConjugationPrompt, 1500);
                }
           } else {
-               // Reveal mode - show answer and play audio
-               displayConjugationPromptWithAnswer(prompt.verb, prompt.tenseKey, prompt.pronounKey, prompt.answer, true);
+               displayConjugationPrompt(prompt.verb, prompt.tenseKey, prompt.pronounKey, prompt.answer, true);
                $('conjugationFeedback').innerHTML = `
-            <div style="padding: 8px; border-radius: 6px; background: var(--tips-bg);">
-                <strong>Answer:</strong> «${prompt.answer}»
-            </div>
-        `;
+                <div style="padding: 8px; border-radius: 6px; background: var(--tips-bg);">
+                    <strong>Answer:</strong> «${prompt.answer}»
+                </div>
+            `;
                $('conjugationFeedback').className = 'conjugation-feedback';
-               speakConjugationAnswer(prompt.answer);
+               const langSelect = $('conjugationLang') || $('lang');
+               const langCode = langSelect ? langSelect.value : 'es-MX';
+               playAudioFromServer(prompt.answer, langCode);
                disableConjugationAccentBar();
-
                const input = $('conjugationAnswer');
                input.disabled = true;
           }
@@ -987,7 +767,6 @@ function setupConjugation() {
           $('conjugationProgress').textContent = `${conjugationState.correct} correct / ${conjugationState.attempted} attempted`;
      }
 
-     // Helper function for similarity
      function calculateSimilarity(a, b) {
           if (!a || !b) return 0;
           const longer = a.length > b.length ? a : b;
@@ -997,7 +776,6 @@ function setupConjugation() {
      }
 
      verbSelect.addEventListener('change', function () {
-          // When user selects a new verb, randomize pronoun and/or tense if checkboxes are checked
           if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
                randomizeSelect(pronounSelect);
           }
@@ -1025,7 +803,6 @@ function setupConjugation() {
           if (event.key === 'Enter') checkAnswer(false);
      });
 
-     // Add accent bar functionality
      const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
      accentKeys.forEach(btn => {
           btn.addEventListener('mousedown', function (e) {
@@ -1046,97 +823,91 @@ function setupConjugation() {
                btn.disabled = false;
           });
      }
+
      loadConjugationVerbs();
 }
 
-function renderConjugationPrompt() {
-     if (window.renderConjugationPrompt) window.renderConjugationPrompt();
-}
-
-function setupPracticeTabs() {
-     const pronunciationTab = $('pronunciationTab');
-     const conjugationTab = $('conjugationTab');
-     const pronunciationPanel = $('pronunciationPanel');
-     const conjugationPanel = $('conjugationPanel');
-
-     // If this is the standalone conjugation page, just setup conjugation
-     if (!pronunciationTab && !conjugationTab) {
+// ===================== TAB INITIALIZATION =====================
+function initConjugationTab() {
+     if ($('conjugationVerb')) {
           setupConjugation();
-          return;
      }
-
-     if (!pronunciationTab || !conjugationTab) return;
-
-     function selectTab(tab) {
-          const conjugation = tab === conjugationTab;
-          pronunciationTab.classList.toggle('active', !conjugation);
-          conjugationTab.classList.toggle('active', conjugation);
-          pronunciationTab.setAttribute('aria-selected', String(!conjugation));
-          conjugationTab.setAttribute('aria-selected', String(conjugation));
-          pronunciationPanel.hidden = conjugation;
-          conjugationPanel.hidden = !conjugation;
-     }
-
-     pronunciationTab.onclick = () => selectTab(pronunciationTab);
-     conjugationTab.onclick = () => selectTab(conjugationTab);
-     setupConjugation();
 }
 
 // ===================== EVENTS =====================
 let debounce;
-targetInput.addEventListener('input', () => {
-     clearTimeout(debounce);
-     debounce = setTimeout(showTargetInfo, 300);
-});
+if (targetInput) {
+     targetInput.addEventListener('input', () => {
+          clearTimeout(debounce);
+          debounce = setTimeout(showTargetInfo, 300);
+     });
+}
 
-$('showPhonetic').addEventListener('change', showTargetInfo);
-$('testMode').addEventListener('change', showTargetInfo);
-$('ttsRate').addEventListener('input', e => ($('rateValue').textContent = e.target.value));
-setupPracticeTabs();
+if ($('showPhonetic')) $('showPhonetic').addEventListener('change', showTargetInfo);
+if ($('testMode')) $('testMode').addEventListener('change', showTargetInfo);
+if ($('ttsRate')) {
+     $('ttsRate').addEventListener('input', e => {
+          if ($('rateValue')) $('rateValue').textContent = e.target.value;
+     });
+}
 
-// Theme
+// Initialize conjugation if on the tab
+if ($('conjugationVerb')) {
+     initConjugationTab();
+}
+
+// ===================== THEME =====================
 function setTheme(t) {
      document.documentElement.setAttribute('data-theme', t);
-     $('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
+     if ($('themeBtn')) $('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
      localStorage.setItem('sp_theme', t);
 }
-setTheme(localStorage.getItem('sp_theme') || 'light');
-$('themeBtn').onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 
-// Speak
-speakBtn.onclick = () => {
-     const text = targetInput.value.trim();
-     if (!text) return alert('Enter or select a phrase first');
-     const langCode = $('lang').value;
-     playAudioFromServer(text, langCode);
-};
+setTheme(savedTheme);
+if ($('themeBtn')) {
+     $('themeBtn').onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
 
-// Random
-randomBtn.onclick = () => {
-     const keys = getFilteredKeys();
-     if (!keys.length) {
-          resultCard.innerHTML = '<span class="bad">No matches for current filters.</span>';
-          return;
-     }
-     const k = keys[Math.floor(Math.random() * keys.length)];
-     targetInput.value = k;
-     showTargetInfo();
-     resultCard.innerHTML = `Loaded: <strong>«${k}»</strong>`;
-};
+// ===================== SPEAK =====================
+if (speakBtn) {
+     speakBtn.onclick = () => {
+          const text = targetInput.value.trim();
+          if (!text) return alert('Enter or select a phrase first');
+          const langCode = $('lang').value;
+          playAudioFromServer(text, langCode);
+     };
+}
 
-// Star
-starBtn.onclick = () => {
-     const key = normalize(targetInput.value.trim());
-     if (!key) return;
-     const idx = favorites.indexOf(key);
-     if (idx >= 0) favorites.splice(idx, 1);
-     else favorites.push(key);
-     saveAll();
-     showTargetInfo();
-};
+// ===================== RANDOM =====================
+if (randomBtn) {
+     randomBtn.onclick = () => {
+          const keys = getFilteredKeys();
+          if (!keys.length) {
+               resultCard.innerHTML = '<span class="bad">No matches for current filters.</span>';
+               return;
+          }
+          const k = keys[Math.floor(Math.random() * keys.length)];
+          targetInput.value = k;
+          showTargetInfo();
+          resultCard.innerHTML = `Loaded: <strong>«${k}»</strong>`;
+     };
+}
 
-// Weak
-if ($('weakBtn'))
+// ===================== STAR =====================
+if (starBtn) {
+     starBtn.onclick = () => {
+          const key = normalize(targetInput.value.trim());
+          if (!key) return;
+          const idx = favorites.indexOf(key);
+          if (idx >= 0) favorites.splice(idx, 1);
+          else favorites.push(key);
+          saveAll();
+          showTargetInfo();
+     };
+}
+
+// ===================== WEAK =====================
+if ($('weakBtn')) {
      $('weakBtn').onclick = () => {
           let weak = Object.entries(progress)
                .filter(([k, c]) => c > 0)
@@ -1163,39 +934,45 @@ if ($('weakBtn'))
           showTargetInfo();
           resultCard.innerHTML = `Weak phrase: <strong>«${k}»</strong>`;
      };
+}
 
-// Record
-recordBtn.onclick = async () => {
-     if (mediaRecorder && mediaRecorder.state === 'recording') {
-          mediaRecorder.stop();
-          recordBtn.textContent = '⏺ Record me';
-          return;
-     }
-     try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-          mediaRecorder.onstop = () => {
-               myRecording = new Blob(audioChunks, { type: 'audio/webm' });
-               playMyBtn.disabled = false;
-               stream.getTracks().forEach(t => t.stop());
-          };
-          mediaRecorder.start();
-          recordBtn.textContent = '⏹ Stop';
-     } catch (err) {
-          alert('Microphone access needed for recording.');
-     }
-};
-playMyBtn.onclick = () => {
-     if (myRecording) {
-          const url = URL.createObjectURL(myRecording);
-          new Audio(url).play();
-     }
-};
+// ===================== RECORD =====================
+if (recordBtn) {
+     recordBtn.onclick = async () => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+               mediaRecorder.stop();
+               recordBtn.textContent = '⏺ Record me';
+               return;
+          }
+          try {
+               const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+               mediaRecorder = new MediaRecorder(stream);
+               audioChunks = [];
+               mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+               mediaRecorder.onstop = () => {
+                    myRecording = new Blob(audioChunks, { type: 'audio/webm' });
+                    playMyBtn.disabled = false;
+                    stream.getTracks().forEach(t => t.stop());
+               };
+               mediaRecorder.start();
+               recordBtn.textContent = '⏹ Stop';
+          } catch (err) {
+               alert('Microphone access needed for recording.');
+          }
+     };
+}
 
-// Player
-if ($('playerBtn'))
+if (playMyBtn) {
+     playMyBtn.onclick = () => {
+          if (myRecording) {
+               const url = URL.createObjectURL(myRecording);
+               new Audio(url).play();
+          }
+     };
+}
+
+// ===================== PLAYER =====================
+if ($('playerBtn')) {
      $('playerBtn').onclick = () => {
           const text = targetInput.value.trim();
           if (!text) {
@@ -1207,11 +984,11 @@ if ($('playerBtn'))
           $('togglePlayerBtn').textContent = '▼ Hide';
           updatePlayer();
      };
+}
 
-if ($('togglePlayerBtn'))
+if ($('togglePlayerBtn')) {
      $('togglePlayerBtn').onclick = () => {
           playerVisible = !playerVisible;
-
           const iframe = $('playerFrame');
           const status = $('playerStatus');
 
@@ -1226,19 +1003,20 @@ if ($('togglePlayerBtn'))
                $('togglePlayerBtn').textContent = '▲ Show';
           }
      };
+}
 
 if ($('refreshPlayerBtn')) $('refreshPlayerBtn').onclick = updatePlayer;
 if ($('openPlayerBtn')) $('openPlayerBtn').onclick = openPlayerInNewTab;
 if ($('testPlayerBtn')) $('testPlayerBtn').onclick = testPlayerConnection;
 if ($('lang')) $('lang').addEventListener('change', updatePlayer);
 
-// History & Stats
-if ($('historyBtn'))
+// ===================== HISTORY & STATS =====================
+if ($('historyBtn')) {
      $('historyBtn').onclick = () => {
           const list = $('historyList');
-          if (!history.length) list.innerHTML = '<p>No history yet.</p>';
+          if (!practiceHistory.length) list.innerHTML = '<p>No history yet.</p>';
           else {
-               list.innerHTML = history
+               list.innerHTML = practiceHistory
                     .slice()
                     .reverse()
                     .map(h => `<div class="history-item"><strong>${h.phrase}</strong> — ${(h.score * 100).toFixed(0)}% <span style="color:var(--muted)">${new Date(h.date).toLocaleString()}</span></div>`)
@@ -1246,8 +1024,9 @@ if ($('historyBtn'))
           }
           $('historyModal').classList.add('open');
      };
+}
 
-if ($('statsBtn'))
+if ($('statsBtn')) {
      $('statsBtn').onclick = () => {
           const entries = Object.entries(progress).sort((a, b) => b[1] - a[1]);
           const most =
@@ -1262,26 +1041,28 @@ if ($('statsBtn'))
                     .map(([k, v]) => `${k}: ${v}×`)
                     .join('<br>') || 'None';
           $('statsContent').innerHTML = `
-        <p><strong>Most practiced</strong><br>${most}</p>
-        <p><strong>Least practiced</strong><br>${least}</p>
-        <p>Favorites: ${favorites.length}</p>
-        <p>Total unique phrases: ${Object.keys(progress).length}</p>
-    `;
+            <p><strong>Most practiced</strong><br>${most}</p>
+            <p><strong>Least practiced</strong><br>${least}</p>
+            <p>Favorites: ${favorites.length}</p>
+            <p>Total unique phrases: ${Object.keys(progress).length}</p>
+        `;
           $('statsModal').classList.add('open');
      };
+}
 
-// Export / Import
-if ($('exportBtn'))
+// ===================== EXPORT / IMPORT =====================
+if ($('exportBtn')) {
      $('exportBtn').onclick = () => {
-          const data = { progress, favorites, history, streakData, srs };
+          const data = { progress, favorites, practiceHistory, streakData, srs };
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
           a.download = 'spanish-progress.json';
           a.click();
      };
+}
 
-if ($('importBtn'))
+if ($('importBtn')) {
      $('importBtn').onclick = () => {
           const inp = document.createElement('input');
           inp.type = 'file';
@@ -1295,7 +1076,8 @@ if ($('importBtn'))
                          const data = JSON.parse(reader.result);
                          if (data.progress) progress = data.progress;
                          if (data.favorites) favorites = data.favorites;
-                         if (data.history) history = data.history;
+                         if (data.practiceHistory) practiceHistory = data.practiceHistory;
+                         if (data.history) practiceHistory = data.history; // backward compatibility
                          if (data.streakData) streakData = data.streakData;
                          if (data.srs) srs = data.srs;
                          saveAll();
@@ -1309,20 +1091,26 @@ if ($('importBtn'))
           };
           inp.click();
      };
+}
 
+// ===================== STREAK =====================
 function updateStreakDisplay() {
-     $('streakDisplay').textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
-     $('goalDisplay').textContent = `Today: ${streakData.today} / 10`;
+     const streakEl = $('streakDisplay');
+     const goalEl = $('goalDisplay');
+     const studyGoalEl = $('studyGoalDisplay');
+     if (streakEl) streakEl.textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
+     if (goalEl) goalEl.textContent = `Today: ${streakData.today} / 10`;
+     if (studyGoalEl) studyGoalEl.textContent = `Today: ${streakData.today} / 10`;
 }
 updateStreakDisplay();
 
-// Reset & Clear
-if ($('resetBtn'))
+// ===================== RESET & CLEAR =====================
+if ($('resetBtn')) {
      $('resetBtn').onclick = () => {
           if (confirm('Reset ALL progress, favorites, history, streak and cards?')) {
                progress = {};
                favorites = [];
-               history = [];
+               practiceHistory = [];
                streakData = { count: 0, last: null, today: 0 };
                srs = {};
                saveAll();
@@ -1331,8 +1119,9 @@ if ($('resetBtn'))
                resultCard.innerHTML = '<span class="good">Everything reset.</span>';
           }
      };
+}
 
-if ($('clearBtn'))
+if ($('clearBtn')) {
      $('clearBtn').onclick = () => {
           targetInput.value = '';
           targetCard.style.display = 'none';
@@ -1343,8 +1132,9 @@ if ($('clearBtn'))
           if (recognition) recognition.stop();
           synth.cancel();
      };
+}
 
-// ===================== IMPROVED SPEECH RECOGNITION =====================
+// ===================== SPEECH RECOGNITION =====================
 let recognition = null;
 let recognitionRetryCount = 0;
 const MAX_RETRIES = 2;
@@ -1358,7 +1148,6 @@ function resetListenBtn() {
      recognition = null;
 }
 
-// Real-time visual feedback
 function showRecognitionProgress(interimTranscript, confidence) {
      const confidencePercent = Math.round((confidence || 0) * 100);
      const confidenceColor = confidencePercent > 70 ? 'var(--good, #22c55e)' : confidencePercent > 40 ? 'var(--warning, #f59e0b)' : 'var(--bad, #ef4444)';
@@ -1374,16 +1163,11 @@ function showRecognitionProgress(interimTranscript, confidence) {
     `;
 }
 
-// One-time microphone permission
 async function ensureMicrophonePermission() {
      if (micPermissionGranted) return true;
      try {
           const stream = await navigator.mediaDevices.getUserMedia({
-               audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
-               },
+               audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
           });
           stream.getTracks().forEach(t => t.stop());
           micPermissionGranted = true;
@@ -1394,13 +1178,16 @@ async function ensureMicrophonePermission() {
      }
 }
 
-listenBtn.onclick = startListening;
-$('tryAgainBtn').onclick = () => {
-     resetListenBtn();
-     startListening();
-};
+if (listenBtn) {
+     listenBtn.onclick = startListening;
+}
+if ($('tryAgainBtn')) {
+     $('tryAgainBtn').onclick = () => {
+          resetListenBtn();
+          startListening();
+     };
+}
 
-// Keyboard shortcuts
 document.addEventListener('keydown', e => {
      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
      if ($('studyCard') && $('studyCard').style.display !== 'none') return;
@@ -1421,17 +1208,15 @@ document.addEventListener('keydown', e => {
      }
 });
 
-// Close modals
 document.querySelectorAll('.modal').forEach(m => {
      m.addEventListener('click', e => {
           if (e.target === m) m.classList.remove('open');
      });
 });
 
-// Initialize
 if (playerContainer) playerContainer.style.display = 'none';
 if ($('togglePlayerBtn')) $('togglePlayerBtn').textContent = '▼ Hide';
-playerStatus.innerHTML = '⏳ Select a word to load the player';
+if (playerStatus) playerStatus.innerHTML = '⏳ Select a word to load the player';
 
 if (!SpeechRecognition) {
      resultCard.innerHTML = '<span class="bad">Speech Recognition requires Chrome or Edge.</span>';
@@ -1475,19 +1260,19 @@ async function startListening() {
           try {
                recognition.stop();
           } catch (e) {}
+          // Wait a moment before starting a new one
+          await new Promise(resolve => setTimeout(resolve, 300));
           recognition = null;
           recognitionRetryCount = 0;
-          return;
      }
 
      try {
           recognition = new SpeechRecognition();
           recognition.lang = $('lang').value;
           recognition.interimResults = true;
-          recognition.maxAlternatives = 10; // Increased from 5 to 10
+          recognition.maxAlternatives = 10;
           recognition.continuous = false;
 
-          // Add grammar support for better accuracy
           if ('grammars' in recognition) {
                const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
                if (SpeechGrammarList) {
@@ -1540,19 +1325,16 @@ async function startListening() {
                     let allAlternatives = [];
                     let interimTranscript = '';
 
-                    // Collect all results with confidence scores
                     for (let i = 0; i < ev.results.length; i++) {
                          const result = ev.results[i];
                          for (let j = 0; j < result.length; j++) {
                               const alt = result[j];
                               const cleanedText = alt.transcript.trim();
-
                               allAlternatives.push({
                                    text: cleanedText,
                                    conf: alt.confidence || 0,
                                    final: result.isFinal,
                               });
-
                               if (result.isFinal) {
                                    if (alt.confidence > bestConfidence) {
                                         bestConfidence = alt.confidence;
@@ -1565,7 +1347,6 @@ async function startListening() {
                          }
                     }
 
-                    // Show interim results
                     if (!isFinal && interimTranscript) {
                          showRecognitionProgress(interimTranscript, bestConfidence);
                          return;
@@ -1573,7 +1354,6 @@ async function startListening() {
 
                     if (!isFinal || !bestTranscript) return;
 
-                    // Remove duplicates and sort by confidence
                     allAlternatives = allAlternatives
                          .filter(a => a.final)
                          .filter((a, index, self) => index === self.findIndex(t => t.text.toLowerCase() === a.text.toLowerCase()))
@@ -1595,7 +1375,6 @@ async function startListening() {
                     const targetWordCount = targetWords.length;
                     const transcriptWordCount = transcriptWords.length;
 
-                    // ---------- Improved Spanish phonetic key ----------
                     function spanishPhoneticKey(text) {
                          return text
                               .toLowerCase()
@@ -1621,11 +1400,9 @@ async function startListening() {
                          return similarity(spanishPhoneticKey(a), spanishPhoneticKey(b));
                     }
 
-                    // Character & phonetic similarity
                     const charSimilarity = similarity(normalizedTarget, normalizedTranscript);
                     const phoneticSim = phoneticSimilarity(normalizedTarget, normalizedTranscript);
 
-                    // ---------- Word matching (position-aware) ----------
                     let matchedWords = [];
                     let orderedMatches = 0;
                     let used = new Set();
@@ -1644,7 +1421,6 @@ async function startListening() {
                               }
                          }
 
-                         // Use dynamic thresholds
                          const threshold = targetWordCount === 1 ? dynamicThresholds.similarity : dynamicThresholds.similarity - 0.1;
                          if (bestSim >= threshold && Math.abs(bestIdx - i) <= 1) {
                               matchedWords.push(transcriptWords[bestIdx]);
@@ -1653,7 +1429,6 @@ async function startListening() {
                          }
                     }
 
-                    // Count truly extra words
                     for (let j = 0; j < transcriptWords.length; j++) {
                          if (!used.has(j)) extraWordsCount++;
                     }
@@ -1661,13 +1436,10 @@ async function startListening() {
                     const orderedRatio = targetWordCount > 0 ? orderedMatches / targetWordCount : 0;
                     const lengthRatio = Math.min(targetWordCount, transcriptWordCount) / Math.max(targetWordCount, transcriptWordCount || 1);
 
-                    // ---------- Scoring ----------
                     let combinedScore = 0;
 
                     if (targetWordCount === 1) {
-                         // ===== SINGLE WORD =====
                          if (transcriptWordCount > 1) {
-                              // Extra words → heavy penalty
                               let bestWordMatch = 0;
                               for (const w of transcriptWords) {
                                    bestWordMatch = Math.max(bestWordMatch, similarity(targetWords[0], w));
@@ -1686,7 +1458,6 @@ async function startListening() {
                               }
                          }
                     } else {
-                         // ===== MULTI-WORD =====
                          if (orderedRatio >= 0.85 && extraWordsCount <= 1 && lengthRatio > 0.8) {
                               combinedScore = 0.92 + orderedRatio * 0.08;
                          } else if (orderedRatio >= 0.55) {
@@ -1701,14 +1472,12 @@ async function startListening() {
                          }
                     }
 
-                    // Confidence gating
                     if (bestConfidence < 0.55 && targetWordCount <= 3) {
                          combinedScore *= 0.65;
                     }
 
                     const weightedScore = Math.min(Math.max(combinedScore, 0), 1.0);
 
-                    // Completely wrong detection
                     let isCompletelyWrong = false;
                     if (targetWordCount === 1) {
                          const bestWordMatch = transcriptWords.reduce((best, w) => Math.max(best, similarity(targetWords[0], w)), 0);
@@ -1720,8 +1489,13 @@ async function startListening() {
                     // ---------- Progress & history ----------
                     const key = normalizedTarget;
                     progress[key] = (progress[key] || 0) + 1;
-                    history.push({ phrase: target, score: weightedScore, date: Date.now() });
-                    if (history.length > 25) history.shift();
+
+                    // Make sure practiceHistory is an array before pushing
+                    if (!Array.isArray(practiceHistory)) {
+                         practiceHistory = [];
+                    }
+                    practiceHistory.push({ phrase: target, score: weightedScore, date: Date.now() });
+                    if (practiceHistory.length > 25) practiceHistory.shift();
                     updateStreak();
                     saveAll();
                     showTargetInfo();
@@ -1730,7 +1504,6 @@ async function startListening() {
                          $('meaningGuide').innerHTML = meaningLineHtml(target, true);
                     }
 
-                    // ---------- Feedback ----------
                     let feedback, cls;
                     if (weightedScore >= 0.88 && orderedRatio >= 0.75 && extraWordsCount <= 1) {
                          feedback = '✅ Excellent!';
@@ -1759,7 +1532,6 @@ async function startListening() {
                     if (pct >= 75) barClass = 'high';
                     else if (pct >= 45) barClass = 'medium';
 
-                    // Match details
                     let matchDetails = '';
                     if (targetWordCount === 1 && transcriptWordCount > 1) {
                          matchDetails = `
@@ -1778,7 +1550,6 @@ async function startListening() {
                         </div>`;
                     }
 
-                    // Alternatives (very useful)
                     let altHtml = '';
                     if (allAlternatives.length > 1) {
                          altHtml = `
@@ -1852,14 +1623,13 @@ async function startListening() {
                          if (recognitionRetryCount < MAX_RETRIES) {
                               shouldRetry = true;
                               userMessage += `Retrying... (${recognitionRetryCount + 1}/${MAX_RETRIES})`;
-                              retryDelay = 2000 * (recognitionRetryCount + 1); // Exponential backoff
+                              retryDelay = 2000 * (recognitionRetryCount + 1);
                          } else {
                               isNetworkErrorLoop = true;
                               userMessage += 'Service unavailable. Check your internet connection.';
                          }
                          break;
                     case 'aborted':
-                         // Don't show error for intentional aborts
                          return;
                     case 'language-not-supported':
                          userMessage = '🌍 Selected language is not supported. Try a different Spanish variant.';
@@ -1903,187 +1673,14 @@ async function startListening() {
      }
 }
 
-// ===================== IMPROVED SIMILARITY FUNCTIONS =====================
-
-// Word-level similarity - checks if words match
-function calculateWordSimilarity(target, transcript) {
-     if (!target || !transcript) return 0;
-
-     const targetWords = target.split(' ');
-     const transcriptWords = transcript.split(' ');
-
-     if (targetWords.length === 0 || transcriptWords.length === 0) return 0;
-
-     let matches = 0;
-     let totalWeight = 0;
-
-     for (const targetWord of targetWords) {
-          let bestMatch = 0;
-          for (const transcriptWord of transcriptWords) {
-               const sim = similarity(targetWord, transcriptWord);
-               if (sim > bestMatch) bestMatch = sim;
-          }
-          matches += bestMatch;
-          totalWeight += 1;
-     }
-
-     // Penalize if lengths are very different
-     const lengthPenalty = Math.min(targetWords.length, transcriptWords.length) / Math.max(targetWords.length, transcriptWords.length);
-
-     return (matches / totalWeight) * lengthPenalty;
-}
-
-// Character-level similarity - for detailed matching
-function calculateCharSimilarity(target, transcript) {
-     if (!target || !transcript) return 0;
-     return similarity(target, transcript);
-}
-
-// Phonetic similarity - checks pronunciation patterns
-function calculatePhoneticSimilarity(target, transcript) {
-     if (!target || !transcript) return 0;
-
-     // Convert to phonetic approximations for comparison
-     const targetPhonetic = generatePhoneticApproximation(target).toLowerCase();
-     const transcriptPhonetic = generatePhoneticApproximation(transcript).toLowerCase();
-
-     // Check if the phonetic versions are similar
-     const directSim = similarity(targetPhonetic, transcriptPhonetic);
-
-     // Check if key phonetic features match
-     const targetFeatures = extractPhoneticFeatures(target.toLowerCase());
-     const transcriptFeatures = extractPhoneticFeatures(transcript.toLowerCase());
-
-     let featureMatches = 0;
-     let totalFeatures = 0;
-
-     for (const [feature, value] of Object.entries(targetFeatures)) {
-          if (transcriptFeatures[feature] !== undefined) {
-               totalFeatures++;
-               if (Math.abs(value - transcriptFeatures[feature]) < 0.3) {
-                    featureMatches++;
-               }
-          }
-     }
-
-     const featureScore = totalFeatures > 0 ? featureMatches / totalFeatures : 0;
-
-     return directSim * 0.6 + featureScore * 0.4;
-}
-
-// Extract phonetic features for comparison
-function extractPhoneticFeatures(text) {
-     const features = {};
-
-     // Count specific sounds
-     features.vowelCount = (text.match(/[aeiouáéíóú]/g) || []).length;
-     features.consonantCount = (text.match(/[bcdfghjklmnñpqrstvwxyz]/g) || []).length;
-     features.syllableCount = (text.match(/[aeiouáéíóú]/g) || []).length;
-
-     // Check for rolled R
-     features.hasRolledR = /rr/.test(text) ? 1 : 0;
-
-     // Check for strong H (j, g+e/i)
-     features.hasStrongH = /[jg][ei]/.test(text) ? 1 : 0;
-
-     // Check for ñ
-     features.hasEnye = /ñ/.test(text) ? 1 : 0;
-
-     // Average word length
-     const words = text.split(' ');
-     features.avgWordLength = words.reduce((sum, w) => sum + w.length, 0) / Math.max(words.length, 1);
-
-     // Vowel-to-consonant ratio
-     if (features.consonantCount > 0) {
-          features.vowelConsonantRatio = features.vowelCount / features.consonantCount;
-     } else {
-          features.vowelConsonantRatio = features.vowelCount;
-     }
-
-     return features;
-}
-
-// Generate phonetic approximation
-function generatePhoneticApproximation(text) {
-     const rules = {
-          a: 'ah',
-          á: 'ah',
-          e: 'eh',
-          é: 'eh',
-          i: 'ee',
-          í: 'ee',
-          o: 'oh',
-          ó: 'oh',
-          u: 'oo',
-          ú: 'oo',
-          ü: 'oo',
-          b: 'b',
-          c: 'k',
-          d: 'd',
-          f: 'f',
-          g: 'g',
-          h: '',
-          j: 'h',
-          k: 'k',
-          l: 'l',
-          m: 'm',
-          n: 'n',
-          ñ: 'ny',
-          p: 'p',
-          q: 'k',
-          r: 'r',
-          s: 's',
-          t: 't',
-          v: 'b',
-          w: 'w',
-          x: 'ks',
-          y: 'y',
-          z: 's',
-     };
-
-     let result = '';
-     const words = text.toLowerCase().split(' ');
-
-     for (let word of words) {
-          let phonetic = '';
-          let i = 0;
-          while (i < word.length) {
-               if (i < word.length - 1) {
-                    const twoChars = word.substring(i, i + 2);
-                    if (twoChars === 'll') {
-                         phonetic += 'y';
-                         i += 2;
-                         continue;
-                    } else if (twoChars === 'rr') {
-                         phonetic += 'rr';
-                         i += 2;
-                         continue;
-                    } else if (twoChars === 'ch') {
-                         phonetic += 'ch';
-                         i += 2;
-                         continue;
-                    } else if (twoChars === 'qu') {
-                         phonetic += 'k';
-                         i += 2;
-                         continue;
-                    }
-               }
-               const char = word[i];
-               phonetic += rules[char] || char;
-               i++;
-          }
-          result += (result ? ' ' : '') + phonetic;
-     }
-
-     return result.toUpperCase();
-}
-
+// ===================== CATEGORY CHANGE =====================
 if ($('category')) {
      $('category').addEventListener('change', function () {
           extraPool = null;
      });
 }
 
+// ===================== TOP 1000 =====================
 if ($('top1000Btn')) {
      $('top1000Btn').onclick = () => {
           if (typeof TOP1000 === 'undefined' || !TOP1000.length) {
@@ -2097,6 +1694,7 @@ if ($('top1000Btn')) {
      };
 }
 
+// ===================== PRACTICE PARAMS =====================
 (function applyPracticeParams() {
      if (document.body.classList.contains('study-page')) return;
      const params = new URLSearchParams(window.location.search);
@@ -2162,49 +1760,4 @@ if ($('top1000Btn')) {
      }
 })();
 
-console.log('Spanish Pronunciation App initialized with enhanced speech recognition.');
-console.log('Speech recognition enhanced with confidence weighting, dynamic thresholds, and better matching.');
-
-// Detect if this is the standalone conjugation page
-if (document.body.classList.contains('conjugation-page')) {
-     // Initialize conjugation directly without tabs
-     setupConjugation();
-}
-
-// Handle verb parameter on conjugation page
-(function handleConjugationParam() {
-     if (!document.body.classList.contains('conjugation-page')) return;
-
-     const params = new URLSearchParams(window.location.search);
-     const verb = params.get('verb');
-     if (verb) {
-          let attempts = 0;
-          const maxAttempts = 20;
-          const checkInterval = setInterval(() => {
-               attempts++;
-               const verbSelect = $('conjugationVerb');
-               if (verbSelect && verbSelect.options.length > 0) {
-                    clearInterval(checkInterval);
-                    const options = Array.from(verbSelect.options);
-                    const match = options.find(opt => opt.text.toLowerCase().startsWith(verb.toLowerCase()));
-                    if (match) {
-                         verbSelect.value = match.value;
-                         verbSelect.dispatchEvent(new Event('change'));
-                         // Auto-play after selection
-                         setTimeout(() => {
-                              const prompt = currentPrompt();
-                              if (prompt && prompt.verb) {
-                                   const langSelect = $('conjugationLang') || $('lang');
-                                   const langCode = langSelect ? langSelect.value : 'es-MX';
-                                   playAudioFromServer(prompt.verb.infinitive, langCode);
-                              }
-                         }, 500);
-                    }
-                    return;
-               }
-               if (attempts >= maxAttempts) {
-                    clearInterval(checkInterval);
-               }
-          }, 200);
-     }
-})();
+console.log('✅ Spanish Practice initialized');

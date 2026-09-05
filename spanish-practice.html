@@ -3,7 +3,7 @@
      <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Spanish Pronunciation Practice</title>
+          <title>Spanish Practice</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
           <script src="js/dictionary.js"></script>
           <script src="js/dictionary-extra.js"></script>
@@ -12,8 +12,8 @@
      <body>
           <div class="header">
                <div class="header-left">
-                    <h1>Spanish Pronunciation Practice</h1>
-                    <p class="subtitle">Build a phrase, hear it, then make it yours.</p>
+                    <h1>Spanish Practice</h1>
+                    <p class="subtitle">Pronounce, conjugate, and study all in one place.</p>
                </div>
                <div class="header-right">
                     <div class="streak" id="streakDisplay">🔥 Streak: 0 days</div>
@@ -22,13 +22,14 @@
           </div>
 
           <nav class="page-nav" aria-label="Practice navigation">
-               <a href="spanish-practice.html" class="active">Pronunciation</a>
-               <a href="spanish-study.html">Study &amp; progress</a>
-               <a href="spanish-conjugation.html">Conjugation</a>
+               <a href="#" data-tab="pronunciation" class="active">Pronunciation</a>
+               <a href="#" data-tab="conjugation">Conjugation</a>
+               <a href="#" data-tab="study">Study &amp; progress</a>
                <a href="spanish-cheatsheet.html">Cheat sheet</a>
           </nav>
 
-          <section id="pronunciationPanel" class="practice-panel" role="tabpanel" aria-labelledby="pronunciationTab">
+          <!-- ==================== PRONUNCIATION TAB ==================== -->
+          <section id="pronunciationPanel" class="practice-panel active" role="tabpanel" style="display: block">
                <section class="practice-intro">
                     <div>
                          <span class="eyebrow">Pronunciation lab</span>
@@ -95,7 +96,6 @@
                     <label style="margin: 0; white-space: nowrap">TTS Speed</label>
                     <input type="range" id="ttsRate" min="0.5" max="1.2" step="0.05" value="0.85" style="flex: 1; margin: 0" />
                     <span id="rateValue">0.85</span>
-                    <!-- <label style="margin: 0"><input type="checkbox" id="showPhonetic" checked /> Show phonetic</label> -->
                </div>
 
                <div class="btn-row practice-actions">
@@ -148,7 +148,8 @@
                </div>
           </section>
 
-          <section id="conjugationPanel" class="practice-panel" role="tabpanel" aria-labelledby="conjugationTab" hidden>
+          <!-- ==================== CONJUGATION TAB ==================== -->
+          <section id="conjugationPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
                <section class="practice-intro">
                     <div>
                          <span class="eyebrow">Conjugation lab</span>
@@ -174,7 +175,6 @@
                          <label for="conjugationPronoun">Pronoun</label>
                          <select id="conjugationPronoun"></select>
                     </div>
-                    <!-- Add this new div for language selector -->
                     <div>
                          <label for="conjugationLang">Spanish variant</label>
                          <select id="conjugationLang">
@@ -217,6 +217,140 @@
                <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
           </section>
 
+          <!-- ==================== STUDY TAB ==================== -->
+          <section id="studyPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
+               <section class="practice-intro">
+                    <div>
+                         <span class="eyebrow">Study desk</span>
+                         <h2>Choose a way to remember.</h2>
+                         <p>Use a page from the Cheat Sheet, a category, or the Top 1000 words as your study set.</p>
+                    </div>
+                    <div class="study-goal" id="studyGoalDisplay" style="font-size: 0.9rem; color: var(--muted)">Today: 0 / 10</div>
+               </section>
+
+               <section class="card study-setup">
+                    <div class="section-heading">
+                         <div>
+                              <span class="eyebrow">Study set</span>
+                              <h2>What should we review?</h2>
+                         </div>
+                         <button id="top1000Btn" class="secondary-action">📚 Top 1000</button>
+                    </div>
+                    <div class="filters">
+                         <div>
+                              <label for="studyDifficulty">Difficulty</label>
+                              <select id="studyDifficulty">
+                                   <option value="all">All levels</option>
+                                   <option value="beginner">Beginner</option>
+                                   <option value="intermediate">Intermediate</option>
+                                   <option value="advanced">Advanced</option>
+                              </select>
+                         </div>
+                         <div>
+                              <label for="studyCategory">Category</label>
+                              <select id="studyCategory">
+                                   <option value="all">All categories</option>
+                                   <option value="greetings">Greetings</option>
+                                   <option value="food">Food</option>
+                                   <option value="verbs">Verbs</option>
+                                   <option value="everyday">Everyday</option>
+                                   <option value="travel">Travel</option>
+                                   <option value="family">Family</option>
+                                   <option value="body">Body</option>
+                                   <option value="house">House</option>
+                                   <option value="weather">Weather</option>
+                                   <option value="shopping">Shopping</option>
+                                   <option value="clothing">Clothing</option>
+                                   <option value="animals">Animals</option>
+                                   <option value="emotions">Emotions</option>
+                                   <option value="work">Work &amp; School</option>
+                                   <option value="numbers">Numbers</option>
+                                   <option value="time">Time</option>
+                              </select>
+                         </div>
+                         <label><input type="checkbox" id="studyOnlyVerbs" /> Only verbs</label>
+                    </div>
+                    <div class="study-options">
+                         <label for="studyLang">Spanish variant</label>
+                         <select id="studyLang">
+                              <option value="es-ES">Spain (es-ES)</option>
+                              <option value="es-MX" selected>Mexico (es-MX)</option>
+                              <option value="es-US">United States (es-US)</option>
+                              <option value="es-AR">Argentina (es-AR)</option>
+                         </select>
+                         <label><input type="checkbox" id="studyAutoAdvance" /> Auto-advance successful answers</label>
+                    </div>
+               </section>
+
+               <div class="study-launcher" aria-label="Study modes">
+                    <button id="quizBtn" class="mode-card"><span>📝</span><strong>Quiz</strong><small>Recall meanings and forms</small></button>
+                    <button id="dictationBtn" class="mode-card"><span>✍️</span><strong>Dictation</strong><small>Listen and type Spanish</small></button>
+                    <button id="cardsBtn" class="mode-card"><span>🃏</span><strong>Flashcards</strong><small>Review what is due</small></button>
+                    <button id="weakBtn" class="mode-card"><span>📉</span><strong>Weak words</strong><small>Practice your least-used items</small></button>
+               </div>
+
+               <div class="card result-card" id="studyResultCard">Choose a study mode to begin.</div>
+               <div class="page-pool-status" id="studyPagePoolStatus" hidden></div>
+
+               <div class="card" id="studyCard" style="display: none">
+                    <div class="player-controls">
+                         <strong id="studyTitle">Study</strong>
+                         <div class="player-buttons"><button type="button" id="studyExitBtn">✕ Close study</button></div>
+                    </div>
+                    <div id="studyBody"></div>
+               </div>
+
+               <section class="card progress-tools">
+                    <div class="section-heading">
+                         <div>
+                              <span class="eyebrow">Your record</span>
+                              <h2>Progress tools</h2>
+                         </div>
+                    </div>
+                    <div class="btn-row">
+                         <button id="historyBtn">📜 History</button>
+                         <button id="statsBtn">📊 Stats</button>
+                         <button id="exportBtn">⬆ Export</button>
+                         <button id="importBtn">⬇ Import</button>
+                         <button id="resetBtn">🗑 Reset all progress</button>
+                    </div>
+               </section>
+          </section>
+
+          <!-- ==================== MODALS ==================== -->
+          <div class="modal" id="historyModal">
+               <div class="modal-content">
+                    <h3>Practice History (last 25)</h3>
+                    <div id="historyList"></div>
+                    <button onclick="closeModal('historyModal')" style="margin-top: 12px">Close</button>
+               </div>
+          </div>
+          <div class="modal" id="statsModal">
+               <div class="modal-content">
+                    <h3>Stats</h3>
+                    <div id="statsContent"></div>
+                    <button onclick="closeModal('statsModal')" style="margin-top: 12px">Close</button>
+               </div>
+          </div>
+
+          <!-- Hidden runtime elements used by JS -->
+          <div class="practice-runtime" aria-hidden="true">
+               <input id="target" type="text" />
+               <div id="targetCard"></div>
+               <div id="playerContainer">
+                    <div id="playerStatus"></div>
+                    <iframe id="playerFrame"></iframe><button id="playerBtn"></button><button id="togglePlayerBtn"></button><button id="refreshPlayerBtn"></button><button id="openPlayerBtn"></button><button id="testPlayerBtn"></button><span id="playerUrlDisplay"></span>
+               </div>
+               <button id="speakBtn"></button><button id="listenBtn"></button><button id="randomBtn"></button><button id="tryAgainBtn"></button><button id="starBtn"></button><button id="recordBtn"></button><button id="playMyBtn"></button><button id="clearBtn"></button> <input id="testMode" type="checkbox" /><input id="showPhonetic" type="checkbox" checked /><input id="ttsRate" type="range" value="0.85" /><span id="rateValue">0.85</span>
+               <div id="phoneticGuide"></div>
+               <div id="meaningGuide"></div>
+               <div id="starIndicator"></div>
+               <div id="phoneticTipsContent"></div>
+               <div id="phraseProgress"></div>
+          </div>
+
+          <script src="./js/shared.js"></script>
           <script src="./js/spanish-practice.js"></script>
+          <script src="./js/spanish-study.js"></script>
      </body>
 </html>
