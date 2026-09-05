@@ -41,6 +41,119 @@ if (synth) {
      }
 }
 
+// ===================== VOICE HELPERS =====================
+let cachedSpanishVoice = null;
+let voicesLoaded = false;
+
+function getSpanishVoice(langCode) {
+     // If we already have a cached voice and it matches the language, use it
+     if (cachedSpanishVoice && cachedSpanishVoice.lang.startsWith('es-')) {
+          return cachedSpanishVoice;
+     }
+
+     const voices = synth.getVoices();
+     if (!voices || voices.length === 0) {
+          // Try to load voices
+          try {
+               synth.getVoices(); // This can trigger loading
+          } catch (e) {}
+          return null;
+     }
+
+     const lang = langCode || 'es-MX';
+
+     // Priority order for voice selection:
+     // 1. Native Spanish voice with matching locale (e.g., es-MX)
+     // 2. Any native Spanish voice (localService: false)
+     // 3. Google Spanish voices
+     // 4. Any Spanish voice
+     // 5. Any voice with Spanish in the name
+
+     // Try exact match first (prefer native/non-robot voices)
+     let voice = voices.find(v => v.lang === lang && v.localService === false);
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     // Try any Spanish voice with localService false (usually better quality)
+     voice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     // Try Google Spanish voices (usually good)
+     voice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     // Try any Spanish voice
+     voice = voices.find(v => v.lang.startsWith('es-'));
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     // Last resort: any voice with Spanish in the name
+     voice = voices.find(v => v.name.toLowerCase().includes('spanish'));
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     return null;
+}
+
+// Preload voices and log available ones
+function preloadVoices() {
+     if (voicesLoaded) return;
+
+     if (synth) {
+          // Try to get voices immediately
+          let voices = synth.getVoices();
+          if (voices && voices.length > 0) {
+               voicesLoaded = true;
+               console.log('Voices loaded:', voices.length);
+               // Log available Spanish voices for debugging
+               const spanishVoices = voices.filter(v => v.lang.startsWith('es-'));
+               console.log(
+                    'Spanish voices available:',
+                    spanishVoices.map(v => v.lang + ' - ' + v.name)
+               );
+               return;
+          }
+
+          // If no voices yet, wait for them to load
+          synth.onvoiceschanged = function () {
+               voices = synth.getVoices();
+               if (voices && voices.length > 0) {
+                    voicesLoaded = true;
+                    console.log('Voices loaded:', voices.length);
+                    const spanishVoices = voices.filter(v => v.lang.startsWith('es-'));
+                    console.log(
+                         'Spanish voices available:',
+                         spanishVoices.map(v => v.lang + ' - ' + v.name)
+                    );
+
+                    // Pre-cache the best Spanish voice
+                    if (spanishVoices.length > 0) {
+                         getSpanishVoice('es-MX');
+                    }
+               }
+          };
+     }
+}
+
+// Call this when the page loads
+if (document.readyState === 'complete') {
+     preloadVoices();
+} else {
+     window.addEventListener('load', preloadVoices);
+}
+
 // ===================== HELPERS =====================
 function normalize(t) {
      return t
@@ -430,51 +543,26 @@ function speakConjugationAnswer(answer, lang) {
           } catch (e) {}
      }
 
+     // Small delay to ensure cancel completes
      setTimeout(() => {
           try {
                const utterance = new SpeechSynthesisUtterance(answer);
-               // Use conjugationLang if it exists, otherwise fall back to the main lang selector
                const langSelect = $('conjugationLang') || $('lang');
                const langCode = lang || (langSelect ? langSelect.value : 'es-MX');
                utterance.lang = langCode;
 
-               // Get rate from the main TTS control
                const rateControl = $('ttsRate');
                utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
                utterance.volume = 1;
                utterance.pitch = 1;
 
-               // Get available voices and select the best Spanish voice
-               const voices = synth.getVoices();
-               if (voices && voices.length > 0) {
-                    let spanishVoice = null;
-
-                    // Try exact match first
-                    spanishVoice = voices.find(v => v.lang === langCode && v.localService === false);
-
-                    // Try any Spanish voice
-                    if (!spanishVoice) {
-                         spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
-                    }
-
-                    // Try Google voices
-                    if (!spanishVoice) {
-                         spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
-                    }
-
-                    // Try any Spanish voice
-                    if (!spanishVoice) {
-                         spanishVoice = voices.find(v => v.lang.startsWith('es-'));
-                    }
-
-                    // Last resort
-                    if (!spanishVoice) {
-                         spanishVoice = voices.find(v => v.name.toLowerCase().includes('spanish'));
-                    }
-
-                    if (spanishVoice) {
-                         utterance.voice = spanishVoice;
-                    }
+               // Get the best Spanish voice
+               const voice = getSpanishVoice(langCode);
+               if (voice) {
+                    utterance.voice = voice;
+                    console.log('Using voice:', voice.name, voice.lang);
+               } else {
+                    console.warn('No Spanish voice found, using default');
                }
 
                // For mobile, use a lower rate
@@ -486,7 +574,7 @@ function speakConjugationAnswer(answer, lang) {
           } catch (e) {
                console.warn('Speech synthesis error:', e);
           }
-     }, 100);
+     }, 150); // Increased delay for better mobile performance
 }
 
 function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, showAnswer) {
@@ -1058,15 +1146,13 @@ function setupConjugation() {
 
           const rateControl = $('ttsRate');
           utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+          utterance.volume = 1;
+          utterance.pitch = 1;
 
-          // Get voice
-          const voices = synth.getVoices();
-          if (voices && voices.length > 0) {
-               let spanishVoice = voices.find(v => v.lang === langCode && v.localService === false);
-               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
-               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
-               if (!spanishVoice) spanishVoice = voices.find(v => v.lang.startsWith('es-'));
-               if (spanishVoice) utterance.voice = spanishVoice;
+          // Get the best Spanish voice
+          const voice = getSpanishVoice(langCode);
+          if (voice) {
+               utterance.voice = voice;
           }
 
           synth.cancel();
@@ -2209,3 +2295,22 @@ if ($('top1000Btn')) {
 
 console.log('Spanish Pronunciation App initialized with enhanced speech recognition.');
 console.log('Speech recognition enhanced with confidence weighting, dynamic thresholds, and better matching.');
+
+// Debug function - call this from console to see available voices
+window.debugVoices = function () {
+     const voices = synth.getVoices();
+     if (!voices || voices.length === 0) {
+          console.log('No voices loaded yet. Try again in a moment.');
+          return;
+     }
+     console.log('All voices:');
+     voices.forEach(v => {
+          console.log(`  ${v.lang} - ${v.name} (${v.localService ? 'system' : 'network'})`);
+     });
+     console.log('\nSpanish voices:');
+     voices
+          .filter(v => v.lang.startsWith('es-'))
+          .forEach(v => {
+               console.log(`  ${v.lang} - ${v.name} (${v.localService ? 'system' : 'network'})`);
+          });
+};
