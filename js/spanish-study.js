@@ -198,22 +198,15 @@
      }
 
      function speakText(text) {
-          if (!text || typeof synth === 'undefined' || !synth) return;
-          const u = new SpeechSynthesisUtterance(text);
+          if (!text) return;
           const langCode = ($('lang') && $('lang').value) || 'es-MX';
-          u.lang = langCode;
-          u.rate = parseFloat(($('ttsRate') && $('ttsRate').value) || '0.85');
-          u.volume = 1;
-          u.pitch = 1;
-
-          // Get the best Spanish voice
-          const voice = getSpanishVoice(langCode);
-          if (voice) {
-               u.voice = voice;
+          // Use the global playAudioFromServer function
+          if (typeof playAudioFromServer === 'function') {
+               playAudioFromServer(text, langCode);
+          } else {
+               // Fallback if function not available
+               fallbackBrowserTTS(text, langCode);
           }
-
-          synth.cancel();
-          synth.speak(u);
      }
 
      function looksLikeEnglishGloss(text) {
