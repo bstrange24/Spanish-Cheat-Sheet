@@ -968,6 +968,24 @@ function setupConjugation() {
 
           // Enable accent bar
           enableConjugationAccentBar();
+
+          const langSelect = $('conjugationLang') || $('lang');
+          const langCode = langSelect ? langSelect.value : 'es-MX';
+          const utterance = new SpeechSynthesisUtterance(prompt.verb.infinitive);
+          utterance.lang = langCode;
+          const rateControl = $('ttsRate');
+          utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+          utterance.volume = 1;
+          utterance.pitch = 1;
+
+          // Get the best Spanish voice
+          const voice = getSpanishVoice(langCode);
+          if (voice) {
+               utterance.voice = voice;
+          }
+
+          synth.cancel();
+          synth.speak(utterance);
      }
 
      // Replace the randomizeVerb function with this:
@@ -1195,7 +1213,15 @@ function setupPracticeTabs() {
      const conjugationTab = $('conjugationTab');
      const pronunciationPanel = $('pronunciationPanel');
      const conjugationPanel = $('conjugationPanel');
+
+     // If this is the standalone conjugation page, just setup conjugation
+     if (!pronunciationTab && !conjugationTab) {
+          setupConjugation();
+          return;
+     }
+
      if (!pronunciationTab || !conjugationTab) return;
+
      function selectTab(tab) {
           const conjugation = tab === conjugationTab;
           pronunciationTab.classList.toggle('active', !conjugation);
@@ -1205,6 +1231,7 @@ function setupPracticeTabs() {
           pronunciationPanel.hidden = conjugation;
           conjugationPanel.hidden = !conjugation;
      }
+
      pronunciationTab.onclick = () => selectTab(pronunciationTab);
      conjugationTab.onclick = () => selectTab(conjugationTab);
      setupConjugation();
@@ -2314,3 +2341,58 @@ window.debugVoices = function () {
                console.log(`  ${v.lang} - ${v.name} (${v.localService ? 'system' : 'network'})`);
           });
 };
+
+// Detect if this is the standalone conjugation page
+if (document.body.classList.contains('conjugation-page')) {
+     // Initialize conjugation directly without tabs
+     setupConjugation();
+}
+
+// Handle verb parameter on conjugation page
+// Handle verb parameter on conjugation page
+(function handleConjugationParam() {
+     if (!document.body.classList.contains('conjugation-page')) return;
+
+     const params = new URLSearchParams(window.location.search);
+     const verb = params.get('verb');
+     if (verb) {
+          // Wait for verbs to load, then select the verb
+          let attempts = 0;
+          const maxAttempts = 20;
+          const checkInterval = setInterval(() => {
+               attempts++;
+               const verbSelect = $('conjugationVerb');
+               if (verbSelect && verbSelect.options.length > 0) {
+                    clearInterval(checkInterval);
+                    const options = Array.from(verbSelect.options);
+                    const match = options.find(opt => opt.text.toLowerCase().startsWith(verb.toLowerCase()));
+                    if (match) {
+                         verbSelect.value = match.value;
+                         verbSelect.dispatchEvent(new Event('change'));
+                         // --- ADD THIS --- Play audio after selection
+                         setTimeout(() => {
+                              const prompt = currentPrompt();
+                              if (prompt && prompt.verb) {
+                                   const langSelect = $('conjugationLang') || $('lang');
+                                   const langCode = langSelect ? langSelect.value : 'es-MX';
+                                   const utterance = new SpeechSynthesisUtterance(prompt.verb.infinitive);
+                                   utterance.lang = langCode;
+                                   const rateControl = $('ttsRate');
+                                   utterance.rate = rateControl ? parseFloat(rateControl.value) : 0.85;
+                                   utterance.volume = 1;
+                                   utterance.pitch = 1;
+                                   const voice = getSpanishVoice(langCode);
+                                   if (voice) utterance.voice = voice;
+                                   synth.cancel();
+                                   synth.speak(utterance);
+                              }
+                         }, 500);
+                    }
+                    return;
+               }
+               if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+               }
+          }, 200);
+     }
+})();

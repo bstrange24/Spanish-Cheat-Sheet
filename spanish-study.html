@@ -21,9 +21,17 @@
                </div>
           </div>
 
+          <!-- <nav class="page-nav" aria-label="Practice navigation">
+               <a href="spanish-practice.html" class="active">Pronunciation</a>
+               <a href="spanish-study.html">Study &amp; progress</a>
+               <a href="spanish-conjugation.html">Conjugation</a>
+               <a href="spanish-cheatsheet.html">Cheat sheet</a>
+          </nav> -->
+
           <nav class="page-nav" aria-label="Practice navigation">
                <a href="spanish-practice.html">Pronunciation</a>
                <a class="active" href="spanish-study.html">Study &amp; progress</a>
+               <a href="spanish-conjugation.html">Conjugation</a>
                <a href="spanish-cheatsheet.html">Cheat sheet</a>
           </nav>
 
@@ -156,5 +164,21 @@
 
           <script src="./js/spanish-practice.js"></script>
           <script src="./js/spanish-study.js"></script>
+
+          <script>
+               // Fix navigation active state on study page
+               document.addEventListener('DOMContentLoaded', function () {
+                    const navLinks = document.querySelectorAll('.page-nav a');
+                    const currentPage = window.location.pathname.split('/').pop() || 'spanish-study.html';
+
+                    navLinks.forEach(link => {
+                         link.classList.remove('active');
+                         const href = link.getAttribute('href');
+                         if (href === currentPage) {
+                              link.classList.add('active');
+                         }
+                    });
+               });
+          </script>
      </body>
 </html>

@@ -1117,6 +1117,25 @@
                     }
                     launchStudy({ mode: 'quiz', items: payload.items, pairs: payload.pairs, words: payload.words, gloss: payload.gloss });
                };
+          const conjugationPageBtn = document.getElementById('conjugationPageBtn');
+          if (conjugationPageBtn) {
+               conjugationPageBtn.onclick = function () {
+                    // Try to find the current verb from the page
+                    let verb = '';
+                    const activeSection = document.querySelector('.section.active');
+                    if (activeSection) {
+                         // Look for the first highlighted verb in the section
+                         const verbEl = activeSection.querySelector('.say[data-text]');
+                         if (verbEl) {
+                              verb = verbEl.getAttribute('data-text') || verbEl.textContent.trim();
+                         }
+                    }
+
+                    // Open conjugation page with verb parameter
+                    const url = verb ? 'spanish-conjugation.html?verb=' + encodeURIComponent(verb) : 'spanish-conjugation.html';
+                    window.open(url, '_blank', 'noopener');
+               };
+          }
      }
 
      const SECTION_ALIASES = {
