@@ -135,6 +135,7 @@ if ($('themeBtn')) {
 }
 
 // ===================== TAB NAVIGATION =====================
+// ===================== TAB NAVIGATION =====================
 function switchTab(tabId) {
      // Hide all panels
      document.querySelectorAll('.practice-panel').forEach(panel => {
@@ -151,16 +152,46 @@ function switchTab(tabId) {
           panel.style.display = 'block';
      }
 
-     // Update nav links
+     // Update nav links - find ALL nav links including those with data-tab
      document.querySelectorAll('.page-nav a').forEach(link => {
           link.classList.remove('active');
+          // Check if this link has a data-tab attribute that matches
           if (link.dataset.tab === tabId) {
+               link.classList.add('active');
+          }
+          // Also check if it's a regular href link that matches the current page
+          const href = link.getAttribute('href');
+          if (href && href.includes('spanish-conjugation.html') && tabId === 'conjugation') {
+               link.classList.add('active');
+          }
+          if (href && href.includes('spanish-study.html') && tabId === 'study') {
+               link.classList.add('active');
+          }
+          if (href && href.includes('spanish-practice.html') && tabId === 'pronunciation') {
                link.classList.add('active');
           }
      });
 
      // Update URL hash
      window.location.hash = tabId;
+
+     // If switching to study tab, initialize study
+     if (tabId === 'study') {
+          setTimeout(function () {
+               if (typeof initStudyTab === 'function') {
+                    initStudyTab();
+               }
+          }, 100);
+     }
+
+     // If switching to conjugation tab, initialize conjugation
+     if (tabId === 'conjugation') {
+          setTimeout(function () {
+               if (typeof initConjugationTab === 'function') {
+                    initConjugationTab();
+               }
+          }, 100);
+     }
 }
 
 // Handle nav clicks

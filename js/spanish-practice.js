@@ -845,7 +845,7 @@
                loadConjugationVerbs();
           }
 
-          // ===================== TAB INITIALIZATION =====================
+          // ===================== CONJUGATION INITIALIZATION =====================
           function initConjugationTab() {
                if ($('conjugationVerb')) {
                     setupConjugation();
@@ -1286,21 +1286,27 @@
 
                try {
                     recognition = new SpeechRecognition();
-                    recognition.lang = $('lang').value;
+                    recognition.lang = $('lang').value || 'es-MX';
                     recognition.interimResults = true;
                     recognition.maxAlternatives = 10;
                     recognition.continuous = false;
 
                     if ('grammars' in recognition) {
-                         const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-                         if (SpeechGrammarList) {
-                              const grammar = '#JSGF V1.0; grammar phrase; public <phrase> = ' + target.toLowerCase() + ';';
-                              const speechRecognitionList = new SpeechGrammarList();
-                              speechRecognitionList.addFromString(grammar, 1);
-                              recognition.grammars = speechRecognitionList;
+                         try {
+                              const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+                              if (SpeechGrammarList) {
+                                   const grammar = '#JSGF V1.0; grammar phrase; public <phrase> = ' + target.toLowerCase() + ';';
+                                   const speechRecognitionList = new SpeechGrammarList();
+                                   speechRecognitionList.addFromString(grammar, 1);
+                                   recognition.grammars = speechRecognitionList;
+                              }
+                         } catch (e) {
+                              // Grammar not supported, continue without it
+                              console.warn('Grammar not supported:', e);
                          }
                     }
 
+                    // Timeout for recognition
                     if (recognitionTimeout) clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                          if (recognition) {
@@ -1608,7 +1614,7 @@
 
                               isSpeaking = false;
                          } catch (err) {
-                              console.error('Error processing result', err);
+                              console.error('Error processing result:', err);
                               resultCard.innerHTML = '<span class="bad">Error processing speech. Please try again.</span>';
                          }
                     };
@@ -1717,6 +1723,14 @@
                if (document.body.classList.contains('study-page')) return;
                const params = new URLSearchParams(window.location.search);
                const fromPage = params.get('from') === 'page' || params.get('mode') === 'quiz' || params.get('pool') === 'page';
+
+               // Check if we should show a specific tab from URL
+               const tab = params.get('tab');
+               if (tab && ['pronunciation', 'conjugation', 'study'].includes(tab)) {
+                    setTimeout(function () {
+                         switchTab(tab);
+                    }, 100);
+               }
                if (fromPage) {
                     try {
                          const launch = JSON.parse(localStorage.getItem('sp_launch') || 'null');

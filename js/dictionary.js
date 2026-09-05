@@ -6,7 +6,7 @@ const PLAYER_BASE_URL = (() => {
      return base + '/pronunciation_player.html';
 })();
 
-const TIPS = ['Vowels are pure: a=AH, e=EH, i=EE, o=OH, u=OO', 'j / g(e,i) = strong H (like loch)', 'll & y ≈ English y (or zh in Argentina)', 'ñ = ny (canyon)', 'rr and initial r are rolled', 'h is always silent'];
+const TIPS = ['Vowels are pure: a=AH, e=EH, i=EE, o=OH, u=OO', 'j / g(e,i) = strong H (like loch)', 'c = k before a/o/u - s before e/i', 'll & y ≈ English y', 'ñ = ny (canyon)', 'rr and initial r are rolled', 'h is always silent'];
 
 // ===================== DATA =====================
 const DICT = {

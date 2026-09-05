@@ -1025,4 +1025,41 @@
      if (mode === 'quiz') startQuizFromButton();
      else if (mode === 'dictation') startDictation();
      else if (mode === 'cards') startCards();
+
+     const studyPanel = $('studyPanel');
+     if (studyPanel && studyPanel.style.display !== 'none' && !studyPanel.classList.contains('hidden')) {
+          initStudyTab();
+     }
 })();
+
+function initStudyTab() {
+     // Check if study is already initialized
+     if (window._studyInitialized) return;
+     window._studyInitialized = true;
+
+     // Re-run the study initialization
+     const studyCard = $('studyCard');
+     const studyBody = $('studyBody');
+     if (!studyCard || !studyBody) return;
+
+     // Load page context if coming from cheat sheet
+     if (typeof loadPageContext === 'function') {
+          loadPageContext();
+     }
+
+     // Check URL params for mode
+     const params = new URLSearchParams(window.location.search);
+     const mode = params.get('mode');
+     if (mode === 'quiz') {
+          if (typeof startQuizFromButton === 'function') startQuizFromButton();
+     } else if (mode === 'dictation') {
+          if (typeof startDictation === 'function') startDictation();
+     } else if (mode === 'cards') {
+          if (typeof startCards === 'function') startCards();
+     }
+}
+
+// Expose study initialization globally
+window.initStudyTab = initStudyTab;
+
+console.log('✅ Spanish Study initialized');
