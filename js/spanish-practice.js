@@ -53,38 +53,41 @@ function getSpanishVoice(langCode) {
 
      const voices = synth.getVoices();
      if (!voices || voices.length === 0) {
-          // Try to load voices
-          try {
-               synth.getVoices(); // This can trigger loading
-          } catch (e) {}
           return null;
      }
 
      const lang = langCode || 'es-MX';
 
-     // Priority order for voice selection:
-     // 1. Native Spanish voice with matching locale (e.g., es-MX)
-     // 2. Any native Spanish voice (localService: false)
-     // 3. Google Spanish voices
-     // 4. Any Spanish voice
-     // 5. Any voice with Spanish in the name
+     // Log available voices for debugging (helps identify issues on Vercel)
+     if (voices.length > 0 && !window._voicesLogged) {
+          window._voicesLogged = true;
+          console.log(
+               'Available voices:',
+               voices.map(v => `${v.lang} - ${v.name} (${v.localService ? 'local' : 'network'})`)
+          );
+     }
 
-     // Try exact match first (prefer native/non-robot voices)
-     let voice = voices.find(v => v.lang === lang && v.localService === false);
+     // Priority: Google voices first (usually best quality)
+     let voice = voices.find(v => v.lang === lang && v.name.includes('Google'));
      if (voice) {
           cachedSpanishVoice = voice;
           return voice;
      }
 
-     // Try any Spanish voice with localService false (usually better quality)
-     voice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
-     if (voice) {
-          cachedSpanishVoice = voice;
-          return voice;
-     }
-
-     // Try Google Spanish voices (usually good)
      voice = voices.find(v => v.lang.startsWith('es-') && v.name.includes('Google'));
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     // Try network voices (usually better than local)
+     voice = voices.find(v => v.lang === lang && v.localService === false);
+     if (voice) {
+          cachedSpanishVoice = voice;
+          return voice;
+     }
+
+     voice = voices.find(v => v.lang.startsWith('es-') && v.localService === false);
      if (voice) {
           cachedSpanishVoice = voice;
           return voice;
@@ -117,33 +120,81 @@ function preloadVoices() {
           if (voices && voices.length > 0) {
                voicesLoaded = true;
                console.log('Voices loaded:', voices.length);
-               // Log available Spanish voices for debugging
                const spanishVoices = voices.filter(v => v.lang.startsWith('es-'));
                console.log(
                     'Spanish voices available:',
                     spanishVoices.map(v => v.lang + ' - ' + v.name)
                );
+
+               // Cache the best voice
+               if (spanishVoices.length > 0) {
+                    const bestVoice = getSpanishVoice('es-MX');
+                    if (bestVoice) {
+                         cachedSpanishVoice = bestVoice;
+                         console.log('Cached best voice:', bestVoice.name, bestVoice.lang);
+                    }
+               }
                return;
           }
 
           // If no voices yet, wait for them to load
+          let attempts = 0;
+          const maxAttempts = 10;
+
           synth.onvoiceschanged = function () {
                voices = synth.getVoices();
                if (voices && voices.length > 0) {
                     voicesLoaded = true;
-                    console.log('Voices loaded:', voices.length);
+                    console.log('Voices loaded (event):', voices.length);
                     const spanishVoices = voices.filter(v => v.lang.startsWith('es-'));
                     console.log(
                          'Spanish voices available:',
                          spanishVoices.map(v => v.lang + ' - ' + v.name)
                     );
 
-                    // Pre-cache the best Spanish voice
                     if (spanishVoices.length > 0) {
-                         getSpanishVoice('es-MX');
+                         const bestVoice = getSpanishVoice('es-MX');
+                         if (bestVoice) {
+                              cachedSpanishVoice = bestVoice;
+                              console.log('Cached best voice (event):', bestVoice.name, bestVoice.lang);
+                         }
+                    }
+               } else {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                         setTimeout(() => {
+                              if (synth) {
+                                   const retryVoices = synth.getVoices();
+                                   if (retryVoices && retryVoices.length > 0) {
+                                        synth.onvoiceschanged();
+                                   }
+                              }
+                         }, 500);
                     }
                }
           };
+
+          // Also try polling for voices (works better on some browsers/vercel)
+          let pollAttempts = 0;
+          const pollInterval = setInterval(() => {
+               pollAttempts++;
+               const pollVoices = synth.getVoices();
+               if (pollVoices && pollVoices.length > 0) {
+                    voicesLoaded = true;
+                    console.log('Voices loaded (poll):', pollVoices.length);
+                    const spanishVoices = pollVoices.filter(v => v.lang.startsWith('es-'));
+                    if (spanishVoices.length > 0) {
+                         const bestVoice = getSpanishVoice('es-MX');
+                         if (bestVoice) {
+                              cachedSpanishVoice = bestVoice;
+                              console.log('Cached best voice (poll):', bestVoice.name, bestVoice.lang);
+                         }
+                    }
+                    clearInterval(pollInterval);
+               } else if (pollAttempts > 20) {
+                    clearInterval(pollInterval);
+               }
+          }, 300);
      }
 }
 
@@ -556,13 +607,34 @@ function speakConjugationAnswer(answer, lang) {
                utterance.volume = 1;
                utterance.pitch = 1;
 
-               // Get the best Spanish voice
-               const voice = getSpanishVoice(langCode);
+               // Get the best Spanish voice - try multiple times if needed
+               let voice = getSpanishVoice(langCode);
+
+               // If no voice found, try to reload voices
+               if (!voice) {
+                    console.warn('No Spanish voice found, attempting to reload voices...');
+                    const voices = synth.getVoices();
+                    if (voices && voices.length > 0) {
+                         voice = getSpanishVoice(langCode);
+                    } else {
+                         // Try to force voice loading
+                         synth.getVoices();
+                         setTimeout(() => {
+                              const retryVoice = getSpanishVoice(langCode);
+                              if (retryVoice) {
+                                   utterance.voice = retryVoice;
+                                   synth.speak(utterance);
+                              }
+                         }, 500);
+                         return;
+                    }
+               }
+
                if (voice) {
                     utterance.voice = voice;
                     console.log('Using voice:', voice.name, voice.lang);
                } else {
-                    console.warn('No Spanish voice found, using default');
+                    console.warn('No Spanish voice found, using default (may sound robotic)');
                }
 
                // For mobile, use a lower rate
@@ -574,7 +646,7 @@ function speakConjugationAnswer(answer, lang) {
           } catch (e) {
                console.warn('Speech synthesis error:', e);
           }
-     }, 150); // Increased delay for better mobile performance
+     }, 150);
 }
 
 function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, showAnswer) {
@@ -1265,6 +1337,15 @@ speakBtn.onclick = () => {
      const u = new SpeechSynthesisUtterance(text);
      u.lang = $('lang').value;
      u.rate = parseFloat($('ttsRate').value);
+     u.volume = 1;
+     u.pitch = 1;
+
+     // Get the best Spanish voice
+     const voice = getSpanishVoice($('lang').value);
+     if (voice) {
+          u.voice = voice;
+     }
+
      synth.cancel();
      synth.speak(u);
 };

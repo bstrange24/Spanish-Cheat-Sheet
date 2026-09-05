@@ -200,8 +200,18 @@
      function speakText(text) {
           if (!text || typeof synth === 'undefined' || !synth) return;
           const u = new SpeechSynthesisUtterance(text);
-          u.lang = ($('lang') && $('lang').value) || 'es-MX';
+          const langCode = ($('lang') && $('lang').value) || 'es-MX';
+          u.lang = langCode;
           u.rate = parseFloat(($('ttsRate') && $('ttsRate').value) || '0.85');
+          u.volume = 1;
+          u.pitch = 1;
+
+          // Get the best Spanish voice
+          const voice = getSpanishVoice(langCode);
+          if (voice) {
+               u.voice = voice;
+          }
+
           synth.cancel();
           synth.speak(u);
      }
