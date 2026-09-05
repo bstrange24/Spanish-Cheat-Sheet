@@ -412,11 +412,34 @@ function conjugateVerb(verb, tense) {
 // ===================== CONJUGATION AUDIO & DISPLAY =====================
 function speakConjugationAnswer(answer, lang) {
      if (!answer) return;
-     const utterance = new SpeechSynthesisUtterance(answer);
-     utterance.lang = lang || $('lang').value || 'es-MX';
-     utterance.rate = parseFloat($('ttsRate').value) || 0.85;
-     synth.cancel();
-     synth.speak(utterance);
+
+     // Cancel any ongoing speech
+     if (synth) {
+          try {
+               synth.cancel();
+          } catch (e) {
+               // Ignore errors on mobile
+          }
+     }
+
+     // Small delay to ensure cancel completes
+     setTimeout(() => {
+          try {
+               const utterance = new SpeechSynthesisUtterance(answer);
+               utterance.lang = lang || $('lang').value || 'es-MX';
+               utterance.rate = parseFloat($('ttsRate').value) || 0.85;
+               utterance.volume = 1;
+
+               // For mobile, use a lower rate if needed
+               if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent)) {
+                    utterance.rate = Math.min(utterance.rate, 0.9);
+               }
+
+               synth.speak(utterance);
+          } catch (e) {
+               console.warn('Speech synthesis error:', e);
+          }
+     }, 100);
 }
 
 function displayConjugationPromptWithAnswer(verb, tenseKey, pronounKey, answer, showAnswer) {
@@ -776,10 +799,15 @@ function setupConjugation() {
                false // Don't show answer
           );
 
-          $('conjugationAnswer').value = '';
-          $('conjugationFeedback').textContent = 'Type the conjugated form.';
+          const input = $('conjugationAnswer');
+          input.value = '';
+          input.disabled = false; // Re-enable input for new prompt
+
+          // Clear any previous feedback
+          $('conjugationFeedback').innerHTML = 'Type the conjugated form.';
           $('conjugationFeedback').className = 'conjugation-feedback';
-          $('conjugationAnswer').focus();
+
+          input.focus();
 
           // Enable accent bar
           enableConjugationAccentBar();
@@ -811,6 +839,11 @@ function setupConjugation() {
      }
 
      function advanceConjugationPrompt() {
+          // Reset input state
+          const input = $('conjugationAnswer');
+          input.disabled = false;
+          input.value = '';
+
           if ($('conjugationAutoAdvance').checked) {
                // Randomize verb, and also randomize pronoun/tense if checked
                randomizeVerb(); // This now handles everything
@@ -828,13 +861,17 @@ function setupConjugation() {
           const answer = $('conjugationAnswer').value.trim();
 
           if (!revealOnly && !answer) {
-               $('conjugationFeedback').textContent = 'Type an answer first.';
+               $('conjugationFeedback').textContent = '⚠️ Type an answer first.';
+               $('conjugationFeedback').className = 'conjugation-feedback warning';
                return;
           }
 
           if (!revealOnly) {
                conjugationState.attempted++;
-               const correct = normalize(answer) === normalize(prompt.answer);
+               const normalizedAnswer = normalize(answer);
+               const normalizedCorrect = normalize(prompt.answer);
+               const correct = normalizedAnswer === normalizedCorrect;
+
                if (correct) conjugationState.correct++;
 
                // Show the prompt with the answer revealed
@@ -849,34 +886,78 @@ function setupConjugation() {
                // Play audio of the correct answer
                speakConjugationAnswer(prompt.answer);
 
-               // Feedback
-               const feedbackMsg = correct ? '✅ Correct!' : `❌ Not quite. The answer is «${prompt.answer}»`;
-               $('conjugationFeedback').textContent = feedbackMsg;
-               $('conjugationFeedback').className = `conjugation-feedback ${correct ? 'good' : 'bad'}`;
+               // Enhanced feedback
+               let feedbackMsg = '';
+               let feedbackClass = '';
+
+               if (correct) {
+                    feedbackMsg = '✅ Correct!';
+                    feedbackClass = 'good';
+               } else {
+                    // Check for common mistakes
+                    if (normalizedAnswer.length > 0) {
+                         // Check if it's a close match (typo)
+                         const similarity = calculateSimilarity(normalizedAnswer, normalizedCorrect);
+                         if (similarity > 0.7) {
+                              feedbackMsg = `❌ Close! The correct answer is «${prompt.answer}»`;
+                         } else {
+                              feedbackMsg = `❌ Not quite. The correct answer is «${prompt.answer}»`;
+                         }
+                    } else {
+                         feedbackMsg = `❌ The correct answer is «${prompt.answer}»`;
+                    }
+                    feedbackClass = 'bad';
+               }
+
+               // Show the feedback with extra details
+               $('conjugationFeedback').innerHTML = `
+            <div class="${feedbackClass}" style="padding: 8px; border-radius: 6px;">
+                <strong>${feedbackMsg}</strong>
+                ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: «${answer}»</span>` : ''}
+                ${!correct && normalizedAnswer.length > 0 ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>` : ''}
+            </div>
+        `;
+               $('conjugationFeedback').className = 'conjugation-feedback';
 
                // Disable accent bar after checking
                disableConjugationAccentBar();
 
-               // Auto-advance if correct and auto-advance is enabled
-               if (correct && ($('conjugationAutoAdvance').checked || $('conjugationRandomPronoun').checked || $('conjugationRandomTense').checked)) {
+               // Disable input after checking
+               const input = $('conjugationAnswer');
+               input.disabled = true;
+
+               // Auto-advance ONLY if correct and auto-advance is enabled
+               if (correct && $('conjugationAutoAdvance').checked) {
+                    setTimeout(advanceConjugationPrompt, 1500);
+               } else if (correct && ($('conjugationRandomPronoun').checked || $('conjugationRandomTense').checked)) {
                     setTimeout(advanceConjugationPrompt, 1500);
                }
           } else {
                // Reveal mode - show answer and play audio
-               displayConjugationPromptWithAnswer(
-                    prompt.verb,
-                    prompt.tenseKey,
-                    prompt.pronounKey,
-                    prompt.answer, // Show the answer
-                    true // Show answer
-               );
-               $('conjugationFeedback').textContent = `Answer: ${prompt.answer}`;
+               displayConjugationPromptWithAnswer(prompt.verb, prompt.tenseKey, prompt.pronounKey, prompt.answer, true);
+               $('conjugationFeedback').innerHTML = `
+            <div style="padding: 8px; border-radius: 6px; background: var(--tips-bg);">
+                <strong>Answer:</strong> «${prompt.answer}»
+            </div>
+        `;
                $('conjugationFeedback').className = 'conjugation-feedback';
                speakConjugationAnswer(prompt.answer);
                disableConjugationAccentBar();
+
+               const input = $('conjugationAnswer');
+               input.disabled = true;
           }
 
           $('conjugationProgress').textContent = `${conjugationState.correct} correct / ${conjugationState.attempted} attempted`;
+     }
+
+     // Helper function for similarity
+     function calculateSimilarity(a, b) {
+          if (!a || !b) return 0;
+          const longer = a.length > b.length ? a : b;
+          const shorter = a.length > b.length ? b : a;
+          if (!longer.length) return 1;
+          return (longer.length - editDistance(longer, shorter)) / longer.length;
      }
 
      verbSelect.addEventListener('change', function () {

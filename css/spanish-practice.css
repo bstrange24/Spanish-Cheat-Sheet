@@ -405,6 +405,73 @@ body {
      .conjugation-actions {
           justify-content: flex-start;
      }
+
+     .conjugation-filters {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+     }
+
+     .conjugation-filters>div {
+          width: 100%;
+     }
+
+     .conjugation-filters select,
+     .conjugation-filters label {
+          width: 100%;
+          font-size: 16px;
+          /* Prevents iOS zoom */
+     }
+
+     .conjugation-settings {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px 16px;
+          margin-top: 8px;
+     }
+
+     .conjugation-settings label {
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+     }
+
+     .conjugation-card .btn-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+     }
+
+     .conjugation-card .btn-row button {
+          flex: 1 1 auto;
+          min-width: 60px;
+          font-size: 14px;
+          padding: 8px 12px;
+     }
+
+     #conjugationPanel .accent-bar {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          justify-content: center;
+          margin: 6px 0;
+     }
+
+     #conjugationPanel .accent-bar button {
+          padding: 6px 10px;
+          font-size: 16px;
+          min-width: 36px;
+     }
+
+     .conjugation-prompt {
+          font-size: 15px;
+     }
+
+     #conjugationAnswer {
+          font-size: 16px;
+          padding: 10px;
+     }
 }
 
 .header {
