@@ -1,5 +1,4 @@
 // Study modes: page/pool quiz, listening dictation, SM-2 flashcards.
-// Uses the same globals as spanish-practice.js. Does not change speaking flow.
 (function () {
      'use strict';
      if (typeof $ !== 'function') return;
@@ -18,6 +17,13 @@
      const MAX_NEW_CARDS = 100;
 
      let study = null;
+
+     // ===================== DEBUG HELPER =====================
+     function debugLog(msg, data) {
+          console.log(`[Spanish Study] ${msg}`, data || '');
+     }
+
+     debugLog('Study module loaded');
 
      function esc(s) {
           return String(s == null ? '' : s)
@@ -87,9 +93,12 @@
           const params = new URLSearchParams(window.location.search);
           if (!(params.get('from') === 'page' || params.get('mode') === 'quiz' || params.get('pool') === 'page')) return;
 
+          debugLog('Loading page context from cheat sheet');
+
           try {
                const launch = JSON.parse(localStorage.getItem('sp_launch') || 'null');
                if (launch && typeof launch === 'object') {
+                    debugLog('Launch data found', { sectionId: launch.sectionId, label: launch.label, itemCount: launch.items?.length, wordCount: launch.words?.length });
                     if (Array.isArray(launch.items) && launch.items.length) {
                          sessionStorage.setItem('sp_page_quiz', JSON.stringify({ sectionId: launch.sectionId || '', label: launch.label || '', items: launch.items }));
                     }
@@ -103,6 +112,7 @@
           try {
                const words = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
                const label = sessionStorage.getItem('sp_page_label') || 'this page';
+               debugLog('Page pool loaded from sessionStorage', { wordCount: words.length, label: label, firstFew: words.slice(0, 5) });
                if (Array.isArray(words) && words.length) {
                     extraPool = words;
                     if ($('category')) $('category').value = 'all';
@@ -121,20 +131,23 @@
           // Check if extraPool exists (from shared.js or spanish-practice.js)
           if (typeof extraPool !== 'undefined' && extraPool && extraPool.length) {
                keys = extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
+               debugLog('Using extraPool (no filters)', { keyCount: keys.length, firstFew: keys.slice(0, 5) });
           } else {
-               // Try to get from sessionStorage (from cheat sheet)
+               // Try to get from sessionStorage
                try {
                     const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
                     if (Array.isArray(stored) && stored.length) {
                          keys = stored.filter(k => typeof k === 'string' && k.trim().length > 0);
+                         debugLog('Using sessionStorage pool', { keyCount: keys.length, firstFew: keys.slice(0, 5) });
                     }
                } catch (e) {}
 
-               // If still empty, use getFilteredKeys or dictionary
                if (!keys.length && typeof getFilteredKeys === 'function') {
                     keys = getFilteredKeys();
+                    debugLog('Using getFilteredKeys() fallback', { keyCount: keys.length });
                } else if (!keys.length && typeof DICT === 'object') {
                     keys = Object.keys(DICT);
+                    debugLog('Using DICT keys fallback', { keyCount: keys.length });
                }
           }
 
@@ -163,7 +176,9 @@
           });
 
           if (fromCheatSheet()) {
-               storedPairs().forEach(p =>
+               const stored = storedPairs();
+               debugLog('Adding stored pairs from cheat sheet', { pairCount: stored.length });
+               stored.forEach(p =>
                     addPair(p.spanish, p.english, {
                          role: p.role,
                          irregularYo: p.irregularYo,
@@ -174,6 +189,7 @@
                );
           }
 
+          debugLog('dictPairsFromPool result', { pairCount: pairs.length, firstFew: pairs.slice(0, 3) });
           return pairs;
      }
 
@@ -225,11 +241,9 @@
      function speakText(text) {
           if (!text) return;
           const langCode = ($('lang') && $('lang').value) || 'es-MX';
-          // Use the global playAudioFromServer function
           if (typeof playAudioFromServer === 'function') {
                playAudioFromServer(text, langCode);
           } else {
-               // Fallback if function not available
                fallbackBrowserTTS(text, langCode);
           }
      }
@@ -386,6 +400,7 @@
           studyBody.innerHTML = '';
           if (studyTitle) studyTitle.textContent = 'Study';
           if (typeof synth !== 'undefined' && synth) synth.cancel();
+          debugLog('Study closed');
      }
 
      function showStudy() {
@@ -418,11 +433,14 @@
      }
 
      function buildQuestions(items) {
+          debugLog('Building questions from items', { itemCount: items.length });
           const pairs = items.filter(it => it.kind === 'pair' && it.spanish && it.english);
           const choices = items.filter(it => it.kind === 'choice' && it.prompt && it.answer);
           const questions = [];
           const yoPairs = pairs.filter(isYoPair);
           const lexPairs = pairs.filter(p => !isYoPair(p));
+
+          debugLog('Questions breakdown', { pairs: pairs.length, choices: choices.length, yoPairs: yoPairs.length, lexPairs: lexPairs.length });
 
           const choiceAnswers = {};
           choices.forEach(c => {
@@ -564,7 +582,9 @@
                }
           });
 
-          return shuffle(questions).slice(0, MAX_QUIZ);
+          const result = shuffle(questions).slice(0, MAX_QUIZ);
+          debugLog('Questions built', { questionCount: result.length, firstFew: result.slice(0, 3).map(q => q.prompt) });
+          return result;
      }
 
      function renderQuiz() {
@@ -647,6 +667,7 @@
      }
 
      function startQuiz(items, label, sectionId) {
+          debugLog('Starting Quiz', { items: items?.length, label: label, sectionId: sectionId });
           const questions = buildQuestions(items || []);
           if (!questions.length) {
                if (typeof resultCard !== 'undefined' && resultCard) {
@@ -672,14 +693,18 @@
      }
 
      function startQuizFromButton() {
+          debugLog('startQuizFromButton called');
           const stored = storedQuiz();
           const params = new URLSearchParams(window.location.search);
           if ((params.get('mode') === 'quiz' || params.get('from') === 'page') && stored) {
                const label = stored.label || pageLabel() || stored.sectionId || 'this page';
+               debugLog('Using stored quiz from cheat sheet', { label: label, itemCount: stored.items?.length });
                startQuiz(stored.items, label, stored.sectionId);
                return;
           }
+
           const pairs = dictPairsFromPool();
+          debugLog('Quiz pairs from pool', { pairCount: pairs.length });
           if (!pairs.length) {
                if (typeof resultCard !== 'undefined' && resultCard) {
                     resultCard.innerHTML = '<span class="bad">No quiz items. Pick a category or open Quiz this page from the cheat sheet.</span>';
@@ -796,7 +821,9 @@
      }
 
      function startDictation() {
+          debugLog('startDictation called');
           const words = dictationPool();
+          debugLog('Dictation words', { wordCount: words.length, firstFew: words.slice(0, 5) });
           if (!words.length) {
                if (typeof resultCard !== 'undefined' && resultCard) {
                     resultCard.innerHTML = '<span class="bad">No dictation words for the current filters.</span>';
@@ -819,6 +846,7 @@
 
      function cardQueue() {
           const pairs = dictPairsFromPool();
+          debugLog('cardQueue pairs', { pairCount: pairs.length, firstFew: pairs.slice(0, 3) });
           const store = ensureSrs();
           const now = Date.now();
           const due = [];
@@ -841,13 +869,15 @@
                return fb - fa;
           });
 
-          return {
+          const result = {
                queue: shuffle(due).concat(neu.slice(0, MAX_NEW_CARDS)),
                due: due.length,
                neu: Math.min(neu.length, MAX_NEW_CARDS),
                extra: false,
                all: pairs,
           };
+          debugLog('cardQueue result', { queueLength: result.queue.length, due: result.due, neu: result.neu });
+          return result;
      }
 
      function renderCard() {
@@ -948,6 +978,7 @@
      }
 
      function startCards() {
+          debugLog('startCards called');
           const built = cardQueue();
           let queue = built.queue;
           if (!queue.length && built.all && built.all.length) {
@@ -997,11 +1028,13 @@
      }
 
      function startWeakReview() {
+          debugLog('startWeakReview called');
           const weak = Object.entries(typeof progress === 'object' && progress ? progress : {})
                .filter(([key, count]) => count > 0 && dictEntry(key))
                .sort((a, b) => a[1] - b[1])
                .slice(0, 30)
                .map(([key]) => key);
+          debugLog('Weak words found', { weakCount: weak.length });
           if (!weak.length) {
                if (typeof resultCard !== 'undefined' && resultCard) resultCard.innerHTML = '<span class="bad">Practice a few phrases first, then Weak words will build a review set here.</span>';
                return;
@@ -1010,6 +1043,7 @@
           startCards();
      }
 
+     // Event Listeners
      studyBody.addEventListener('mousedown', function (e) {
           const btn = e.target.closest('[data-study="accent"]');
           if (!btn) return;
@@ -1086,7 +1120,6 @@
                const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
                if (Array.isArray(stored) && stored.length) {
                     extraPool = stored;
-                    // Also store in window for other scripts
                     window._pagePool = stored;
                     const label = sessionStorage.getItem('sp_page_label') || 'this page';
                     window._pageLabel = label;
@@ -1096,21 +1129,17 @@
 })();
 
 function initStudyTab() {
-     // Check if study is already initialized
      if (window._studyInitialized) return;
      window._studyInitialized = true;
 
-     // Re-run the study initialization
      const studyCard = $('studyCard');
      const studyBody = $('studyBody');
      if (!studyCard || !studyBody) return;
 
-     // Load page context if coming from cheat sheet
      if (typeof loadPageContext === 'function') {
           loadPageContext();
      }
 
-     // Check URL params for mode
      const params = new URLSearchParams(window.location.search);
      const mode = params.get('mode');
      if (mode === 'quiz') {
@@ -1122,7 +1151,4 @@ function initStudyTab() {
      }
 }
 
-// Expose study initialization globally
 window.initStudyTab = initStudyTab;
-
-console.log('✅ Spanish Study initialized');

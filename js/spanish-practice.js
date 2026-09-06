@@ -197,7 +197,7 @@
                const url = getPlayerUrl();
                if (!url) return;
 
-               playerStatus.innerHTML = `⏳ Loading: <strong>«${text}»</strong>...`;
+               playerStatus.innerHTML = `⏳ Loading: <strong>${text}</strong>...`;
                playerStatus.className = 'player-status';
                $('playerUrlDisplay').textContent = url;
                playerFrame.src = url;
@@ -207,7 +207,7 @@
                     try {
                          const iframeDoc = playerFrame.contentDocument || playerFrame.contentWindow?.document;
                          if (iframeDoc && iframeDoc.readyState === 'complete') {
-                              playerStatus.innerHTML = `✅ Loaded: <strong>«${text}»</strong>`;
+                              playerStatus.innerHTML = `✅ Loaded: <strong>${text}</strong>`;
                               playerStatus.className = 'player-status success';
                          } else {
                               playerStatus.innerHTML = `⚠️ Could not load player. Is the server running at <code>${PLAYER_BASE_URL}</code>?`;
@@ -753,12 +753,12 @@
                               if (normalizedAnswer.length > 0) {
                                    const sim = calculateSimilarity(normalizedAnswer, normalizedCorrect);
                                    if (sim > 0.7) {
-                                        feedbackMsg = `❌ Close! The correct answer is «${prompt.answer}»`;
+                                        feedbackMsg = `❌ Close! The correct answer is ${prompt.answer}`;
                                    } else {
-                                        feedbackMsg = `❌ Not quite. The correct answer is «${prompt.answer}»`;
+                                        feedbackMsg = `❌ Not quite. The correct answer is ${prompt.answer}`;
                                    }
                               } else {
-                                   feedbackMsg = `❌ The correct answer is «${prompt.answer}»`;
+                                   feedbackMsg = `❌ The correct answer is ${prompt.answer}`;
                               }
                               feedbackClass = 'bad';
                          }
@@ -766,7 +766,7 @@
                          $('conjugationFeedback').innerHTML = `
                 <div class="${feedbackClass}" style="padding: 8px; border-radius: 6px;">
                     <strong>${feedbackMsg}</strong>
-                    ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: «${answer}»</span>` : ''}
+                    ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: ${answer}</span>` : ''}
                     ${!correct && normalizedAnswer.length > 0 ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>` : ''}
                 </div>
             `;
@@ -785,7 +785,7 @@
                          displayConjugationPrompt(prompt.verb, prompt.tenseKey, prompt.pronounKey, prompt.answer, true);
                          $('conjugationFeedback').innerHTML = `
                 <div style="padding: 8px; border-radius: 6px; background: var(--tips-bg);">
-                    <strong>Answer:</strong> «${prompt.answer}»
+                    <strong>Answer:</strong> ${prompt.answer}
                 </div>
             `;
                          $('conjugationFeedback').className = 'conjugation-feedback';
@@ -922,7 +922,7 @@
                     const k = keys[Math.floor(Math.random() * keys.length)];
                     targetInput.value = k;
                     showTargetInfo();
-                    resultCard.innerHTML = `Loaded: <strong>«${k}»</strong>`;
+                    resultCard.innerHTML = `Loaded: <strong>${k}</strong>`;
                };
           }
 
@@ -956,7 +956,7 @@
                               const k = extraPool[Math.floor(Math.random() * extraPool.length)];
                               targetInput.value = k;
                               showTargetInfo();
-                              resultCard.innerHTML = `No weak scores in this pool yet. Random from pool: <strong>«${k}»</strong>`;
+                              resultCard.innerHTML = `No weak scores in this pool yet. Random from pool: <strong>${k}</strong>`;
                               return;
                          }
                          resultCard.innerHTML = 'No weak phrases yet. Practice more!';
@@ -965,7 +965,7 @@
                     const k = weak[Math.floor(Math.random() * weak.length)];
                     targetInput.value = k;
                     showTargetInfo();
-                    resultCard.innerHTML = `Weak phrase: <strong>«${k}»</strong>`;
+                    resultCard.innerHTML = `Weak phrase: <strong>${k}</strong>`;
                };
           }
 
@@ -1553,12 +1553,12 @@
                               } else if (isCompletelyWrong) {
                                    if (targetWordCount === 1) {
                                         if (transcriptWordCount > 1) {
-                                             feedback = `❌ You said multiple words. Just say: «${target}»`;
+                                             feedback = `❌ You said multiple words. Just say: ${target}`;
                                         } else {
-                                             feedback = `❌ That doesn't match. Say: «${target}»`;
+                                             feedback = `❌ That doesn't match. Say: ${target}`;
                                         }
                                    } else {
-                                        feedback = `❌ That doesn't match. Please say: «${target}»`;
+                                        feedback = `❌ That doesn't match. Please say: ${target}`;
                                    }
                                    cls = 'bad';
                               } else {
@@ -1575,7 +1575,7 @@
                               if (targetWordCount === 1 && transcriptWordCount > 1) {
                                    matchDetails = `
                         <div style="font-size:0.85rem;color:var(--warning);margin-top:4px;">
-                            ⚠️ You said ${transcriptWordCount} words. Target is just: <strong>«${target}»</strong>
+                            ⚠️ You said ${transcriptWordCount} words. Target is just: <strong>${target}</strong>
                         </div>`;
                               } else if (matchedWords.length > 0 && !isCompletelyWrong && weightedScore > 0.4) {
                                    matchDetails = `
@@ -1585,7 +1585,7 @@
                               } else if (weightedScore < 0.35) {
                                    matchDetails = `
                         <div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">
-                            🎯 Target: <strong>«${target}»</strong> → You said: <em>«${bestTranscript}»</em>
+                            🎯 Target: <strong>${target}</strong> → You said: <em>${bestTranscript}</em>
                         </div>`;
                               }
 
@@ -1595,14 +1595,14 @@
                         <div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">
                             Other possibilities: ${allAlternatives
                                  .slice(1)
-                                 .map(a => `«${a.text}» (${Math.round(a.conf * 100)}%)`)
+                                 .map(a => `${a.text} (${Math.round(a.conf * 100)}%)`)
                                  .join(' • ')}
                         </div>`;
                               }
 
                               resultCard.innerHTML = `
-                    <div><strong>You said:</strong> «${bestTranscript}»</div>
-                    <div><strong>Target:</strong> «${target}»</div>
+                    <div><strong>You said:</strong> ${bestTranscript}</div>
+                    <div><strong>Target:</strong> ${target}</div>
                     <div class="score">Similarity: <strong>${pct}%</strong>
                         ${bestConfidence > 0 ? ` • Confidence: ${Math.round(bestConfidence * 100)}%` : ''}
                     </div>
@@ -1616,7 +1616,7 @@
                          isCompletelyWrong
                               ? `
                         <div style="margin-top:8px;padding:8px;background:var(--tips-bg);border-radius:6px;font-size:0.9rem;">
-                            <strong>💡 Tip:</strong> Practice saying: <em>«${target}»</em>
+                            <strong>💡 Tip:</strong> Practice saying: <em>${target}</em>
                             ${targetWordCount === 1 ? ' (just one word)' : ''}
                         </div>`
                               : ''
@@ -1796,7 +1796,7 @@
                               _autoPlayEnabled = true;
 
                               // Update the result card
-                              resultCard.innerHTML = `Ready: <strong>«${firstWord}»</strong> from <strong>${label}</strong>. Click Hear or Speak to practice it.`;
+                              resultCard.innerHTML = `Ready: <strong>${firstWord}</strong> from <strong>${label}</strong>. Click Hear or Speak to practice it.`;
 
                               // Also update the target card to show it's loaded
                               const targetCard = $('targetCard');
