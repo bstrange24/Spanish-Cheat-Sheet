@@ -30,14 +30,21 @@
 
           <section class="practice-intro">
                <div>
-                    <span class="eyebrow">Conjugation lab</span>
+                    <span class="eyebrow">Conjugation lab.</span>
                     <h2>Build the right verb form.</h2>
                     <p>Choose a verb, tense, and pronoun. Type the form you think belongs there, then check your answer.</p>
                </div>
-               <div class="conjugation-actions">
-                    <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random verb</button>
-               </div>
           </section>
+
+          <div>
+               <label for="conjugationLang">Spanish variant</label>
+               <select id="conjugationLang">
+                    <option value="es-ES">Spain (es-ES)</option>
+                    <option value="es-MX" selected>Mexico (es-MX)</option>
+                    <option value="es-US">United States (es-US)</option>
+                    <option value="es-AR">Argentina (es-AR)</option>
+               </select>
+          </div>
 
           <div class="conjugation-filters">
                <div>
@@ -53,15 +60,7 @@
                     <label for="conjugationPronoun">Pronoun</label>
                     <select id="conjugationPronoun"></select>
                </div>
-               <div>
-                    <label for="conjugationLang">Spanish variant</label>
-                    <select id="conjugationLang">
-                         <option value="es-ES">Spain (es-ES)</option>
-                         <option value="es-MX" selected>Mexico (es-MX)</option>
-                         <option value="es-US">United States (es-US)</option>
-                         <option value="es-AR">Argentina (es-AR)</option>
-                    </select>
-               </div>
+
                <div class="conjugation-settings">
                     <label><input type="checkbox" id="conjugationAutoAdvance" checked /> Auto-advance to random verb</label>
                     <label><input type="checkbox" id="conjugationRandomPronoun" /> Randomize pronoun</label>
@@ -88,6 +87,9 @@
                     <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
                     <button type="button" id="revealConjugationBtn">Reveal</button>
                     <button type="button" id="hearConjugationBtn">Hear answer</button>
+                    <!-- <div class="conjugation-actions"> -->
+                    <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random verb</button>
+                    <!-- </div> -->
                     <button type="button" id="newConjugationBtn" class="secondary-action" disabled>New prompt</button>
                </div>
                <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
@@ -111,5 +113,61 @@
 
           <script src="js/shared.js"></script>
           <script src="js/spanish-practice.js"></script>
+
+          <script>
+               // Ensure conjugation tab is active on load
+               document.addEventListener('DOMContentLoaded', function () {
+                    // Switch to conjugation tab
+                    if (typeof switchTab === 'function') {
+                         switchTab('conjugation');
+                    } else {
+                         // Fallback: manually show conjugation panel
+                         document.querySelectorAll('.practice-panel').forEach(p => {
+                              p.classList.add('hidden');
+                              p.style.display = 'none';
+                         });
+                         const panel = document.getElementById('conjugationPanel');
+                         if (panel) {
+                              panel.classList.remove('hidden');
+                              panel.style.display = 'block';
+                         }
+                         // Update nav
+                         document.querySelectorAll('.page-nav a').forEach(link => {
+                              link.classList.remove('active');
+                              if (link.getAttribute('href') === 'spanish-conjugation.html') {
+                                   link.classList.add('active');
+                              }
+                         });
+                    }
+                    // Initialize conjugation
+                    if (typeof initConjugationTab === 'function') {
+                         initConjugationTab();
+                    }
+                    // Fix accent buttons
+                    fixConjugationAccentButtons();
+               });
+
+               function fixConjugationAccentButtons() {
+                    const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
+                    accentKeys.forEach(btn => {
+                         btn.addEventListener('mousedown', function (e) {
+                              e.preventDefault();
+                              const char = this.getAttribute('data-char') || '';
+                              const input = document.getElementById('conjugationAnswer');
+                              if (!input || input.disabled || !char) return;
+                              let ch = char;
+                              if (e.shiftKey && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
+                              const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+                              const end = input.selectionEnd == null ? start : input.selectionEnd;
+                              input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+                              const pos = start + ch.length;
+                              try {
+                                   input.setSelectionRange(pos, pos);
+                              } catch (err) {}
+                              input.focus();
+                         });
+                    });
+               }
+          </script>
      </body>
 </html>

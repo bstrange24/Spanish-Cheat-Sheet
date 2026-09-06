@@ -4,6 +4,10 @@
      'use strict';
      if (typeof $ !== 'function') return;
 
+     if (typeof extraPool === 'undefined') {
+          var extraPool = null;
+     }
+
      const studyCard = $('studyCard');
      const studyBody = $('studyBody');
      const studyTitle = $('studyTitle');
@@ -112,7 +116,28 @@
      }
 
      function dictPairsFromPool() {
-          const keys = typeof getFilteredKeys === 'function' ? getFilteredKeys() : Object.keys(typeof DICT === 'object' ? DICT : {});
+          let keys = [];
+
+          // Check if extraPool exists (from shared.js or spanish-practice.js)
+          if (typeof extraPool !== 'undefined' && extraPool && extraPool.length) {
+               keys = extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
+          } else {
+               // Try to get from sessionStorage (from cheat sheet)
+               try {
+                    const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+                    if (Array.isArray(stored) && stored.length) {
+                         keys = stored.filter(k => typeof k === 'string' && k.trim().length > 0);
+                    }
+               } catch (e) {}
+
+               // If still empty, use getFilteredKeys or dictionary
+               if (!keys.length && typeof getFilteredKeys === 'function') {
+                    keys = getFilteredKeys();
+               } else if (!keys.length && typeof DICT === 'object') {
+                    keys = Object.keys(DICT);
+               }
+          }
+
           const pairs = [];
           const seen = new Set();
 
@@ -665,7 +690,29 @@
      }
 
      function dictationPool() {
-          const keys = typeof getFilteredKeys === 'function' ? getFilteredKeys() : [];
+          // Get keys from extraPool if available, otherwise from dictionary
+          let keys = [];
+
+          // Check if extraPool exists (from shared.js or spanish-practice.js)
+          if (typeof extraPool !== 'undefined' && extraPool && extraPool.length) {
+               keys = extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
+          } else {
+               // Try to get from sessionStorage (from cheat sheet)
+               try {
+                    const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+                    if (Array.isArray(stored) && stored.length) {
+                         keys = stored.filter(k => typeof k === 'string' && k.trim().length > 0);
+                    }
+               } catch (e) {}
+
+               // If still empty, use getFilteredKeys or dictionary
+               if (!keys.length && typeof getFilteredKeys === 'function') {
+                    keys = getFilteredKeys();
+               } else if (!keys.length && typeof DICT === 'object') {
+                    keys = Object.keys(DICT);
+               }
+          }
+
           const out = [];
           const seen = new Set();
           keys.forEach(k => {
@@ -1029,6 +1076,22 @@
      const studyPanel = $('studyPanel');
      if (studyPanel && studyPanel.style.display !== 'none' && !studyPanel.classList.contains('hidden')) {
           initStudyTab();
+     }
+})();
+
+// Try to load from sessionStorage if available
+(function loadExtraPoolFromStorage() {
+     if (!extraPool) {
+          try {
+               const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+               if (Array.isArray(stored) && stored.length) {
+                    extraPool = stored;
+                    // Also store in window for other scripts
+                    window._pagePool = stored;
+                    const label = sessionStorage.getItem('sp_page_label') || 'this page';
+                    window._pageLabel = label;
+               }
+          } catch (e) {}
      }
 })();
 

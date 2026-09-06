@@ -20,6 +20,11 @@ if (typeof srs === 'undefined') {
      var srs = JSON.parse(localStorage.getItem('sp_srs') || '{}');
 }
 
+// Add extraPool as a shared global variable
+if (typeof extraPool === 'undefined') {
+     var extraPool = null;
+}
+
 // ===================== SHARED DOM HELPERS =====================
 const $ = id => document.getElementById(id);
 
@@ -135,7 +140,6 @@ if ($('themeBtn')) {
 }
 
 // ===================== TAB NAVIGATION =====================
-// ===================== TAB NAVIGATION =====================
 function switchTab(tabId) {
      // Hide all panels
      document.querySelectorAll('.practice-panel').forEach(panel => {
@@ -152,30 +156,40 @@ function switchTab(tabId) {
           panel.style.display = 'block';
      }
 
-     // Update nav links - find ALL nav links including those with data-tab
+     // Update nav links
      document.querySelectorAll('.page-nav a').forEach(link => {
           link.classList.remove('active');
-          // Check if this link has a data-tab attribute that matches
           if (link.dataset.tab === tabId) {
                link.classList.add('active');
           }
-          // Also check if it's a regular href link that matches the current page
           const href = link.getAttribute('href');
-          if (href && href.includes('spanish-conjugation.html') && tabId === 'conjugation') {
-               link.classList.add('active');
-          }
-          if (href && href.includes('spanish-study.html') && tabId === 'study') {
-               link.classList.add('active');
-          }
-          if (href && href.includes('spanish-practice.html') && tabId === 'pronunciation') {
-               link.classList.add('active');
+          if (href) {
+               if (href.includes('spanish-conjugation.html') && tabId === 'conjugation') {
+                    link.classList.add('active');
+               }
+               if (href.includes('spanish-study.html') && tabId === 'study') {
+                    link.classList.add('active');
+               }
+               if (href.includes('spanish-practice.html') && tabId === 'pronunciation') {
+                    link.classList.add('active');
+               }
           }
      });
+
+     // Update page title
+     const titles = {
+          pronunciation: 'Spanish Practice',
+          conjugation: 'Spanish Conjugation Practice',
+          study: 'Spanish Study & Progress',
+     };
+     if (titles[tabId]) {
+          document.title = titles[tabId];
+     }
 
      // Update URL hash
      window.location.hash = tabId;
 
-     // If switching to study tab, initialize study
+     // Initialize tabs
      if (tabId === 'study') {
           setTimeout(function () {
                if (typeof initStudyTab === 'function') {
@@ -184,17 +198,16 @@ function switchTab(tabId) {
           }, 100);
      }
 
-     // If switching to conjugation tab, initialize conjugation
      if (tabId === 'conjugation') {
           setTimeout(function () {
                if (typeof initConjugationTab === 'function') {
                     initConjugationTab();
                }
+               setTimeout(fixConjugationAccentButtons, 200);
           }, 100);
      }
 }
 
-// Handle nav clicks
 // Handle nav clicks
 document.querySelectorAll('.page-nav a').forEach(link => {
      link.addEventListener('click', function (e) {
@@ -219,4 +232,28 @@ if (hash && ['pronunciation', 'conjugation', 'study'].includes(hash)) {
      switchTab('pronunciation');
 }
 
+function fixConjugationAccentButtons() {
+     const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
+     accentKeys.forEach(btn => {
+          // Remove old listeners by cloning
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+          newBtn.addEventListener('mousedown', function (e) {
+               e.preventDefault();
+               const char = this.getAttribute('data-char') || '';
+               const input = document.getElementById('conjugationAnswer');
+               if (!input || input.disabled || !char) return;
+               let ch = char;
+               if (e.shiftKey && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
+               const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+               const end = input.selectionEnd == null ? start : input.selectionEnd;
+               input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+               const pos = start + ch.length;
+               try {
+                    input.setSelectionRange(pos, pos);
+               } catch (err) {}
+               input.focus();
+          });
+     });
+}
 console.log('✅ Shared utilities loaded');

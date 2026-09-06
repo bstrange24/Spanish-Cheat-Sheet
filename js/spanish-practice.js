@@ -25,6 +25,7 @@
           let micPermissionGranted = false;
           let conjugationState = { correct: 0, attempted: 0 };
           let extraPool = null;
+          let _autoPlayEnabled = true;
 
           // ===================== DOM =====================
           const targetInput = $('target');
@@ -291,8 +292,11 @@
                $('phraseProgress').innerHTML = `This phrase: <strong>${count}</strong> time(s) • Total attempts: <strong>${total}</strong>`;
                targetCard.style.display = 'block';
 
-               clearTimeout(playerTimeout);
-               playerTimeout = setTimeout(updatePlayer, 300);
+               // Don't auto-play if disabled (e.g., during initial page load from cheat sheet)
+               if (_autoPlayEnabled !== false) {
+                    clearTimeout(playerTimeout);
+                    playerTimeout = setTimeout(updatePlayer, 300);
+               }
           }
 
           // ===================== CONJUGATION PRACTICE =====================
@@ -580,6 +584,7 @@
 
           // ===================== CONJUGATION SETUP =====================
           function setupConjugation() {
+               const fromPage = new URLSearchParams(window.location.search).get('from') === 'page';
                const verbSelect = $('conjugationVerb');
                const tenseSelect = $('conjugationTense');
                const pronounSelect = $('conjugationPronoun');
@@ -661,9 +666,19 @@
                     input.focus();
                     enableConjugationAccentBar();
 
+                    // Only play audio if NOT coming from a page launch and if conjugation tab is active
                     const langSelect = $('conjugationLang') || $('lang');
                     const langCode = langSelect ? langSelect.value : 'es-MX';
-                    playAudioFromServer(prompt.verb.infinitive, langCode);
+
+                    // Check if conjugation panel is visible before playing
+                    const panel = document.getElementById('conjugationPanel');
+                    const isVisible = panel && panel.style.display !== 'none' && !panel.classList.contains('hidden');
+
+                    if (!fromPage && isVisible) {
+                         const langSelect = $('conjugationLang') || $('lang');
+                         const langCode = langSelect ? langSelect.value : 'es-MX';
+                         playAudioFromServer(prompt.verb.infinitive, langCode);
+                    }
                }
 
                function randomizeVerb() {
@@ -1761,16 +1776,33 @@
                          const label = sessionStorage.getItem('sp_page_label') || 'this page';
                          if (Array.isArray(words) && words.length) {
                               extraPool = words;
+                              window._pagePool = words;
+                              window._pageLabel = label;
                               if ($('category')) $('category').value = 'all';
-                              resultCard.innerHTML = `Focused on <strong>${label}</strong> (${words.length} items from the cheat sheet).`;
+
+                              // Store for study page
                               if ($('pagePoolStatus')) {
                                    $('pagePoolStatus').textContent = `${label}: ${words.length} words loaded from the Cheat Sheet page. Use Give me a phrase to choose one.`;
                                    $('pagePoolStatus').hidden = false;
                               }
+
+                              // Load the first word but DON'T auto-play
                               const firstWord = words[Math.floor(Math.random() * words.length)];
                               targetInput.value = firstWord;
+
+                              // Call showTargetInfo with autoPlay disabled
+                              _autoPlayEnabled = false;
                               showTargetInfo();
+                              _autoPlayEnabled = true;
+
+                              // Update the result card
                               resultCard.innerHTML = `Ready: <strong>«${firstWord}»</strong> from <strong>${label}</strong>. Click Hear or Speak to practice it.`;
+
+                              // Also update the target card to show it's loaded
+                              const targetCard = $('targetCard');
+                              if (targetCard) {
+                                   targetCard.style.display = 'block';
+                              }
                          }
                     } catch (err) {
                          console.warn('Could not read page practice pool', err);
