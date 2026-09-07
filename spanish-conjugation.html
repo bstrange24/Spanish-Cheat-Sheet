@@ -68,6 +68,26 @@
                </div>
           </div>
 
+          <div class="irregular-legend" style="margin-bottom: 16px">
+               <span style="font-weight: 600; margin-right: 4px">Irregular verb types:</span>
+               <span class="irregular-legend-item">
+                    <span class="dot" style="background: #f59e0b"></span>
+                    Irregular "yo"
+               </span>
+               <span class="irregular-legend-item">
+                    <span class="dot" style="background: #3b82f6"></span>
+                    Stem-changer
+               </span>
+               <span class="irregular-legend-item">
+                    <span class="dot" style="background: #ef4444"></span>
+                    Highly irregular
+               </span>
+               <span class="irregular-legend-item">
+                    <span class="dot" style="background: #8b5cf6"></span>
+                    Prefix-counting
+               </span>
+          </div>
+
           <div class="card conjugation-card">
                <div class="conjugation-prompt" id="conjugationPrompt"></div>
                <label for="conjugationAnswer">Your answer</label>
@@ -115,7 +135,6 @@
           <script src="js/spanish-practice.js"></script>
 
           <script>
-               // Ensure conjugation tab is active on load
                document.addEventListener('DOMContentLoaded', function () {
                     // Switch to conjugation tab
                     if (typeof switchTab === 'function') {
@@ -143,31 +162,13 @@
                     if (typeof initConjugationTab === 'function') {
                          initConjugationTab();
                     }
-                    // Fix accent buttons
-                    fixConjugationAccentButtons();
+                    // Fix accent buttons - ADD THIS
+                    setTimeout(function () {
+                         if (typeof fixConjugationAccentButtons === 'function') {
+                              fixConjugationAccentButtons();
+                         }
+                    }, 200);
                });
-
-               function fixConjugationAccentButtons() {
-                    const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
-                    accentKeys.forEach(btn => {
-                         btn.addEventListener('mousedown', function (e) {
-                              e.preventDefault();
-                              const char = this.getAttribute('data-char') || '';
-                              const input = document.getElementById('conjugationAnswer');
-                              if (!input || input.disabled || !char) return;
-                              let ch = char;
-                              if (e.shiftKey && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
-                              const start = input.selectionStart == null ? input.value.length : input.selectionStart;
-                              const end = input.selectionEnd == null ? start : input.selectionEnd;
-                              input.value = input.value.slice(0, start) + ch + input.value.slice(end);
-                              const pos = start + ch.length;
-                              try {
-                                   input.setSelectionRange(pos, pos);
-                              } catch (err) {}
-                              input.focus();
-                         });
-                    });
-               }
           </script>
      </body>
 </html>

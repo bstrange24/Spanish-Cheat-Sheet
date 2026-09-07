@@ -13,6 +13,112 @@
           return;
      }
 
+     const IRREGULAR_CLASSIFICATIONS = {
+          // Irregular "yo" verbs (yo form only)
+          yo: {
+               hacer: { type: 'irregular-yo', yo: 'hago', pattern: 'hacer → hago' },
+               poner: { type: 'irregular-yo', yo: 'pongo', pattern: 'poner → pongo' },
+               salir: { type: 'irregular-yo', yo: 'salgo', pattern: 'salir → salgo' },
+               tener: { type: 'irregular-yo', yo: 'tengo', pattern: 'tener → tengo' },
+               venir: { type: 'irregular-yo', yo: 'vengo', pattern: 'venir → vengo' },
+               decir: { type: 'irregular-yo', yo: 'digo', pattern: 'decir → digo' },
+               oír: { type: 'irregular-yo', yo: 'oigo', pattern: 'oír → oigo' },
+               caer: { type: 'irregular-yo', yo: 'caigo', pattern: 'caer → caigo' },
+               traer: { type: 'irregular-yo', yo: 'traigo', pattern: 'traer → traigo' },
+               ver: { type: 'irregular-yo', yo: 'veo', pattern: 'ver → veo' },
+               saber: { type: 'irregular-yo', yo: 'sé', pattern: 'saber → sé' },
+               caber: { type: 'irregular-yo', yo: 'quepo', pattern: 'caber → quepo' },
+               dar: { type: 'irregular-yo', yo: 'doy', pattern: 'dar → doy' },
+               conocer: { type: 'irregular-yo', yo: 'conozco', pattern: 'conocer → conozco' },
+               aparecer: { type: 'irregular-yo', yo: 'aparezco', pattern: 'aparecer → aparezco' },
+               establecer: { type: 'irregular-yo', yo: 'establezco', pattern: 'establecer → establezco' },
+               ofrecer: { type: 'irregular-yo', yo: 'ofrezco', pattern: 'ofrecer → ofrezco' },
+               parecer: { type: 'irregular-yo', yo: 'parezco', pattern: 'parecer → parezco' },
+               reconocer: { type: 'irregular-yo', yo: 'reconozco', pattern: 'reconocer → reconozco' },
+               producir: { type: 'irregular-yo', yo: 'produzco', pattern: 'producir → produzco' },
+               conducir: { type: 'irregular-yo', yo: 'conduzco', pattern: 'conducir → conduzco' },
+               traducir: { type: 'irregular-yo', yo: 'traduzco', pattern: 'traducir → traduzco' },
+          },
+
+          // Stem-changing verbs (o→ue, e→ie, e→i, u→ue)
+          'stem-changer': {
+               // o→ue
+               acostar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               almorzar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               contar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               costar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               demostrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               devolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               dormir: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               encontrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               jugar: { pattern: 'u→ue', type: 'stem-changer', change: 'u→ue' },
+               llover: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               morir: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               mostrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               poder: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               probar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               recordar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               resolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               soñar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               volar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               volver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+
+               // e→ie
+               cerrar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               comenzar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               confesar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               despertar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               empezar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               entender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               mentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               negar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               nevar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               pensar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               perder: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               preferir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               sentar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               sentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               temblar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               tender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+
+               // e→i
+               conseguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               corregir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               decir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               elegir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               pedir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               reír: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               repetir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               seguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               servir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               vestir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+          },
+
+          // Highly irregular verbs (multiple irregularities)
+          'highly-irregular': {
+               ser: { type: 'highly-irregular', pattern: 'ser is completely irregular in all tenses' },
+               ir: { type: 'highly-irregular', pattern: 'ir is completely irregular in all tenses' },
+               estar: { type: 'highly-irregular', pattern: 'estar has stem changes in preterite' },
+               haber: { type: 'highly-irregular', pattern: 'haber is irregular in most tenses' },
+          },
+
+          // Prefix-counting verbs (verbs that follow the pattern of their root)
+          'prefix-counting': {
+               contener: { type: 'prefix-counting', root: 'tener', pattern: 'contener follows tener' },
+               mantener: { type: 'prefix-counting', root: 'tener', pattern: 'mantener follows tener' },
+               obtener: { type: 'prefix-counting', root: 'tener', pattern: 'obtener follows tener' },
+               contraer: { type: 'prefix-counting', root: 'traer', pattern: 'contraer follows traer' },
+               distraer: { type: 'prefix-counting', root: 'traer', pattern: 'distraer follows traer' },
+               atraer: { type: 'prefix-counting', root: 'traer', pattern: 'atraer follows traer' },
+               suponer: { type: 'prefix-counting', root: 'poner', pattern: 'suponer follows poner' },
+               imponer: { type: 'prefix-counting', root: 'poner', pattern: 'imponer follows poner' },
+               reconocer: { type: 'prefix-counting', root: 'conocer', pattern: 'reconocer follows conocer' },
+               desconocer: { type: 'prefix-counting', root: 'conocer', pattern: 'desconocer follows conocer' },
+               producir: { type: 'prefix-counting', root: 'conducir', pattern: 'producir follows conducir' },
+               traducir: { type: 'prefix-counting', root: 'conducir', pattern: 'traducir follows conducir' },
+          },
+     };
+
      initSpanishPractice();
 
      function initSpanishPractice() {
@@ -432,7 +538,28 @@
                               const yoForm = (cells[3]?.querySelector('[data-text]')?.getAttribute('data-text') || cells[3]?.textContent || '').trim().toLowerCase();
                               if (!infinitive || !/(ar|er|ir)$/.test(infinitive) || seen.has(infinitive)) return null;
                               seen.add(infinitive);
-                              return { infinitive, meaning: meaning || 'verb', yoForm, present: conjugationPresentForms[infinitive], stemChange: conjugationStemChanges[infinitive] || CONJUGATION_STEM_CHANGE_OVERRIDES[infinitive], irregular: CONJUGATION_IRREGULARS[infinitive] };
+
+                              // 👇 ADD THE IRREGULAR CLASSIFICATION HERE 👇
+                              // Get the irregular classification for this verb
+                              const irregClass = getIrregularClassifications(infinitive);
+                              let irregularType = null;
+                              let irregularInfo = null;
+                              if (irregClass && irregClass.length > 0) {
+                                   // Store all classifications
+                                   irregularType = irregClass.map(c => c.type).join('+');
+                                   irregularInfo = irregClass;
+                              }
+
+                              return {
+                                   infinitive,
+                                   meaning: meaning || 'verb',
+                                   yoForm,
+                                   present: conjugationPresentForms[infinitive],
+                                   stemChange: conjugationStemChanges[infinitive] || CONJUGATION_STEM_CHANGE_OVERRIDES[infinitive],
+                                   irregular: CONJUGATION_IRREGULARS[infinitive],
+                                   irregularType: irregularType,
+                                   irregularInfo: irregularInfo,
+                              };
                          })
                          .filter(Boolean);
                     if (!conjugationVerbs.length) throw new Error('No verbs found');
@@ -619,27 +746,67 @@
                     const pronounLabel = CONJUGATION_PRONOUNS.find(p => p[0] === pronounKey)?.[1] || pronounKey;
                     const translation = getConjugationTranslation(verb, tenseKey, pronounKey);
 
+                    // Get irregular classification
+                    // const irregInfo = getIrregularDisplayInfo(verb.infinitive);
+                    const irregInfo = verb.irregularInfo ? getIrregularDisplayInfoFromClass(verb.irregularInfo) : null;
+                    let irregBadge = '';
+                    if (irregInfo) {
+                         irregBadge = `
+            <span class="irregular-badge" 
+                  style="background: ${irregInfo.color}; 
+                         color: white; 
+                         padding: 2px 10px; 
+                         border-radius: 12px; 
+                         font-size: 0.8rem; 
+                         font-weight: 600; 
+                         display: inline-flex; 
+                         align-items: center; 
+                         gap: 4px;"
+                  title="${irregInfo.description}">
+                ${irregInfo.icon} ${irregInfo.label}
+                <span style="font-weight: 400; opacity: 0.8;">${irregInfo.shortLabel ? '· ' + irregInfo.shortLabel : ''}</span>
+            </span>
+        `;
+                    }
+
                     let answerHtml = '';
                     if (showAnswer && answer) {
-                         answerHtml = `<div style="font-size: 1.2rem; color: var(--good, #22c55e); margin-top: 4px;">→ ${answer}</div>`;
+                         answerHtml = `
+            <div style="font-size: 1.2rem; color: var(--good, #22c55e); margin-top: 4px;">
+                → ${answer}
+                ${irregInfo ? `<span style="font-size: 0.8rem; color: var(--muted); margin-left: 8px;">${irregInfo.detail}</span>` : ''}
+            </div>
+        `;
+                    }
+
+                    // If it's irregular, show a warning/note
+                    let irregNote = '';
+                    if (irregInfo && !showAnswer) {
+                         irregNote = `
+            <div style="font-size: 0.85rem; color: var(--warning, #f59e0b); margin-top: 4px; background: var(--tips-bg); padding: 4px 8px; border-radius: 4px;">
+                ⚠️ ${irregInfo.description}
+            </div>
+        `;
                     }
 
                     promptDiv.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <strong>${pronounLabel}</strong>
-                    <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
-                    <button type="button" id="conjugationHearInfinitiveBtn" 
-                            style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
-                            title="Hear the infinitive">
-                        🔊
-                    </button>
-                    <small style="color: var(--muted);">(${tenseLabel})</small>
-                </div>
-                <div style="color: var(--muted); font-size: 0.95rem;">${translation}</div>
-                ${answerHtml}
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <strong>${pronounLabel}</strong>
+                <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
+                ${irregBadge}
+                <button type="button" id="conjugationHearInfinitiveBtn" 
+                        style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
+                        title="Hear the infinitive">
+                    🔊
+                </button>
+                <small style="color: var(--muted);">(${tenseLabel})</small>
             </div>
-        `;
+            <div style="color: var(--muted); font-size: 0.95rem;">${translation}</div>
+            ${irregNote}
+            ${answerHtml}
+        </div>
+    `;
 
                     const hearBtn = document.getElementById('conjugationHearInfinitiveBtn');
                     if (hearBtn) {
@@ -649,6 +816,45 @@
                               const langCode = langSelect ? langSelect.value : 'es-MX';
                               playAudioFromServer(verb.infinitive, langCode);
                          });
+                    }
+               }
+
+               // Helper function to convert stored classification to display info
+               function getIrregularDisplayInfoFromClass(irregClassArray) {
+                    if (!irregClassArray || !irregClassArray.length) return null;
+
+                    const displayMap = {
+                         'irregular-yo': { label: 'Irregular "yo"', icon: '👤', color: '#f59e0b' },
+                         'stem-changer': { label: 'Stem Change', icon: '🔄', color: '#3b82f6' },
+                         'highly-irregular': { label: 'Highly Irregular', icon: '⚡', color: '#ef4444' },
+                         'prefix-counting': { label: 'Prefix-counting', icon: '📎', color: '#8b5cf6' },
+                    };
+
+                    if (irregClassArray.length === 1) {
+                         const info = irregClassArray[0];
+                         const display = displayMap[info.type];
+                         return {
+                              ...display,
+                              detail: info.pattern || info.yo || '',
+                              description: info.pattern || `Yo: ${info.yo}` || '',
+                              shortLabel: info.pattern || info.yo || '',
+                         };
+                    } else {
+                         // Multiple classifications
+                         const labels = irregClassArray.map(c => displayMap[c.type].label).join(' + ');
+                         const icons = irregClassArray.map(c => displayMap[c.type].icon).join('');
+                         const details = irregClassArray
+                              .map(c => c.pattern || c.yo || '')
+                              .filter(Boolean)
+                              .join(' · ');
+                         return {
+                              label: labels,
+                              icon: icons,
+                              color: '#6b7280', // neutral color for multiple types
+                              detail: details,
+                              description: details,
+                              shortLabel: details,
+                         };
                     }
                }
 
@@ -1823,6 +2029,74 @@
                     }
                }
           })();
+
+          function getIrregularClassifications(verb) {
+               const infinitive = verb.infinitive || verb.toLowerCase();
+               const classifications = [];
+
+               // Check each type
+               if (IRREGULAR_CLASSIFICATIONS['yo'][infinitive]) {
+                    classifications.push(IRREGULAR_CLASSIFICATIONS['yo'][infinitive]);
+               }
+               if (IRREGULAR_CLASSIFICATIONS['stem-changer'][infinitive]) {
+                    classifications.push(IRREGULAR_CLASSIFICATIONS['stem-changer'][infinitive]);
+               }
+               if (IRREGULAR_CLASSIFICATIONS['highly-irregular'][infinitive]) {
+                    classifications.push(IRREGULAR_CLASSIFICATIONS['highly-irregular'][infinitive]);
+               }
+               if (IRREGULAR_CLASSIFICATIONS['prefix-counting'][infinitive]) {
+                    classifications.push(IRREGULAR_CLASSIFICATIONS['prefix-counting'][infinitive]);
+               }
+
+               return classifications.length > 0 ? classifications : null;
+          }
+
+          function getIrregularDisplayInfo(verb) {
+               const classifications = getIrregularClassifications(verb);
+               if (!classifications) return null;
+
+               // Build combined display
+               const displayMap = {
+                    'irregular-yo': { label: 'Irregular "yo"', icon: '👤', color: '#f59e0b' },
+                    'stem-changer': { label: 'Stem Change', icon: '🔄', color: '#3b82f6' },
+                    'highly-irregular': { label: 'Highly Irregular', icon: '⚡', color: '#ef4444' },
+                    'prefix-counting': { label: 'Prefix-counting', icon: '📎', color: '#8b5cf6' },
+               };
+
+               // If multiple classifications, combine them
+               if (classifications.length === 1) {
+                    const info = classifications[0];
+                    const display = displayMap[info.type];
+                    return {
+                         ...display,
+                         detail: info.pattern || info.yo || '',
+                         description: info.pattern || `Yo: ${info.yo}` || '',
+                         shortLabel: info.pattern || info.yo || '',
+                    };
+               } else {
+                    // Multiple classifications - show all
+                    const labels = classifications.map(c => displayMap[c.type].label).join(' + ');
+                    const icons = classifications.map(c => displayMap[c.type].icon).join('');
+                    const colors = classifications.map(c => displayMap[c.type].color);
+                    return {
+                         label: labels,
+                         icon: icons,
+                         color: colors[0], // Use first color as primary
+                         detail: classifications
+                              .map(c => c.pattern || c.yo || '')
+                              .filter(Boolean)
+                              .join(' · '),
+                         description: classifications
+                              .map(c => c.pattern || `Yo: ${c.yo}` || '')
+                              .filter(Boolean)
+                              .join(' · '),
+                         shortLabel: classifications
+                              .map(c => c.pattern || '')
+                              .filter(Boolean)
+                              .join(' · '),
+                    };
+               }
+          }
 
           console.log('✅ Spanish Practice initialized');
      }

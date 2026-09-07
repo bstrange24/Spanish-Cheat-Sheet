@@ -1577,6 +1577,7 @@
           'te quiero': { approx: 'teh KYEH-roh', meaning: 'I love you', level: 'beginner', cat: 'emotions' },
           'me gusta': { approx: 'meh GOOS-tah', meaning: 'I like it', level: 'beginner', cat: 'everyday' },
      };
+
      Object.keys(extra).forEach(function (k) {
           if (!Object.prototype.hasOwnProperty.call(DICT, k)) {
                DICT[k] = extra[k];

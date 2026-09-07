@@ -233,27 +233,79 @@ if (hash && ['pronunciation', 'conjugation', 'study'].includes(hash)) {
 }
 
 function fixConjugationAccentButtons() {
-     const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
-     accentKeys.forEach(btn => {
-          // Remove old listeners by cloning
-          const newBtn = btn.cloneNode(true);
-          btn.parentNode.replaceChild(newBtn, btn);
-          newBtn.addEventListener('mousedown', function (e) {
-               e.preventDefault();
-               const char = this.getAttribute('data-char') || '';
-               const input = document.getElementById('conjugationAnswer');
-               if (!input || input.disabled || !char) return;
-               let ch = char;
-               if (e.shiftKey && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
-               const start = input.selectionStart == null ? input.value.length : input.selectionStart;
-               const end = input.selectionEnd == null ? start : input.selectionEnd;
-               input.value = input.value.slice(0, start) + ch + input.value.slice(end);
-               const pos = start + ch.length;
-               try {
-                    input.setSelectionRange(pos, pos);
-               } catch (err) {}
-               input.focus();
-          });
+     // Look for the accent bar directly, not inside #conjugationPanel
+     const accentBar = document.querySelector('.accent-bar');
+     if (!accentBar) {
+          console.warn('Accent bar not found');
+          return;
+     }
+
+     // Remove any existing listeners by cloning
+     const newAccentBar = accentBar.cloneNode(true);
+     accentBar.parentNode.replaceChild(newAccentBar, accentBar);
+
+     // Use event delegation on the parent
+     newAccentBar.addEventListener('click', function (e) {
+          const btn = e.target.closest('.accent-key');
+          if (!btn) return;
+          e.preventDefault();
+
+          const char = btn.getAttribute('data-char') || '';
+          const input = document.getElementById('conjugationAnswer');
+          if (!input || input.disabled || !char) return;
+
+          let ch = char;
+          // Check for Shift key for uppercase
+          if (window._shiftPressed && /[áéíóúüñ]/i.test(char)) {
+               ch = char.toUpperCase();
+          }
+
+          const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+          const end = input.selectionEnd == null ? start : input.selectionEnd;
+          input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+          const pos = start + ch.length;
+          try {
+               input.setSelectionRange(pos, pos);
+          } catch (err) {}
+          input.focus();
      });
 }
+
+// Track Shift key state globally
+document.addEventListener('keydown', function (e) {
+     if (e.key === 'Shift') {
+          window._shiftPressed = true;
+     }
+});
+
+document.addEventListener('keyup', function (e) {
+     if (e.key === 'Shift') {
+          window._shiftPressed = false;
+     }
+});
+
+// function fixConjugationAccentButtons() {
+//      const accentKeys = document.querySelectorAll('#conjugationPanel .accent-key');
+//      accentKeys.forEach(btn => {
+//           // Remove old listeners by cloning
+//           const newBtn = btn.cloneNode(true);
+//           btn.parentNode.replaceChild(newBtn, btn);
+//           newBtn.addEventListener('mousedown', function (e) {
+//                e.preventDefault();
+//                const char = this.getAttribute('data-char') || '';
+//                const input = document.getElementById('conjugationAnswer');
+//                if (!input || input.disabled || !char) return;
+//                let ch = char;
+//                if (e.shiftKey && /[áéíóúüñ]/i.test(char)) ch = char.toUpperCase();
+//                const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+//                const end = input.selectionEnd == null ? start : input.selectionEnd;
+//                input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+//                const pos = start + ch.length;
+//                try {
+//                     input.setSelectionRange(pos, pos);
+//                } catch (err) {}
+//                input.focus();
+//           });
+//      });
+// }
 console.log('✅ Shared utilities loaded');
