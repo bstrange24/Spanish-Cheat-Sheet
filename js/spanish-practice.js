@@ -62,9 +62,11 @@
                soñar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                volar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                volver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               comprobar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
 
                // e→ie
                cerrar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               convertir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                comenzar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                confesar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                despertar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
@@ -80,6 +82,8 @@
                sentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                temblar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                tender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               tener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               venir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
 
                // e→i
                conseguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
@@ -92,6 +96,7 @@
                seguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                servir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                vestir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               medir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
           },
 
           // Highly irregular verbs (multiple irregularities)
@@ -453,27 +458,30 @@
           };
 
           function conjugateVerb(verb, tense) {
+               if (typeof SpanishConjugate !== 'undefined') {
+                    const generated = SpanishConjugate.conjugate(verb.infinitive, tense);
+                    if (generated && generated.length) return generated;
+               }
                if (verb.irregular && verb.irregular[tense]) return verb.irregular[tense];
-               if (tense === 'present' && verb.present) {
-                    if (verb.present.length === 7) {
-                         verb.present.shift();
-                    }
+               if (tense === 'present' && Array.isArray(verb.present) && verb.present.length === 6 && verb.present.every(form => form && !/\s/.test(form))) {
                     return verb.present;
                }
-               const ending = verb.infinitive.slice(-2);
+               const ending = verb.infinitive.endsWith('ír') ? 'ir' : verb.infinitive.slice(-2);
                if (tense === 'future' || tense === 'conditional') {
                     const suffixes = tense === 'future' ? ['é', 'ás', 'á', 'emos', 'éis', 'án'] : ['ía', 'ías', 'ía', 'íamos', 'íais', 'ían'];
                     return suffixes.map(suffix => verb.infinitive + suffix);
                }
+               const endings = CONJUGATION_ENDINGS[tense] && CONJUGATION_ENDINGS[tense][ending];
+               if (!endings) return null;
                const stem = verb.infinitive.slice(0, -2);
-               const forms = CONJUGATION_ENDINGS[tense][ending].map(suffix => stem + suffix);
+               const forms = endings.map(suffix => stem + suffix);
                if (tense === 'present' && verb.stemChange) {
                     const changedStem = applyStemChange(stem, verb.stemChange);
                     [0, 1, 2, 5].forEach(index => {
-                         forms[index] = changedStem + CONJUGATION_ENDINGS[tense][ending][index];
+                         forms[index] = changedStem + endings[index];
                     });
                }
-               if (tense === 'present' && verb.yoForm) forms[0] = verb.yoForm;
+               if (tense === 'present' && verb.yoForm && /(?:o|oy|í|é)$/i.test(verb.yoForm)) forms[0] = verb.yoForm;
                return forms;
           }
 
@@ -496,8 +504,15 @@
                               const irregularDoc = new DOMParser().parseFromString(await irregularResponse.text(), 'text/html');
                               irregularDoc.querySelectorAll('table').forEach(table => {
                                    const headers = Array.from(table.querySelectorAll('thead th')).map(cell => cell.textContent.replace(/\s+/g, ' ').trim().toLowerCase());
-                                   if (headers.length !== 7 && headers.length !== 8) return;
                                    if (headers[0] !== 'verb') return;
+                                   const personIdx = {
+                                        yo: headers.findIndex(h => h === 'yo' || h.startsWith('yo ')),
+                                        tu: headers.findIndex(h => h === 'tú' || h === 'tu'),
+                                        el: headers.findIndex(h => /^él/.test(h)),
+                                        nosotros: headers.findIndex(h => h.startsWith('nosotros')),
+                                        vosotros: headers.findIndex(h => h.startsWith('vosotros')),
+                                        ellos: headers.findIndex(h => /^ellos/.test(h)),
+                                   };
                                    if (headers.length === 8) {
                                         const heading = table.previousElementSibling?.textContent.replace(/\s+/g, ' ').trim() || '';
                                         const change = heading.match(/([eou])\s*→\s*([ieou]+)/i)?.[0]?.replace(/\s+/g, '') || '';
@@ -507,12 +522,21 @@
                                              if (infinitive && change) conjugationStemChanges[infinitive] = change;
                                         });
                                    }
-                                   table.querySelectorAll('tbody tr').forEach(row => {
-                                        const cells = row.querySelectorAll('td');
-                                        const forms = Array.from(cells).map(cell => cell.querySelector('[data-text]')?.getAttribute('data-text') || cell.textContent.trim());
-                                        const infinitive = forms[0]?.toLowerCase();
-                                        if (infinitive && forms.length === 8) conjugationPresentForms[infinitive] = forms.slice(1).map(form => form.toLowerCase());
-                                   });
+                                   if (personIdx.yo >= 0 && personIdx.el >= 0 && personIdx.nosotros >= 0 && personIdx.ellos >= 0) {
+                                        table.querySelectorAll('tbody tr').forEach(row => {
+                                             const cells = row.querySelectorAll('td');
+                                             const cellText = index => {
+                                                  const cell = cells[index];
+                                                  if (!cell) return '';
+                                                  return (cell.querySelector('[data-text]')?.getAttribute('data-text') || cell.textContent || '').trim().toLowerCase();
+                                             };
+                                             const infinitive = cellText(0);
+                                             const forms = [personIdx.yo, personIdx.tu, personIdx.el, personIdx.nosotros, personIdx.vosotros, personIdx.ellos].map(cellText);
+                                             if (infinitive && forms.length === 6 && forms.every(form => form && !/\s/.test(form) && !/^to$/.test(form))) {
+                                                  conjugationPresentForms[infinitive] = forms;
+                                             }
+                                        });
+                                   }
                               });
                               irregularDoc.querySelectorAll('p').forEach(paragraph => {
                                    const text = paragraph.textContent.replace(/\s+/g, ' ').trim();
@@ -555,7 +579,7 @@
                                    meaning: meaning || 'verb',
                                    yoForm,
                                    present: conjugationPresentForms[infinitive],
-                                   stemChange: conjugationStemChanges[infinitive] || CONJUGATION_STEM_CHANGE_OVERRIDES[infinitive],
+                                   stemChange: conjugationStemChanges[infinitive] || CONJUGATION_STEM_CHANGE_OVERRIDES[infinitive] || (typeof SpanishConjugate !== 'undefined' ? SpanishConjugate.stemChangeOf(infinitive) : null),
                                    irregular: CONJUGATION_IRREGULARS[infinitive],
                                    irregularType: irregularType,
                                    irregularInfo: irregularInfo,
