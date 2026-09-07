@@ -36,85 +36,130 @@
                </div>
           </section>
 
-          <div>
-               <label for="conjugationLang">Spanish variant</label>
-               <select id="conjugationLang">
-                    <option value="es-ES">Spain (es-ES)</option>
-                    <option value="es-MX" selected>Mexico (es-MX)</option>
-                    <option value="es-US">United States (es-US)</option>
-                    <option value="es-AR">Argentina (es-AR)</option>
-               </select>
-          </div>
-
-          <div class="conjugation-filters">
-               <div>
-                    <label for="conjugationVerb">Verb</label>
-                    <select id="conjugationVerb"></select>
-                    <div id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html...</div>
-               </div>
-               <div>
-                    <label for="conjugationTense">Tense</label>
-                    <select id="conjugationTense"></select>
-               </div>
-               <div>
-                    <label for="conjugationPronoun">Pronoun</label>
-                    <select id="conjugationPronoun"></select>
+          <!-- MOBILE-FIRST LAYOUT -->
+          <div class="mobile-conjugation-layout">
+               <!-- Quick Select Row -->
+               <div class="quick-select-row">
+                    <button class="quick-select-btn" id="quickVerbBtn" aria-label="Select verb">
+                         <span class="label">Verb</span>
+                         <span class="value" id="selectedVerbDisplay">Loading...</span>
+                         <span class="arrow">▾</span>
+                    </button>
+                    <button class="quick-select-btn" id="quickTenseBtn" aria-label="Select tense">
+                         <span class="label">Tense</span>
+                         <span class="value" id="selectedTenseDisplay">Present</span>
+                         <span class="arrow">▾</span>
+                    </button>
+                    <button class="quick-select-btn" id="quickPronounBtn" aria-label="Select pronoun">
+                         <span class="label">Pronoun</span>
+                         <span class="value" id="selectedPronounDisplay">yo</span>
+                         <span class="arrow">▾</span>
+                    </button>
                </div>
 
-               <div class="conjugation-settings">
-                    <label><input type="checkbox" id="conjugationAutoAdvance" checked /> Auto-advance to random verb</label>
-                    <label><input type="checkbox" id="conjugationRandomPronoun" /> Randomize pronoun</label>
-                    <label><input type="checkbox" id="conjugationRandomTense" /> Randomize tense</label>
+               <!-- Settings Row - ALWAYS VISIBLE -->
+               <div class="conjugation-settings-row">
+                    <label class="setting-checkbox">
+                         <input type="checkbox" id="conjugationAutoAdvance" checked />
+                         <span class="checkmark"></span>
+                         Auto-advance
+                    </label>
+                    <label class="setting-checkbox">
+                         <input type="checkbox" id="conjugationRandomPronoun" />
+                         <span class="checkmark"></span>
+                         Random pronoun
+                    </label>
+                    <label class="setting-checkbox">
+                         <input type="checkbox" id="conjugationRandomTense" />
+                         <span class="checkmark"></span>
+                         Random tense
+                    </label>
                </div>
-          </div>
 
-          <div class="irregular-legend" style="margin-bottom: 16px">
-               <span style="font-weight: 600; margin-right: 4px">Irregular verb types:</span>
-               <span class="irregular-legend-item">
-                    <span class="dot" style="background: #f59e0b"></span>
-                    Irregular "yo"
-               </span>
-               <span class="irregular-legend-item">
-                    <span class="dot" style="background: #3b82f6"></span>
-                    Stem-changer
-               </span>
-               <span class="irregular-legend-item">
-                    <span class="dot" style="background: #ef4444"></span>
-                    Highly irregular
-               </span>
-               <span class="irregular-legend-item">
-                    <span class="dot" style="background: #8b5cf6"></span>
-                    Prefix-counting
-               </span>
-          </div>
+               <!-- Full Filters Panel - slide up/down -->
+               <div class="filters-panel" id="filtersPanel">
+                    <div class="filters-panel-header">
+                         <span class="filters-panel-title">⚙️ Filters</span>
+                         <button class="filters-panel-close" id="filtersPanelClose" aria-label="Close filters">✕</button>
+                    </div>
 
-          <div class="card conjugation-card">
-               <div class="conjugation-prompt" id="conjugationPrompt"></div>
-               <label for="conjugationAnswer">Your answer</label>
-               <input type="text" id="conjugationAnswer" autocomplete="off" autocapitalize="none" />
-               <div class="accent-bar" aria-label="Spanish accent marks">
-                    <button type="button" class="accent-key" data-char="á" title="Insert á — Shift+click for uppercase">á</button>
-                    <button type="button" class="accent-key" data-char="é" title="Insert é — Shift+click for uppercase">é</button>
-                    <button type="button" class="accent-key" data-char="í" title="Insert í — Shift+click for uppercase">í</button>
-                    <button type="button" class="accent-key" data-char="ó" title="Insert ó — Shift+click for uppercase">ó</button>
-                    <button type="button" class="accent-key" data-char="ú" title="Insert ú — Shift+click for uppercase">ú</button>
-                    <button type="button" class="accent-key" data-char="ü" title="Insert ü — Shift+click for uppercase">ü</button>
-                    <button type="button" class="accent-key" data-char="ñ" title="Insert ñ — Shift+click for uppercase">ñ</button>
-                    <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button>
-                    <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button>
+                    <div class="conjugation-filters">
+                         <div>
+                              <label for="conjugationLang">Spanish variant</label>
+                              <select id="conjugationLang">
+                                   <option value="es-ES">Spain (es-ES)</option>
+                                   <option value="es-MX" selected>Mexico (es-MX)</option>
+                                   <option value="es-US">United States (es-US)</option>
+                                   <option value="es-AR">Argentina (es-AR)</option>
+                              </select>
+                         </div>
+                         <div>
+                              <label for="conjugationVerb">Verb</label>
+                              <select id="conjugationVerb"></select>
+                              <div id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html...</div>
+                         </div>
+                         <div>
+                              <label for="conjugationTense">Tense</label>
+                              <select id="conjugationTense"></select>
+                         </div>
+                         <div>
+                              <label for="conjugationPronoun">Pronoun</label>
+                              <select id="conjugationPronoun"></select>
+                         </div>
+                    </div>
                </div>
-               <div class="btn-row">
-                    <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
-                    <button type="button" id="revealConjugationBtn">Reveal</button>
-                    <button type="button" id="hearConjugationBtn">Hear answer</button>
-                    <!-- <div class="conjugation-actions"> -->
-                    <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random verb</button>
-                    <!-- </div> -->
-                    <button type="button" id="newConjugationBtn" class="secondary-action" disabled>New prompt</button>
+
+               <!-- Overlay for mobile -->
+               <div class="filters-overlay" id="filtersOverlay"></div>
+
+               <!-- Irregular Verb Legend -->
+               <div class="irregular-legend" style="margin-bottom: 12px">
+                    <span style="font-weight: 600; margin-right: 4px">Irregular verb types:</span>
+                    <span class="irregular-legend-item">
+                         <span class="dot" style="background: #f59e0b"></span>
+                         Irregular "yo"
+                    </span>
+                    <span class="irregular-legend-item">
+                         <span class="dot" style="background: #3b82f6"></span>
+                         Stem-changer
+                    </span>
+                    <span class="irregular-legend-item">
+                         <span class="dot" style="background: #ef4444"></span>
+                         Highly irregular
+                    </span>
+                    <span class="irregular-legend-item">
+                         <span class="dot" style="background: #8b5cf6"></span>
+                         Prefix-counting
+                    </span>
                </div>
-               <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
+
+               <!-- Conjugation Card -->
+               <div class="card conjugation-card">
+                    <div class="conjugation-prompt" id="conjugationPrompt"></div>
+                    <label for="conjugationAnswer">Your answer</label>
+                    <input type="text" id="conjugationAnswer" autocomplete="off" autocapitalize="none" />
+                    <div class="accent-bar" aria-label="Spanish accent marks">
+                         <button type="button" class="accent-key" data-char="á" title="Insert á — Shift+click for uppercase">á</button>
+                         <button type="button" class="accent-key" data-char="é" title="Insert é — Shift+click for uppercase">é</button>
+                         <button type="button" class="accent-key" data-char="í" title="Insert í — Shift+click for uppercase">í</button>
+                         <button type="button" class="accent-key" data-char="ó" title="Insert ó — Shift+click for uppercase">ó</button>
+                         <button type="button" class="accent-key" data-char="ú" title="Insert ú — Shift+click for uppercase">ú</button>
+                         <button type="button" class="accent-key" data-char="ü" title="Insert ü — Shift+click for uppercase">ü</button>
+                         <button type="button" class="accent-key" data-char="ñ" title="Insert ñ — Shift+click for uppercase">ñ</button>
+                         <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button>
+                         <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button>
+                    </div>
+                    <div class="btn-row">
+                         <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
+                         <button type="button" id="revealConjugationBtn">Reveal</button>
+                         <button type="button" id="hearConjugationBtn">Hear answer</button>
+                         <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random</button>
+                         <button type="button" id="newConjugationBtn" class="secondary-action" disabled>New</button>
+                    </div>
+                    <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
+               </div>
+               <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
           </div>
-          <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
 
           <div class="practice-runtime" aria-hidden="true">
                <input id="target" type="text" />
@@ -140,7 +185,6 @@
                     if (typeof switchTab === 'function') {
                          switchTab('conjugation');
                     } else {
-                         // Fallback: manually show conjugation panel
                          document.querySelectorAll('.practice-panel').forEach(p => {
                               p.classList.add('hidden');
                               p.style.display = 'none';
@@ -150,7 +194,6 @@
                               panel.classList.remove('hidden');
                               panel.style.display = 'block';
                          }
-                         // Update nav
                          document.querySelectorAll('.page-nav a').forEach(link => {
                               link.classList.remove('active');
                               if (link.getAttribute('href') === 'spanish-conjugation.html') {
@@ -158,16 +201,200 @@
                               }
                          });
                     }
-                    // Initialize conjugation
+
                     if (typeof initConjugationTab === 'function') {
                          initConjugationTab();
                     }
-                    // Fix accent buttons - ADD THIS
+
                     setTimeout(function () {
                          if (typeof fixConjugationAccentButtons === 'function') {
                               fixConjugationAccentButtons();
                          }
                     }, 200);
+
+                    // ===== Mobile Filter Controls =====
+                    const quickVerbBtn = document.getElementById('quickVerbBtn');
+                    const quickTenseBtn = document.getElementById('quickTenseBtn');
+                    const quickPronounBtn = document.getElementById('quickPronounBtn');
+                    const filtersPanel = document.getElementById('filtersPanel');
+                    const filtersOverlay = document.getElementById('filtersOverlay');
+                    const filtersPanelClose = document.getElementById('filtersPanelClose');
+
+                    // Get the actual select elements
+                    const verbSelect = document.getElementById('conjugationVerb');
+                    const tenseSelect = document.getElementById('conjugationTense');
+                    const pronounSelect = document.getElementById('conjugationPronoun');
+
+                    // Display elements
+                    const selectedVerbDisplay = document.getElementById('selectedVerbDisplay');
+                    const selectedTenseDisplay = document.getElementById('selectedTenseDisplay');
+                    const selectedPronounDisplay = document.getElementById('selectedPronounDisplay');
+
+                    // ===== UPDATE QUICK SELECT DISPLAY =====
+                    function updateQuickSelectDisplay() {
+                         if (verbSelect && selectedVerbDisplay) {
+                              const selectedOption = verbSelect.options[verbSelect.selectedIndex];
+                              if (selectedOption) {
+                                   const text = selectedOption.textContent;
+                                   const verbName = text.split('(')[0].trim();
+                                   selectedVerbDisplay.textContent = verbName || 'Select verb';
+                              }
+                         }
+                         if (tenseSelect && selectedTenseDisplay) {
+                              const selectedOption = tenseSelect.options[tenseSelect.selectedIndex];
+                              if (selectedOption) {
+                                   selectedTenseDisplay.textContent = selectedOption.textContent || 'Present';
+                              }
+                         }
+                         if (pronounSelect && selectedPronounDisplay) {
+                              const selectedOption = pronounSelect.options[pronounSelect.selectedIndex];
+                              if (selectedOption) {
+                                   selectedPronounDisplay.textContent = selectedOption.textContent || 'yo';
+                              }
+                         }
+                    }
+
+                    // ===== OVERRIDE THE RANDOM FUNCTION =====
+                    // Wait for the conjugation system to initialize
+                    const checkInterval = setInterval(function () {
+                         // Check if the randomConjugationVerbBtn exists and has click handlers
+                         const randomBtn = document.getElementById('randomConjugationVerbBtn');
+                         if (randomBtn && !randomBtn._patched) {
+                              randomBtn._patched = true;
+
+                              // Save the original click handler
+                              const originalClick = randomBtn.onclick;
+
+                              // Replace with our enhanced version
+                              randomBtn.onclick = function (e) {
+                                   // Call the original functionality (which updates the selects and card)
+                                   if (typeof originalClick === 'function') {
+                                        originalClick.call(this, e);
+                                   }
+
+                                   // Update the quick select display after a short delay
+                                   setTimeout(updateQuickSelectDisplay, 50);
+                              };
+
+                              console.log('Random button patched for mobile');
+                              clearInterval(checkInterval);
+                         }
+                    }, 100);
+
+                    // Also patch the New Prompt button
+                    const newBtnInterval = setInterval(function () {
+                         const newBtn = document.getElementById('newConjugationBtn');
+                         if (newBtn && !newBtn._patched) {
+                              newBtn._patched = true;
+
+                              const originalClick = newBtn.onclick;
+
+                              newBtn.onclick = function (e) {
+                                   if (typeof originalClick === 'function') {
+                                        originalClick.call(this, e);
+                                   }
+                                   setTimeout(updateQuickSelectDisplay, 50);
+                              };
+
+                              console.log('New button patched for mobile');
+                              clearInterval(newBtnInterval);
+                         }
+                    }, 100);
+
+                    function openFiltersPanel(highlightField) {
+                         filtersPanel.classList.add('open');
+                         filtersOverlay.classList.add('active');
+                         document.body.style.overflow = 'hidden';
+
+                         if (highlightField) {
+                              setTimeout(() => {
+                                   const target = document.getElementById(highlightField);
+                                   if (target) {
+                                        target.focus();
+                                        target.parentElement.classList.add('highlight');
+                                        setTimeout(() => {
+                                             target.parentElement.classList.remove('highlight');
+                                        }, 2000);
+                                   }
+                              }, 300);
+                         }
+                    }
+
+                    function closeFiltersPanel() {
+                         filtersPanel.classList.remove('open');
+                         filtersOverlay.classList.remove('active');
+                         document.body.style.overflow = '';
+                    }
+
+                    // Quick select button handlers
+                    quickVerbBtn.addEventListener('click', function (e) {
+                         e.stopPropagation();
+                         openFiltersPanel('conjugationVerb');
+                    });
+
+                    quickTenseBtn.addEventListener('click', function (e) {
+                         e.stopPropagation();
+                         openFiltersPanel('conjugationTense');
+                    });
+
+                    quickPronounBtn.addEventListener('click', function (e) {
+                         e.stopPropagation();
+                         openFiltersPanel('conjugationPronoun');
+                    });
+
+                    filtersPanelClose.addEventListener('click', closeFiltersPanel);
+                    filtersOverlay.addEventListener('click', closeFiltersPanel);
+
+                    // Add change listeners to selects
+                    if (verbSelect) verbSelect.addEventListener('change', updateQuickSelectDisplay);
+                    if (tenseSelect) tenseSelect.addEventListener('change', updateQuickSelectDisplay);
+                    if (pronounSelect) pronounSelect.addEventListener('change', updateQuickSelectDisplay);
+
+                    // ===== OVERRIDE renderConjugationPrompt =====
+                    // This catches updates from the conjugation system
+                    const originalRenderPrompt = window.renderConjugationPrompt;
+                    if (originalRenderPrompt) {
+                         window.renderConjugationPrompt = function () {
+                              originalRenderPrompt();
+                              setTimeout(updateQuickSelectDisplay, 50);
+                         };
+                    }
+
+                    // Initial update
+                    setTimeout(updateQuickSelectDisplay, 500);
+
+                    // Close panel on Escape key
+                    document.addEventListener('keydown', function (e) {
+                         if (e.key === 'Escape' && filtersPanel.classList.contains('open')) {
+                              closeFiltersPanel();
+                         }
+                    });
+
+                    // ===== OBSERVER FOR SELECT CHANGES =====
+                    // Use MutationObserver to detect when select options change
+                    if (verbSelect) {
+                         const observer = new MutationObserver(function () {
+                              updateQuickSelectDisplay();
+                         });
+                         observer.observe(verbSelect, {
+                              childList: true,
+                              subtree: true,
+                              attributes: true,
+                              attributeFilter: ['value'],
+                         });
+                    }
+
+                    // Also update when checkboxes change (for random settings)
+                    document.getElementById('conjugationRandomPronoun')?.addEventListener('change', function () {
+                         // If random pronoun is checked and we have a current verb, update display
+                         setTimeout(updateQuickSelectDisplay, 100);
+                    });
+
+                    document.getElementById('conjugationRandomTense')?.addEventListener('change', function () {
+                         setTimeout(updateQuickSelectDisplay, 100);
+                    });
+
+                    console.log('✅ Mobile conjugation controls initialized');
                });
           </script>
      </body>
