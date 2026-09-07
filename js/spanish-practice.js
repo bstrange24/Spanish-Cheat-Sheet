@@ -1329,12 +1329,7 @@
 
           // ===================== STREAK =====================
           function updateStreakDisplay() {
-               const streakEl = $('streakDisplay');
-               const goalEl = $('goalDisplay');
-               const studyGoalEl = $('studyGoalDisplay');
-               if (streakEl) streakEl.textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
-               if (goalEl) goalEl.textContent = `Today: ${streakData.today} / 10`;
-               if (studyGoalEl) studyGoalEl.textContent = `Today: ${streakData.today} / 10`;
+               if (typeof renderStreakDisplay === 'function') renderStreakDisplay();
           }
           updateStreakDisplay();
 

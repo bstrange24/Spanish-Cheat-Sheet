@@ -15,9 +15,12 @@
                     <h1>Spanish Practice</h1>
                     <p class="subtitle">Pronounce, conjugate, and study all in one place.</p>
                </div>
-               <div class="header-right">
-                    <div class="streak" id="streakDisplay">🔥 Streak: 0 days</div>
-                    <button class="theme-toggle" id="themeBtn">🌙</button>
+               <div class="header-tools">
+                    <div class="streak" id="streakDisplay" title="Practice streak">
+                         <span class="streak-icon" aria-hidden="true">🔥</span>
+                         <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
+                    </div>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
                </div>
           </div>
 
@@ -36,7 +39,6 @@
                          <h2>One phrase at a time.</h2>
                          <p>Choose a prompt, listen to a natural model, and speak it back. Your score will appear below.</p>
                     </div>
-                    <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
                </section>
 
                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)">
@@ -99,6 +101,7 @@
                </div>
 
                <div class="btn-row practice-actions">
+                    <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
                     <button id="speakBtn">🔊 Hear</button>
                     <button id="listenBtn">🎤 Speak</button>
                     <button id="tryAgainBtn">🔄 Again</button>

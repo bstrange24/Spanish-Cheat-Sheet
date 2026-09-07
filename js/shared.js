@@ -75,6 +75,34 @@ function saveAll() {
      localStorage.setItem('sp_srs', JSON.stringify(srs));
 }
 
+function renderStreakDisplay() {
+     const count = (streakData && streakData.count) || 0;
+     const today = (streakData && streakData.today) || 0;
+     const unit = count === 1 ? ' day' : ' days';
+     const streakEl = $('streakDisplay');
+     if (streakEl) {
+          const countEl = streakEl.querySelector('.streak-count');
+          const unitEl = streakEl.querySelector('.streak-unit');
+          if (countEl) {
+               countEl.textContent = count;
+               if (unitEl) unitEl.textContent = unit;
+          } else {
+               streakEl.innerHTML =
+                    '<span class="streak-icon" aria-hidden="true">🔥</span>' +
+                    '<span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">' +
+                    count +
+                    '</span><span class="streak-unit">' +
+                    unit +
+                    '</span></span>';
+          }
+          streakEl.title = 'Streak: ' + count + unit;
+     }
+     const goalEl = $('goalDisplay');
+     if (goalEl) goalEl.textContent = 'Today: ' + today + ' / 10';
+     const studyGoalEl = $('studyGoalDisplay');
+     if (studyGoalEl) studyGoalEl.textContent = 'Today: ' + today + ' / 10';
+}
+
 function updateStreak() {
      const today = new Date().toDateString();
      if (streakData.last !== today) {
@@ -89,12 +117,7 @@ function updateStreak() {
           streakData.today = 0;
      }
      streakData.today++;
-     const streakEl = $('streakDisplay');
-     const goalEl = $('goalDisplay');
-     const studyGoalEl = $('studyGoalDisplay');
-     if (streakEl) streakEl.textContent = `🔥 Streak: ${streakData.count} day${streakData.count !== 1 ? 's' : ''}`;
-     if (goalEl) goalEl.textContent = `Today: ${streakData.today} / 10`;
-     if (studyGoalEl) studyGoalEl.textContent = `Today: ${streakData.today} / 10`;
+     renderStreakDisplay();
      saveAll();
 }
 
@@ -192,6 +215,7 @@ setTheme(savedTheme);
 if ($('themeBtn')) {
      $('themeBtn').onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
+renderStreakDisplay();
 
 // ===================== TAB NAVIGATION =====================
 function switchTab(tabId) {
