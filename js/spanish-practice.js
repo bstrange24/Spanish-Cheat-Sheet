@@ -135,7 +135,6 @@
           let playerTimeout;
           let micPermissionGranted = false;
           let conjugationState = { correct: 0, attempted: 0 };
-          let extraPool = null;
           let _autoPlayEnabled = true;
 
           // ===================== DOM =====================
@@ -208,15 +207,6 @@
                };
           }
 
-          function isVerb(e) {
-               return e.meaning.toLowerCase().startsWith('to ');
-          }
-
-          function dictEntry(k) {
-               if (!k) return null;
-               return DICT[k] || DICT[k.toLowerCase()] || DICT[normalize(k)] || null;
-          }
-
           function pageGloss(phrase) {
                try {
                     const map = JSON.parse(sessionStorage.getItem('sp_page_gloss') || '{}');
@@ -249,25 +239,6 @@
                     html += ` <span class="yo-form-badge">Yo form</span> of <strong>${gloss.infinitive}</strong>`;
                }
                return html;
-          }
-
-          function getFilteredKeys() {
-               const level = $('difficulty').value;
-               const cat = $('category').value;
-               const onlyV = $('onlyVerbs').checked;
-               const base = extraPool && extraPool.length ? extraPool.slice() : Object.keys(DICT);
-               return base.filter(k => {
-                    const e = dictEntry(k);
-                    if (!extraPool && !e) return false;
-                    if (level !== 'all') {
-                         if (!e || e.level !== level) return false;
-                    }
-                    if (cat !== 'all') {
-                         if (!e || e.cat !== cat) return false;
-                    }
-                    if (onlyV && (!e || !isVerb(e))) return false;
-                    return true;
-               });
           }
 
           // ===================== ACCENT BAR =====================
@@ -1945,7 +1916,8 @@
           // ===================== CATEGORY CHANGE =====================
           if ($('category')) {
                $('category').addEventListener('change', function () {
-                    extraPool = null;
+                    if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
+                    else extraPool = null;
                });
           }
 
@@ -1956,6 +1928,7 @@
                          resultCard.innerHTML = '<span class="bad">Top 1000 list is not loaded.</span>';
                          return;
                     }
+                    if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
                     extraPool = TOP1000.slice();
                     $('category').value = 'all';
                     $('difficulty').value = 'all';

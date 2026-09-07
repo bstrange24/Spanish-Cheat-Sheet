@@ -29,6 +29,34 @@ if (typeof extraPool === 'undefined') {
 const $ = id => document.getElementById(id);
 
 // ===================== SHARED HELPERS =====================
+function dictEntry(k) {
+     if (!k || typeof DICT !== 'object' || !DICT) return null;
+     return DICT[k] || DICT[k.toLowerCase()] || DICT[normalize(k)] || null;
+}
+
+function isVerb(e) {
+     return !!(e && e.meaning && String(e.meaning).toLowerCase().startsWith('to '));
+}
+
+function getFilteredKeys() {
+     const levelEl = $('difficulty');
+     const catEl = $('category');
+     const onlyEl = $('onlyVerbs');
+     const level = levelEl ? levelEl.value : 'all';
+     const cat = catEl ? catEl.value : 'all';
+     const onlyV = !!(onlyEl && onlyEl.checked);
+     const dict = typeof DICT === 'object' && DICT ? DICT : {};
+     const base = extraPool && extraPool.length ? extraPool.slice() : Object.keys(dict);
+     return base.filter(function (k) {
+          const e = dictEntry(k);
+          if (!(extraPool && extraPool.length) && !e) return false;
+          if (level !== 'all' && (!e || e.level !== level)) return false;
+          if (cat !== 'all' && (!e || e.cat !== cat)) return false;
+          if (onlyV && !isVerb(e)) return false;
+          return true;
+     });
+}
+
 function normalize(t) {
      return t
           .toLowerCase()
@@ -73,6 +101,32 @@ function updateStreak() {
 function closeModal(id) {
      const el = $(id);
      if (el) el.classList.remove('open');
+}
+
+function leaveCheatSheetPool() {
+     extraPool = null;
+     try {
+          sessionStorage.removeItem('sp_page_pool');
+          sessionStorage.removeItem('sp_page_quiz');
+          sessionStorage.removeItem('sp_page_pairs');
+          sessionStorage.removeItem('sp_page_label');
+          sessionStorage.removeItem('sp_page_gloss');
+     } catch (err) {}
+     const status = $('pagePoolStatus');
+     if (status) {
+          status.hidden = true;
+          status.textContent = '';
+     }
+     try {
+          const url = new URL(window.location.href);
+          if (url.searchParams.has('from') || url.searchParams.has('pool') || url.searchParams.get('mode') === 'quiz') {
+               url.searchParams.delete('from');
+               url.searchParams.delete('pool');
+               url.searchParams.delete('mode');
+               url.searchParams.delete('section');
+               window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+          }
+     } catch (err) {}
 }
 
 // ===================== AUDIO SERVER HELPERS =====================

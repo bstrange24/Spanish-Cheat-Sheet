@@ -3,10 +3,6 @@
      'use strict';
      if (typeof $ !== 'function') return;
 
-     if (typeof extraPool === 'undefined') {
-          var extraPool = null;
-     }
-
      const studyCard = $('studyCard');
      const studyBody = $('studyBody');
      const studyTitle = $('studyTitle');
@@ -68,6 +64,7 @@
      }
 
      function fromCheatSheet() {
+          if (!extraPool || !extraPool.length) return false;
           const params = new URLSearchParams(window.location.search);
           return params.get('mode') === 'quiz' || params.get('pool') === 'page' || params.get('from') === 'page';
      }
@@ -125,31 +122,38 @@
           } catch (err) {}
      }
 
-     function dictPairsFromPool() {
-          let keys = [];
+     function studyStatus(html) {
+          const card = $('resultCard');
+          if (card) card.innerHTML = html;
+     }
 
-          // Check if extraPool exists (from shared.js or spanish-practice.js)
-          if (typeof extraPool !== 'undefined' && extraPool && extraPool.length) {
-               keys = extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
-               debugLog('Using extraPool (no filters)', { keyCount: keys.length, firstFew: keys.slice(0, 5) });
-          } else {
-               // Try to get from sessionStorage
-               try {
-                    const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
-                    if (Array.isArray(stored) && stored.length) {
-                         keys = stored.filter(k => typeof k === 'string' && k.trim().length > 0);
-                         debugLog('Using sessionStorage pool', { keyCount: keys.length, firstFew: keys.slice(0, 5) });
-                    }
-               } catch (e) {}
-
-               if (!keys.length && typeof getFilteredKeys === 'function') {
-                    keys = getFilteredKeys();
-                    debugLog('Using getFilteredKeys() fallback', { keyCount: keys.length });
-               } else if (!keys.length && typeof DICT === 'object') {
-                    keys = Object.keys(DICT);
-                    debugLog('Using DICT keys fallback', { keyCount: keys.length });
-               }
+     function studySetLabel() {
+          if (extraPool && extraPool.length) {
+               return pageLabel() || 'current pool';
           }
+          const catEl = $('category');
+          const levelEl = $('difficulty');
+          const cat = catEl && catEl.value !== 'all' ? catEl.options[catEl.selectedIndex].text : '';
+          const level = levelEl && levelEl.value !== 'all' ? levelEl.options[levelEl.selectedIndex].text : '';
+          const bits = [cat, level].filter(Boolean);
+          return bits.length ? bits.join(' · ') : 'dictionary';
+     }
+
+     function studyKeys() {
+          if (typeof getFilteredKeys === 'function') {
+               const keys = getFilteredKeys().filter(k => typeof k === 'string' && k.trim().length > 0);
+               debugLog('Using getFilteredKeys()', { keyCount: keys.length, category: $('category') && $('category').value, firstFew: keys.slice(0, 5) });
+               return keys;
+          }
+          if (extraPool && extraPool.length) {
+               return extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
+          }
+          if (typeof DICT === 'object' && DICT) return Object.keys(DICT);
+          return [];
+     }
+
+     function dictPairsFromPool() {
+          const keys = studyKeys();
 
           const pairs = [];
           const seen = new Set();
@@ -670,9 +674,7 @@
           debugLog('Starting Quiz', { items: items?.length, label: label, sectionId: sectionId });
           const questions = buildQuestions(items || []);
           if (!questions.length) {
-               if (typeof resultCard !== 'undefined' && resultCard) {
-                    resultCard.innerHTML = '<span class="bad">No quiz items for the current filters.</span>';
-               }
+               studyStatus('<span class="bad">No quiz items for the current filters.</span>');
                return;
           }
           study = {
@@ -695,8 +697,7 @@
      function startQuizFromButton() {
           debugLog('startQuizFromButton called');
           const stored = storedQuiz();
-          const params = new URLSearchParams(window.location.search);
-          if ((params.get('mode') === 'quiz' || params.get('from') === 'page') && stored) {
+          if (fromCheatSheet() && stored && extraPool && extraPool.length) {
                const label = stored.label || pageLabel() || stored.sectionId || 'this page';
                debugLog('Using stored quiz from cheat sheet', { label: label, itemCount: stored.items?.length });
                startQuiz(stored.items, label, stored.sectionId);
@@ -706,37 +707,14 @@
           const pairs = dictPairsFromPool();
           debugLog('Quiz pairs from pool', { pairCount: pairs.length });
           if (!pairs.length) {
-               if (typeof resultCard !== 'undefined' && resultCard) {
-                    resultCard.innerHTML = '<span class="bad">No quiz items. Pick a category or open Quiz this page from the cheat sheet.</span>';
-               }
+               studyStatus('<span class="bad">No quiz items. Pick a category or open Quiz this page from the cheat sheet.</span>');
                return;
           }
-          startQuiz(pairs, extraPool && extraPool.length ? 'current pool' : 'dictionary');
+          startQuiz(pairs, studySetLabel());
      }
 
      function dictationPool() {
-          // Get keys from extraPool if available, otherwise from dictionary
-          let keys = [];
-
-          // Check if extraPool exists (from shared.js or spanish-practice.js)
-          if (typeof extraPool !== 'undefined' && extraPool && extraPool.length) {
-               keys = extraPool.filter(k => typeof k === 'string' && k.trim().length > 0);
-          } else {
-               // Try to get from sessionStorage (from cheat sheet)
-               try {
-                    const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
-                    if (Array.isArray(stored) && stored.length) {
-                         keys = stored.filter(k => typeof k === 'string' && k.trim().length > 0);
-                    }
-               } catch (e) {}
-
-               // If still empty, use getFilteredKeys or dictionary
-               if (!keys.length && typeof getFilteredKeys === 'function') {
-                    keys = getFilteredKeys();
-               } else if (!keys.length && typeof DICT === 'object') {
-                    keys = Object.keys(DICT);
-               }
-          }
+          const keys = studyKeys();
 
           const out = [];
           const seen = new Set();
@@ -825,9 +803,7 @@
           const words = dictationPool();
           debugLog('Dictation words', { wordCount: words.length, firstFew: words.slice(0, 5) });
           if (!words.length) {
-               if (typeof resultCard !== 'undefined' && resultCard) {
-                    resultCard.innerHTML = '<span class="bad">No dictation words for the current filters.</span>';
-               }
+               studyStatus('<span class="bad">No dictation words for the current filters.</span>');
                return;
           }
           study = {
@@ -999,9 +975,7 @@
                built.extra = true;
           }
           if (!queue.length) {
-               if (typeof resultCard !== 'undefined' && resultCard) {
-                    resultCard.innerHTML = '<span class="bad">No flashcards for the current filters (need words with meanings).</span>';
-               }
+               studyStatus('<span class="bad">No flashcards for the current filters (need words with meanings).</span>');
                return;
           }
           study = {
@@ -1036,7 +1010,7 @@
                .map(([key]) => key);
           debugLog('Weak words found', { weakCount: weak.length });
           if (!weak.length) {
-               if (typeof resultCard !== 'undefined' && resultCard) resultCard.innerHTML = '<span class="bad">Practice a few phrases first, then Weak words will build a review set here.</span>';
+               studyStatus('<span class="bad">Practice a few phrases first, then Weak words will build a review set here.</span>');
                return;
           }
           extraPool = weak;
@@ -1094,11 +1068,31 @@
           }
      });
 
+     function applyDictionaryStudySet(ev) {
+          const leavingPage = ev && ev.target && ev.target.id === 'category';
+          if (leavingPage) {
+               if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
+               else extraPool = null;
+          }
+          closeStudy();
+          const keys = studyKeys();
+          const label = studySetLabel();
+          const status = $('pagePoolStatus');
+          if (status) {
+               status.hidden = false;
+               status.textContent = `${label}: ${keys.length} words. Use Quiz, Dictation, or Flashcards.`;
+          }
+          studyStatus(`Study set: <strong>${esc(label)}</strong> (${keys.length} words). Click Quiz, Dictation, or Flashcards.`);
+     }
+
      if ($('studyExitBtn')) $('studyExitBtn').onclick = closeStudy;
      if ($('quizBtn')) $('quizBtn').onclick = startQuizFromButton;
      if ($('dictationBtn')) $('dictationBtn').onclick = startDictation;
      if ($('cardsBtn')) $('cardsBtn').onclick = startCards;
      if ($('weakBtn')) $('weakBtn').onclick = startWeakReview;
+     if ($('category')) $('category').addEventListener('change', applyDictionaryStudySet);
+     if ($('difficulty')) $('difficulty').addEventListener('change', applyDictionaryStudySet);
+     if ($('onlyVerbs')) $('onlyVerbs').addEventListener('change', applyDictionaryStudySet);
 
      loadPageContext();
      const params = new URLSearchParams(window.location.search);
@@ -1113,19 +1107,19 @@
      }
 })();
 
-// Try to load from sessionStorage if available
 (function loadExtraPoolFromStorage() {
-     if (!extraPool) {
-          try {
-               const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
-               if (Array.isArray(stored) && stored.length) {
-                    extraPool = stored;
-                    window._pagePool = stored;
-                    const label = sessionStorage.getItem('sp_page_label') || 'this page';
-                    window._pageLabel = label;
-               }
-          } catch (e) {}
-     }
+     const params = new URLSearchParams(window.location.search);
+     const fromPage = params.get('from') === 'page' || params.get('mode') === 'quiz' || params.get('pool') === 'page';
+     if (!fromPage || extraPool) return;
+     try {
+          const stored = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+          if (Array.isArray(stored) && stored.length) {
+               extraPool = stored;
+               window._pagePool = stored;
+               const label = sessionStorage.getItem('sp_page_label') || 'this page';
+               window._pageLabel = label;
+          }
+     } catch (e) {}
 })();
 
 function initStudyTab() {
