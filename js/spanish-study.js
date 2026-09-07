@@ -636,7 +636,7 @@
           const fb = $('studyFeedback');
           const miss = !ok && q.sectionId ? ` • ${sectionLink(q.sectionId)}` : '';
           if (fb) {
-               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>«${esc(q.answer)}»</strong>${yoNote}${miss}`;
+               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}<br/>` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>«${esc(q.answer)}»</strong>${yoNote}${miss}<br/>`;
           }
 
           if (q.mode === 'mcq') {
@@ -783,8 +783,8 @@
           const fb = $('studyFeedback');
           if (fb) {
                if (revealed) fb.innerHTML = `Answer: <strong>«${esc(answer)}»</strong>`;
-               else if (ok) fb.innerHTML = `<span class="good">✅ Correct.</span>${note}`;
-               else fb.innerHTML = `<span class="bad">❌ ${esc(given)}</span> → <strong>«${esc(answer)}»</strong>`;
+               else if (ok) fb.innerHTML = `<span class="good">✅ Correct.</span>${note}<br/>`;
+               else fb.innerHTML = `<span class="bad">❌ ${esc(given)}</span> → <strong>«${esc(answer)}»</strong><br/>`;
           }
           const actions = studyBody.querySelector('.study-actions');
           if (actions) {
@@ -921,7 +921,7 @@
           const fb = $('studyFeedback');
           const yoBit = card.irregularYo ? ` ${yoBadgeHtml(true)}` : card.yoForm ? ` ${yoBadgeHtml(false)}` : '';
           if (fb) {
-               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}` : `<span class="bad">❌</span> → <strong>«${esc(expected)}»</strong>${yoBit}`;
+               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}<br/>` : `<span class="bad">❌</span> → <strong>«${esc(expected)}»</strong>${yoBit}<br/>`;
           }
           showCardRating();
      }
