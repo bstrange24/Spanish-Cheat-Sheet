@@ -882,15 +882,33 @@
                     }
                }
 
+               let shuffledVerbs = [];
+               let shuffledVerbIndex = 0;
+
                function randomizeVerb() {
                     if (!conjugationVerbs.length) return;
-                    let next = Math.floor(Math.random() * conjugationVerbs.length);
-                    if (conjugationVerbs.length > 1 && next === Number(verbSelect.value)) next = (next + 1) % conjugationVerbs.length;
+
+                    // Create a new shuffled list when we've used every verb
+                    if (shuffledVerbIndex >= shuffledVerbs.length) {
+                         shuffledVerbs = conjugationVerbs.map((_, index) => index);
+
+                         // Fisher-Yates shuffle
+                         for (let i = shuffledVerbs.length - 1; i > 0; i--) {
+                              const j = Math.floor(Math.random() * (i + 1));
+                              [shuffledVerbs[i], shuffledVerbs[j]] = [shuffledVerbs[j], shuffledVerbs[i]];
+                         }
+
+                         shuffledVerbIndex = 0;
+                    }
+
+                    // Get the next verb from the shuffled list
+                    const next = shuffledVerbs[shuffledVerbIndex++];
                     verbSelect.value = String(next);
 
                     if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
                          randomizeSelect(pronounSelect);
                     }
+
                     if ($('conjugationRandomTense').checked && tenseSelect.options.length > 1) {
                          randomizeSelect(tenseSelect);
                     }
@@ -898,10 +916,39 @@
                     renderPrompt();
                }
 
+               let shuffledSelectOptions = new Map();
+               let shuffledSelectIndexes = new Map();
+
                function randomizeSelect(select) {
-                    const current = select.value;
-                    let next = Math.floor(Math.random() * select.options.length);
-                    if (select.options.length > 1 && select.options[next].value === current) next = (next + 1) % select.options.length;
+                    if (!select || select.options.length === 0) return;
+
+                    // Get or create the shuffle bag for this select
+                    if (!shuffledSelectOptions.has(select)) {
+                         shuffledSelectOptions.set(select, []);
+                         shuffledSelectIndexes.set(select, 0);
+                    }
+
+                    let shuffled = shuffledSelectOptions.get(select);
+                    let index = shuffledSelectIndexes.get(select);
+
+                    // Create a new shuffled list when we've used every option
+                    if (index >= shuffled.length) {
+                         shuffled = Array.from({ length: select.options.length }, (_, i) => i);
+
+                         // Fisher-Yates shuffle
+                         for (let i = shuffled.length - 1; i > 0; i--) {
+                              const j = Math.floor(Math.random() * (i + 1));
+                              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                         }
+
+                         shuffledSelectOptions.set(select, shuffled);
+                         index = 0;
+                    }
+
+                    // Select the next option
+                    const next = shuffled[index++];
+                    shuffledSelectIndexes.set(select, index);
+
                     select.value = select.options[next].value;
                }
 
