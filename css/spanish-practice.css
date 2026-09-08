@@ -12,6 +12,23 @@
      --danger: #dc2626;
      --tips-bg: #e8f0f8;
      --tips-border: #1d4ed8;
+
+     /* Irregular verb badge colors - Light theme */
+     --irreg-yo-bg: #fef3c7;
+     --irreg-yo-text: #92400e;
+     --irreg-yo-border: #f59e0b;
+
+     --stem-change-bg: #dbeafe;
+     --stem-change-text: #1e40af;
+     --stem-change-border: #3b82f6;
+
+     --highly-irreg-bg: #fecaca;
+     --highly-irreg-text: #991b1b;
+     --highly-irreg-border: #ef4444;
+
+     --prefix-counting-bg: #ede9fe;
+     --prefix-counting-text: #5b21b6;
+     --prefix-counting-border: #8b5cf6;
 }
 
 [data-theme='dark'] {
@@ -26,6 +43,23 @@
      --danger: #f87171;
      --tips-bg: #14233d;
      --tips-border: #4f8cff;
+
+     /* Irregular verb badge colors - Dark theme */
+     --irreg-yo-bg: rgba(251, 191, 36, 0.12);
+     --irreg-yo-text: #fbbf24;
+     --irreg-yo-border: rgba(251, 191, 36, 0.25);
+
+     --stem-change-bg: rgba(96, 165, 250, 0.12);
+     --stem-change-text: #93c5fd;
+     --stem-change-border: rgba(96, 165, 250, 0.25);
+
+     --highly-irreg-bg: rgba(248, 113, 113, 0.12);
+     --highly-irreg-text: #fca5a5;
+     --highly-irreg-border: rgba(248, 113, 113, 0.25);
+
+     --prefix-counting-bg: rgba(196, 181, 253, 0.12);
+     --prefix-counting-text: #c4b5fd;
+     --prefix-counting-border: rgba(196, 181, 253, 0.25);
 }
 
 /* ===== BASE STYLES ===== */
@@ -1649,4 +1683,110 @@ kbd {
 .page-pool-status[hidden],
 .page-pool-status:empty {
      display: none !important;
+}
+
+/* ===== IRREGULAR VERB BADGES ===== */
+.irregular-badge {
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+     padding: 4px 12px;
+     border-radius: 12px;
+     font-size: 0.78rem;
+     font-weight: 600;
+     line-height: 1.4;
+     border: 1px solid transparent;
+     transition: transform 0.2s ease, border-color 0.2s ease;
+     cursor: help;
+}
+
+.irregular-badge:hover {
+     transform: scale(1.05);
+}
+
+.irregular-badge .badge-detail {
+     font-weight: 400;
+     opacity: 0.85;
+     font-size: 0.7rem;
+}
+
+/* Individual badge types */
+.irregular-badge.type-irregular-yo {
+     background: var(--irreg-yo-bg);
+     color: var(--irreg-yo-text);
+     border-color: var(--irreg-yo-border);
+}
+
+.irregular-badge.type-stem-changer {
+     background: var(--stem-change-bg);
+     color: var(--stem-change-text);
+     border-color: var(--stem-change-border);
+}
+
+.irregular-badge.type-highly-irregular {
+     background: var(--highly-irreg-bg);
+     color: var(--highly-irreg-text);
+     border-color: var(--highly-irreg-border);
+}
+
+.irregular-badge.type-prefix-counting {
+     background: var(--prefix-counting-bg);
+     color: var(--prefix-counting-text);
+     border-color: var(--prefix-counting-border);
+}
+
+/* Multiple types combined */
+.irregular-badge.type-multiple {
+     background: var(--bg);
+     color: var(--text);
+     border-color: var(--border);
+}
+
+/* ===== IRREGULAR LEGEND ===== */
+.irregular-legend {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 10px 16px;
+     padding: 10px 14px;
+     background: var(--bg);
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     margin-top: 10px;
+}
+
+.irregular-legend-item {
+     display: flex;
+     align-items: center;
+     gap: 6px;
+     font-size: 0.82rem;
+     color: var(--text);
+}
+
+.irregular-legend-item .dot {
+     width: 12px;
+     height: 12px;
+     border-radius: 50%;
+     display: inline-block;
+     border: 1px solid var(--border);
+     flex-shrink: 0;
+}
+
+.irregular-legend-item .dot.dot-irregular-yo {
+     background: var(--irreg-yo-bg);
+     border-color: var(--irreg-yo-border);
+}
+
+.irregular-legend-item .dot.dot-stem-changer {
+     background: var(--stem-change-bg);
+     border-color: var(--stem-change-border);
+}
+
+.irregular-legend-item .dot.dot-highly-irregular {
+     background: var(--highly-irreg-bg);
+     border-color: var(--highly-irreg-border);
+}
+
+.irregular-legend-item .dot.dot-prefix-counting {
+     background: var(--prefix-counting-bg);
+     border-color: var(--prefix-counting-border);
 }

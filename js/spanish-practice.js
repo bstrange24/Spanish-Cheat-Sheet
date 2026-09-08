@@ -838,21 +838,11 @@
                     let irregBadge = '';
                     if (irregInfo) {
                          irregBadge = `
-            <span class="irregular-badge" 
-                  style="background: ${irregInfo.color}; 
-                         color: white; 
-                         padding: 2px 10px; 
-                         border-radius: 12px; 
-                         font-size: 0.8rem; 
-                         font-weight: 600; 
-                         display: inline-flex; 
-                         align-items: center; 
-                         gap: 4px;"
-                  title="${irregInfo.description}">
-                ${irregInfo.icon} ${irregInfo.label}
-                <span style="font-weight: 400; opacity: 0.8;">${irregInfo.shortLabel ? '· ' + irregInfo.shortLabel : ''}</span>
-            </span>
-        `;
+               <span class="irregular-badge ${irregInfo.cssClass}" title="${irregInfo.description}">
+                    ${irregInfo.icon} ${irregInfo.label}
+                    <span class="badge-detail">${irregInfo.shortLabel ? '· ' + irregInfo.shortLabel : ''}</span>
+               </span>
+          `;
                     }
 
                     let answerHtml = '';
@@ -909,34 +899,37 @@
                function getIrregularDisplayInfoFromClass(irregClassArray) {
                     if (!irregClassArray || !irregClassArray.length) return null;
 
-                    const displayMap = {
-                         'irregular-yo': { label: 'Irregular "yo"', icon: '👤', color: '#f59e0b' },
-                         'stem-changer': { label: 'Stem Change', icon: '🔄', color: '#3b82f6' },
-                         'highly-irregular': { label: 'Highly Irregular', icon: '⚡', color: '#ef4444' },
-                         'prefix-counting': { label: 'Prefix-counting', icon: '📎', color: '#8b5cf6' },
+                    // Map type to CSS class
+                    const typeMap = {
+                         'irregular-yo': { label: 'Irregular "yo"', icon: '👤', cssClass: 'type-irregular-yo' },
+                         'stem-changer': { label: 'Stem Change', icon: '🔄', cssClass: 'type-stem-changer' },
+                         'highly-irregular': { label: 'Highly Irregular', icon: '⚡', cssClass: 'type-highly-irregular' },
+                         'prefix-counting': { label: 'Prefix-counting', icon: '📎', cssClass: 'type-prefix-counting' },
                     };
 
                     if (irregClassArray.length === 1) {
                          const info = irregClassArray[0];
-                         const display = displayMap[info.type];
+                         const typeInfo = typeMap[info.type];
                          return {
-                              ...display,
+                              cssClass: typeInfo.cssClass,
+                              label: typeInfo.label,
+                              icon: typeInfo.icon,
                               detail: info.pattern || info.yo || '',
                               description: info.pattern || `Yo: ${info.yo}` || '',
                               shortLabel: info.pattern || info.yo || '',
                          };
                     } else {
                          // Multiple classifications
-                         const labels = irregClassArray.map(c => displayMap[c.type].label).join(' + ');
-                         const icons = irregClassArray.map(c => displayMap[c.type].icon).join('');
+                         const labels = irregClassArray.map(c => typeMap[c.type]?.label || c.type).join(' + ');
+                         const icons = irregClassArray.map(c => typeMap[c.type]?.icon || '📌').join('');
                          const details = irregClassArray
                               .map(c => c.pattern || c.yo || '')
                               .filter(Boolean)
                               .join(' · ');
                          return {
+                              cssClass: 'type-multiple',
                               label: labels,
                               icon: icons,
-                              color: '#6b7280', // neutral color for multiple types
                               detail: details,
                               description: details,
                               shortLabel: details,
