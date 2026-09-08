@@ -197,13 +197,13 @@
           return pairs;
      }
 
-     const ACCENT_CHARS = ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ', '¿', '¡'];
+     const ACCENT_CHARS = ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ', '¿', '¡', '?'];
 
      function accentBarHtml() {
           return (
-               '<div class="accent-bar" aria-label="Spanish accent marks">' +
+               '<div class="study-accent-bar" aria-label="Spanish accent marks">' +
                ACCENT_CHARS.map(function (ch) {
-                    return `<button type="button" class="accent-key" data-study="accent" data-char="${ch}" title="Insert ${ch} — Shift+click for uppercase">${ch}</button>`;
+                    return `<button type="button" class="study-accent-key" data-study="accent" data-char="${ch}" title="Insert ${ch} — Shift+click for uppercase">${ch}</button>`;
                }).join('') +
                '</div>'
           );
@@ -1022,7 +1022,24 @@
           const btn = e.target.closest('[data-study="accent"]');
           if (!btn) return;
           e.preventDefault();
-          insertAccent(btn.getAttribute('data-char') || '', e.shiftKey);
+          const char = btn.getAttribute('data-char') || '';
+          const input = document.getElementById('studyInput');
+          if (!input || input.disabled || !char) return;
+
+          let ch = char;
+          // Check for Shift key for uppercase
+          if (window._shiftPressed && /[áéíóúüñ]/i.test(char)) {
+               ch = char.toUpperCase();
+          }
+
+          const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+          const end = input.selectionEnd == null ? start : input.selectionEnd;
+          input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+          const pos = start + ch.length;
+          try {
+               input.setSelectionRange(pos, pos);
+          } catch (err) {}
+          input.focus();
      });
 
      studyBody.addEventListener('click', function (e) {
