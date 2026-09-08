@@ -12,7 +12,6 @@
           });
           return;
      }
-
      const IRREGULAR_CLASSIFICATIONS = {
           // Irregular "yo" verbs (yo form only)
           yo: {
@@ -38,6 +37,32 @@
                producir: { type: 'irregular-yo', yo: 'produzco', pattern: 'producir → produzco' },
                conducir: { type: 'irregular-yo', yo: 'conduzco', pattern: 'conducir → conduzco' },
                traducir: { type: 'irregular-yo', yo: 'traduzco', pattern: 'traducir → traduzco' },
+               agradecer: { type: 'irregular-yo', yo: 'agradezco', pattern: 'agradecer → agradezco' },
+               atraer: { type: 'irregular-yo', yo: 'atraigo', pattern: 'atraer → atraigo' },
+               convencer: { type: 'irregular-yo', yo: 'convenzo', pattern: 'convencer → convenzo' },
+               crecer: { type: 'irregular-yo', yo: 'crezco', pattern: 'crecer → crezco' },
+               dirigir: { type: 'irregular-yo', yo: 'dirijo', pattern: 'dirigir → dirijo' },
+               distinguir: { type: 'irregular-yo', yo: 'distingo', pattern: 'distinguir → distingo' },
+               escoger: { type: 'irregular-yo', yo: 'escojo', pattern: 'escoger → escojo' },
+               exigir: { type: 'irregular-yo', yo: 'exijo', pattern: 'exigir → exijo' },
+               favorecer: { type: 'irregular-yo', yo: 'favorezco', pattern: 'favorecer → favorezco' },
+               fluir: { type: 'irregular-yo', yo: 'fluyo', pattern: 'fluir → fluyo' },
+               incluir: { type: 'irregular-yo', yo: 'incluyo', pattern: 'incluir → incluyo' },
+               influir: { type: 'irregular-yo', yo: 'influyo', pattern: 'influir → influyo' },
+               introducir: { type: 'irregular-yo', yo: 'introduzco', pattern: 'introducir → introduzco' },
+               merecer: { type: 'irregular-yo', yo: 'merezco', pattern: 'merecer → merezco' },
+               padecer: { type: 'irregular-yo', yo: 'padezco', pattern: 'padecer → padezco' },
+               pertenecer: { type: 'irregular-yo', yo: 'pertenezco', pattern: 'pertenecer → pertenezco' },
+               predecir: { type: 'irregular-yo', yo: 'predigo', pattern: 'predecir → predigo' },
+               prevenir: { type: 'irregular-yo', yo: 'prevengo', pattern: 'prevenir → prevengo' },
+               proteger: { type: 'irregular-yo', yo: 'protejo', pattern: 'proteger → protejo' },
+               reducir: { type: 'irregular-yo', yo: 'reduzco', pattern: 'reducir → reduzco' },
+               satisfacer: { type: 'irregular-yo', yo: 'satisfago', pattern: 'satisfacer → satisfago' },
+               sostener: { type: 'irregular-yo', yo: 'sostengo', pattern: 'sostener → sostengo' },
+               surgir: { type: 'irregular-yo', yo: 'surjo', pattern: 'surgir → surjo' },
+               torcer: { type: 'irregular-yo', yo: 'tuervo', pattern: 'torcer → tuervo' },
+               valer: { type: 'irregular-yo', yo: 'valgo', pattern: 'valer → valgo' },
+               zurcir: { type: 'irregular-yo', yo: 'zurzo', pattern: 'zurcir → zurzo' },
           },
 
           // Stem-changing verbs (o→ue, e→ie, e→i, u→ue)
@@ -45,58 +70,108 @@
                // o→ue
                acostar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                almorzar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               comprobar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                contar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                costar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                demostrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                devolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                dormir: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                encontrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
-               jugar: { pattern: 'u→ue', type: 'stem-changer', change: 'u→ue' },
+               forzar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                llover: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                morir: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                mostrar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               mover: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                poder: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                probar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               promover: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                recordar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                resolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                soñar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                volar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
                volver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
-               comprobar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               apostar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               aprobar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               colgar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               consolar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               contar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               desaprobar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               descolgar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               envolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               llover: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               morder: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               oler: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               resolver: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               rodar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               rogar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               soldar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               soler: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               sonar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               torcer: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+               tronar: { pattern: 'o→ue', type: 'stem-changer', change: 'o→ue' },
+
+               // u→ue
+               jugar: { pattern: 'u→ue', type: 'stem-changer', change: 'u→ue' },
 
                // e→ie
+               calentar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                cerrar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
-               convertir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                comenzar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                confesar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               convertir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               defender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                despertar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                empezar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               encender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                entender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               extender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               gobernar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               manifestar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                mentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                negar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                nevar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                pensar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                perder: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                preferir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               recomendar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                sentar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                sentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                temblar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                tender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                tener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
                venir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               atender: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               calentar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               confesar: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               consentir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               contener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               detener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               divertir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               herir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               mantener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               obtener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               sostener: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
+               sugerir: { pattern: 'e→ie', type: 'stem-changer', change: 'e→ie' },
 
                // e→i
                conseguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                corregir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                decir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                elegir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               medir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                pedir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                reír: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                repetir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                seguir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                servir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
                vestir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
-               medir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               competir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               concebir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               despedir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               impedir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               reñir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               rendir: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
+               sonreír: { pattern: 'e→i', type: 'stem-changer', change: 'e→i' },
           },
 
           // Highly irregular verbs (multiple irregularities)
@@ -109,18 +184,34 @@
 
           // Prefix-counting verbs (verbs that follow the pattern of their root)
           'prefix-counting': {
+               // tener family
                contener: { type: 'prefix-counting', root: 'tener', pattern: 'contener follows tener' },
+               detener: { type: 'prefix-counting', root: 'tener', pattern: 'detener follows tener' },
                mantener: { type: 'prefix-counting', root: 'tener', pattern: 'mantener follows tener' },
                obtener: { type: 'prefix-counting', root: 'tener', pattern: 'obtener follows tener' },
+               sostener: { type: 'prefix-counting', root: 'tener', pattern: 'sostener follows tener' },
+
+               // traer family
+               atraer: { type: 'prefix-counting', root: 'traer', pattern: 'atraer follows traer' },
                contraer: { type: 'prefix-counting', root: 'traer', pattern: 'contraer follows traer' },
                distraer: { type: 'prefix-counting', root: 'traer', pattern: 'distraer follows traer' },
-               atraer: { type: 'prefix-counting', root: 'traer', pattern: 'atraer follows traer' },
-               suponer: { type: 'prefix-counting', root: 'poner', pattern: 'suponer follows poner' },
+
+               // poner family
                imponer: { type: 'prefix-counting', root: 'poner', pattern: 'imponer follows poner' },
-               reconocer: { type: 'prefix-counting', root: 'conocer', pattern: 'reconocer follows conocer' },
+               suponer: { type: 'prefix-counting', root: 'poner', pattern: 'suponer follows poner' },
+
+               // conocer family
                desconocer: { type: 'prefix-counting', root: 'conocer', pattern: 'desconocer follows conocer' },
+               reconocer: { type: 'prefix-counting', root: 'conocer', pattern: 'reconocer follows conocer' },
+
+               // conducir family
                producir: { type: 'prefix-counting', root: 'conducir', pattern: 'producir follows conducir' },
+               reducir: { type: 'prefix-counting', root: 'conducir', pattern: 'reducir follows conducir' },
+               introducir: { type: 'prefix-counting', root: 'conducir', pattern: 'introducir follows conducir' },
                traducir: { type: 'prefix-counting', root: 'conducir', pattern: 'traducir follows conducir' },
+
+               // decir family
+               predecir: { type: 'prefix-counting', root: 'decir', pattern: 'predecir follows decir' },
           },
      };
 
@@ -1974,19 +2065,25 @@
           }
 
           // ===================== TOP 1000 =====================
-          if ($('top1000Btn')) {
-               $('top1000Btn').onclick = () => {
-                    if (typeof TOP1000 === 'undefined' || !TOP1000.length) {
-                         resultCard.innerHTML = '<span class="bad">Top 1000 list is not loaded.</span>';
-                         return;
-                    }
-                    if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
-                    extraPool = TOP1000.slice();
-                    $('category').value = 'all';
-                    $('difficulty').value = 'all';
-                    resultCard.innerHTML = `Pool: Top 1000 (${extraPool.length} words). Click Random or Weak.`;
-               };
-          }
+          // if ($('top1000Btn')) {
+          //      $('top1000Btn').onclick = () => {
+          //           if (typeof TOP1000 === 'undefined' || !TOP1000.length) {
+          //                if (resultCard) {
+          //                     resultCard.innerHTML = '<span class="bad">Top 1000 list is not loaded.</span>';
+          //                } else {
+          //                     alert('Top 1000 list is not loaded.');
+          //                }
+          //                return;
+          //           }
+          //           if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
+          //           extraPool = TOP1000.slice();
+          //           if ($('category')) $('category').value = 'all';
+          //           if ($('difficulty')) $('difficulty').value = 'all';
+          //           if (resultCard) {
+          //                resultCard.innerHTML = `Pool: Top 1000 (${extraPool.length} words). Click Random or Weak.`;
+          //           }
+          //      };
+          // }
 
           // ===================== PRACTICE PARAMS =====================
           (function applyPracticeParams() {

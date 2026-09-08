@@ -313,7 +313,7 @@
                .trim();
           if (!e || !t) return '';
           if (e === t) return '';
-          if (normalize(e) === normalize(t)) return ` Watch the accent: «${esc(expected)}»`;
+          if (normalize(e) === normalize(t)) return ` Watch the accent: ${esc(expected)}`;
           return '';
      }
 
@@ -329,20 +329,20 @@
           const yoLabel = q.irregularYo ? 'irregular yo' : 'yo';
           if (q.yoHint && yo && normalize(q.answer) === normalize(yo)) {
                if (!ok && inf && givenN === normalize(inf)) {
-                    return ` That's the infinitive. The ${yoLabel} form is «${esc(q.answer)}».`;
+                    return ` That's the infinitive. The ${yoLabel} form is ${esc(q.answer)}.`;
                }
                if (inf) return ` ${yoBadgeHtml(q.irregularYo)} ${esc(inf)} → ${esc(q.answer)}`;
                return ` ${yoBadgeHtml(q.irregularYo)}`;
           }
           if (q.yoHint && inf && normalize(q.answer) === normalize(inf)) {
                if (!ok && yo && givenN === normalize(yo)) {
-                    return ` That's the ${yoLabel} form. The infinitive is «${esc(q.answer)}».`;
+                    return ` That's the ${yoLabel} form. The infinitive is ${esc(q.answer)}.`;
                }
                if (yo) return ` ${yoBadgeHtml(q.irregularYo)} ${esc(q.answer)} → ${esc(yo)}`;
                return ` ${yoBadgeHtml(q.irregularYo)}`;
           }
           if (!q.yoHint && q.yoForm && givenN === normalize(q.yoForm) && normalize(q.answer) !== givenN) {
-               return ` That's the yo form. The infinitive is «${esc(q.answer)}».`;
+               return ` That's the yo form. The infinitive is ${esc(q.answer)}.`;
           }
           return '';
      }
@@ -516,7 +516,7 @@
                          Object.assign(
                               {
                                    mode: options.length > 1 ? 'mcq' : 'type',
-                                   prompt: '«' + p.spanish + '» is the ' + label + ' form of which verb?',
+                                   prompt: '' + p.spanish + ' is the ' + label + ' form of which verb?',
                                    answer: p.infinitive,
                                    options: options,
                                    speak: p.spanish,
@@ -636,7 +636,7 @@
           const fb = $('studyFeedback');
           const miss = !ok && q.sectionId ? ` • ${sectionLink(q.sectionId)}` : '';
           if (fb) {
-               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}<br/>` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>«${esc(q.answer)}»</strong>${yoNote}${miss}<br/>`;
+               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}<br/>` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>${esc(q.answer)}</strong>${yoNote}${miss}<br/>`;
           }
 
           if (q.mode === 'mcq') {
@@ -782,9 +782,9 @@
           const note = accentNote(answer, given);
           const fb = $('studyFeedback');
           if (fb) {
-               if (revealed) fb.innerHTML = `Answer: <strong>«${esc(answer)}»</strong>`;
+               if (revealed) fb.innerHTML = `Answer: <strong>${esc(answer)}</strong>`;
                else if (ok) fb.innerHTML = `<span class="good">✅ Correct.</span>${note}<br/>`;
-               else fb.innerHTML = `<span class="bad">❌ ${esc(given)}</span> → <strong>«${esc(answer)}»</strong><br/>`;
+               else fb.innerHTML = `<span class="bad">❌ ${esc(given)}</span> → <strong>${esc(answer)}</strong><br/>`;
           }
           const actions = studyBody.querySelector('.study-actions');
           if (actions) {
@@ -921,7 +921,7 @@
           const fb = $('studyFeedback');
           const yoBit = card.irregularYo ? ` ${yoBadgeHtml(true)}` : card.yoForm ? ` ${yoBadgeHtml(false)}` : '';
           if (fb) {
-               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}<br/>` : `<span class="bad">❌</span> → <strong>«${esc(expected)}»</strong>${yoBit}<br/>`;
+               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}<br/>` : `<span class="bad">❌</span> → <strong>${esc(expected)}</strong>${yoBit}<br/>`;
           }
           showCardRating();
      }
@@ -938,7 +938,7 @@
           });
           const fb = $('studyFeedback');
           const yoBit = card.irregularYo ? ` ${yoBadgeHtml(true)}` : card.yoForm ? ` ${yoBadgeHtml(false)}` : '';
-          if (fb) fb.innerHTML = `<strong>«${esc(back)}»</strong>${yoBit}`;
+          if (fb) fb.innerHTML = `<strong>${esc(back)}</strong>${yoBit}`;
           speakText(card.spanish);
           showCardRating();
      }
