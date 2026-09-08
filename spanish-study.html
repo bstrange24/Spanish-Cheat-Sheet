@@ -95,18 +95,16 @@
                          <label class="filter-check"><input type="checkbox" id="onlyVerbs" /> Only verbs</label>
                          <label class="filter-check"><input type="checkbox" id="autoAdvance" /> Auto-advance successful answers</label>
                     </div>
+                    <div>Choose a study mode to begin.</div>
+                    <div class="study-launcher" aria-label="Study modes">
+                         <button id="quizBtn" class="mode-card"><span>📝</span><strong>Quiz</strong><small>Recall meanings and forms</small></button>
+                         <button id="dictationBtn" class="mode-card"><span>✍️</span><strong>Dictation</strong><small>Listen and type Spanish</small></button>
+                         <button id="cardsBtn" class="mode-card"><span>🃏</span><strong>Flashcards</strong><small>Review what is due</small></button>
+                         <button id="weakBtn" class="mode-card"><span>📉</span><strong>Weak words</strong><small>Practice your least-used items</small></button>
+                    </div>
+                    <div class="page-pool-status" id="pagePoolStatus" hidden></div>
                </div>
           </section>
-
-          <div class="study-launcher" aria-label="Study modes">
-               <button id="quizBtn" class="mode-card"><span>📝</span><strong>Quiz</strong><small>Recall meanings and forms</small></button>
-               <button id="dictationBtn" class="mode-card"><span>✍️</span><strong>Dictation</strong><small>Listen and type Spanish</small></button>
-               <button id="cardsBtn" class="mode-card"><span>🃏</span><strong>Flashcards</strong><small>Review what is due</small></button>
-               <button id="weakBtn" class="mode-card"><span>📉</span><strong>Weak words</strong><small>Practice your least-used items</small></button>
-          </div>
-
-          <div class="card result-card" id="resultCard">Choose a study mode to begin.</div>
-          <div class="page-pool-status" id="pagePoolStatus" hidden></div>
 
           <div class="card" id="studyCard" style="display: none">
                <div class="player-controls">

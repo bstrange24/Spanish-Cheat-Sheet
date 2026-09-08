@@ -865,10 +865,10 @@ input[type='range'] {
      display: inline-flex;
      align-items: center;
      max-width: 100%;
-     margin: -4px 0 14px;
+     margin: -4px 0 0px;
      padding: 6px 10px;
      border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-     border-radius: 999px;
+     border-radius: 9px;
      background: color-mix(in srgb, var(--accent) 7%, var(--card));
      color: var(--accent);
      font-size: 0.86rem;

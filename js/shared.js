@@ -87,13 +87,7 @@ function renderStreakDisplay() {
                countEl.textContent = count;
                if (unitEl) unitEl.textContent = unit;
           } else {
-               streakEl.innerHTML =
-                    '<span class="streak-icon" aria-hidden="true">🔥</span>' +
-                    '<span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">' +
-                    count +
-                    '</span><span class="streak-unit">' +
-                    unit +
-                    '</span></span>';
+               streakEl.innerHTML = '<span class="streak-icon" aria-hidden="true">🔥</span>' + '<span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">' + count + '</span><span class="streak-unit">' + unit + '</span></span>';
           }
           streakEl.title = 'Streak: ' + count + unit;
      }

@@ -45,18 +45,18 @@
                <!-- <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)"> -->
                <!-- </div> -->
 
-               <label for="lang">Spanish variant</label>
-               <select id="lang">
-                    <option value="es-ES">Spain (es-ES)</option>
-                    <option value="es-MX" selected>Mexico (es-MX)</option>
-                    <option value="es-US">United States (es-US)</option>
-                    <option value="es-AR">Argentina (es-AR)</option>
-               </select>
-
-               <label for="target">Spanish word or sentence</label>
-               <input type="text" id="target" placeholder="Type or click 🎲 Random" />
-
                <div class="control-panel">
+                    <label for="lang">Spanish variant</label>
+                    <select id="lang">
+                         <option value="es-ES">Spain (es-ES)</option>
+                         <option value="es-MX" selected>Mexico (es-MX)</option>
+                         <option value="es-US">United States (es-US)</option>
+                         <option value="es-AR">Argentina (es-AR)</option>
+                    </select>
+
+                    <label for="target">Spanish word or sentence</label>
+                    <input type="text" id="target" placeholder="Type or click 🎲 Random" />
+
                     <div class="filters">
                          <div class="filter-fields">
                               <div class="filter-field">
@@ -103,24 +103,24 @@
                          <input type="range" id="ttsRate" min="0.5" max="1.2" step="0.05" value="0.85" />
                          <span id="rateValue">0.85</span>
                     </div>
-               </div>
 
-               <div class="btn-row practice-actions">
-                    <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
-                    <button id="speakBtn">🔊 Hear</button>
-                    <button id="listenBtn">🎤 Speak</button>
-                    <button id="tryAgainBtn">🔄 Again</button>
-                    <button id="starBtn">⭐ Star</button>
-                    <button id="weakBtn">📉 Weak</button>
-                    <button id="recordBtn">⏺ Record me</button>
-                    <button id="playMyBtn" disabled>▶ My voice</button>
-                    <button id="playerBtn">🎧 Player</button>
-                    <button id="clearBtn">Clear</button>
+                    <div class="btn-row practice-actions">
+                         <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
+                         <button id="speakBtn">🔊 Hear</button>
+                         <button id="listenBtn">🎤 Speak</button>
+                         <button id="tryAgainBtn">🔄 Again</button>
+                         <button id="starBtn">⭐ Star</button>
+                         <button id="weakBtn">📉 Weak</button>
+                         <button id="recordBtn">⏺ Record me</button>
+                         <button id="playMyBtn" disabled>▶ My voice</button>
+                         <button id="playerBtn">🎧 Player</button>
+                         <button id="clearBtn">Clear</button>
+                    </div>
+
+                    <div class="page-pool-status" id="pagePoolStatus" hidden></div>
                </div>
 
                <!-- <div class="info" style="margin-bottom: 12px">Shortcuts: <kbd>Space</kbd> Speak • <kbd>R</kbd> Random • <kbd>H</kbd> Hear • <kbd>T</kbd> Test Mode • <kbd>S</kbd> Star</div> -->
-
-               <div class="page-pool-status" id="pagePoolStatus" hidden></div>
 
                <!-- Target Card -->
                <div class="card" id="targetCard" style="display: none">
@@ -159,7 +159,7 @@
           </section>
 
           <!-- ==================== CONJUGATION TAB ==================== -->
-          <section id="conjugationPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
+          <!-- <section id="conjugationPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
                <section class="practice-intro">
                     <div>
                          <span class="eyebrow">Conjugation lab</span>
@@ -225,10 +225,10 @@
                     <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
                </div>
                <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
-          </section>
+          </section> -->
 
           <!-- ==================== STUDY TAB ==================== -->
-          <section id="studyPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
+          <!-- <section id="studyPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
                <section class="practice-intro">
                     <div>
                          <span class="eyebrow">Study desk</span>
@@ -325,7 +325,7 @@
                          <button id="resetBtn">🗑 Reset all progress</button>
                     </div>
                </section>
-          </section>
+          </section> -->
 
           <!-- ==================== MODALS ==================== -->
           <div class="modal" id="historyModal">
