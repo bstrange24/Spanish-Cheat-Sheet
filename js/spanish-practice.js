@@ -289,8 +289,8 @@
                     try {
                          const iframeDoc = playerFrame.contentDocument || playerFrame.contentWindow?.document;
                          if (iframeDoc && iframeDoc.readyState === 'complete') {
-                              playerStatus.innerHTML = `✅ Loaded: <strong>${text}</strong>`;
-                              playerStatus.className = 'player-status success';
+                              // playerStatus.innerHTML = `✅ Loaded: <strong>${text}</strong>`;
+                              // playerStatus.className = 'player-status success';
                          } else {
                               playerStatus.innerHTML = `⚠️ Could not load player. Is the server running at <code>${PLAYER_BASE_URL}</code>?`;
                               playerStatus.className = 'player-status error';
@@ -1123,7 +1123,7 @@
                     const k = keys[Math.floor(Math.random() * keys.length)];
                     targetInput.value = k;
                     showTargetInfo();
-                    resultCard.innerHTML = `Loaded: <strong>${k}</strong>`;
+                    // resultCard.innerHTML = `Loaded: <strong>${k}</strong>`;
                };
           }
 

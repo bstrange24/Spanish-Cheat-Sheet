@@ -1082,7 +1082,7 @@
                status.hidden = false;
                status.textContent = `${label}: ${keys.length} words. Use Quiz, Dictation, or Flashcards.`;
           }
-          studyStatus(`Study set: <strong>${esc(label)}</strong> (${keys.length} words). Click Quiz, Dictation, or Flashcards.`);
+          // studyStatus(`Study set: <strong>${esc(label)}</strong> (${keys.length} words). Click Quiz, Dictation, or Flashcards.`);
      }
 
      if ($('studyExitBtn')) $('studyExitBtn').onclick = closeStudy;
