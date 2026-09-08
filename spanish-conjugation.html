@@ -25,8 +25,6 @@
           </div>
 
           <nav class="page-nav" aria-label="Practice navigation">
-               <!-- <a href="spanish-practice.html">Pronunciation</a> -->
-               <!-- <a href="spanish-study.html">Study &amp; progress</a> -->
                <a class="active" href="spanish-conjugation.html">Conjugation</a>
                <a href="spanish-cheatsheet.html">Cheat sheet</a>
           </nav>
@@ -97,9 +95,11 @@
                               </select>
                          </div>
                          <div>
-                              <label for="conjugationVerb">Verb</label>
+                              <div class="field-label-row">
+                                   <label for="conjugationVerb">Verb</label>
+                                   <span id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html…</span>
+                              </div>
                               <select id="conjugationVerb"></select>
-                              <div id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html...</div>
                          </div>
                          <div>
                               <label for="conjugationTense">Tense</label>

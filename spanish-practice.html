@@ -26,8 +26,6 @@
 
           <nav class="page-nav" aria-label="Practice navigation">
                <a href="#" data-tab="pronunciation" class="active">Pronunciation</a>
-               <!-- <a href="#" data-tab="conjugation">Conjugation</a>
-               <a href="#" data-tab="study">Study &amp; progress</a> -->
                <a href="spanish-cheatsheet.html">Cheat sheet</a>
           </nav>
 
@@ -42,10 +40,13 @@
                     <span id="study-goal" id="goalDisplay" style="font-size: 0.9rem; color: var(--muted)">Today: 0 / 10</span>
                </section>
 
-               <!-- <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; font-size: 0.9rem; color: var(--muted)"> -->
-               <!-- </div> -->
-
                <div class="control-panel">
+                    <div class="section-heading">
+                         <div>
+                              <span class="eyebrow">Study set</span>
+                              <h2>What should we practice saying?</h2>
+                         </div>
+                    </div>
                     <label for="lang">Spanish variant</label>
                     <select id="lang">
                          <option value="es-ES">Spain (es-ES)</option>
@@ -55,7 +56,7 @@
                     </select>
 
                     <label for="target">Spanish word or sentence</label>
-                    <input type="text" id="target" placeholder="Type or click 🎲 Random" />
+                    <input type="text" id="target" placeholder="Type a word or sentence or click 🎲 Random" />
 
                     <div class="filters">
                          <div class="filter-fields">
@@ -139,7 +140,6 @@
 
                <!-- Result Card -->
                <div class="card result-card" id="resultCard">Your pronunciation feedback will appear here.</div>
-               <!-- <div class="page-pool-status" id="pagePoolStatus" hidden></div> -->
 
                <!-- Player Container -->
                <div class="card" id="playerContainer" style="display: none">
@@ -157,175 +157,6 @@
                     <div style="font-size: 0.8rem; color: var(--muted); margin-top: 6px">Powered by <code id="playerUrlDisplay">http://127.0.0.1:8765/pronunciation_player.html</code></div>
                </div>
           </section>
-
-          <!-- ==================== CONJUGATION TAB ==================== -->
-          <!-- <section id="conjugationPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
-               <section class="practice-intro">
-                    <div>
-                         <span class="eyebrow">Conjugation lab</span>
-                         <h2>Build the right verb form.</h2>
-                         <p>Choose a verb, tense, and pronoun. Type the form you think belongs there, then check your answer.</p>
-                    </div>
-                    <div class="conjugation-actions">
-                         <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Random verb</button>
-                    </div>
-               </section>
-
-               <div class="conjugation-filters">
-                    <div>
-                         <label for="conjugationVerb">Verb</label>
-                         <select id="conjugationVerb"></select>
-                         <div id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html...</div>
-                    </div>
-                    <div>
-                         <label for="conjugationTense">Tense</label>
-                         <select id="conjugationTense"></select>
-                    </div>
-                    <div>
-                         <label for="conjugationPronoun">Pronoun</label>
-                         <select id="conjugationPronoun"></select>
-                    </div>
-                    <div>
-                         <label for="conjugationLang">Spanish variant</label>
-                         <select id="conjugationLang">
-                              <option value="es-ES">Spain (es-ES)</option>
-                              <option value="es-MX" selected>Mexico (es-MX)</option>
-                              <option value="es-US">United States (es-US)</option>
-                              <option value="es-AR">Argentina (es-AR)</option>
-                         </select>
-                    </div>
-                    <div class="conjugation-settings">
-                         <label><input type="checkbox" id="conjugationAutoAdvance" checked /> Auto-advance to random verb</label>
-                         <label><input type="checkbox" id="conjugationRandomPronoun" /> Randomize pronoun</label>
-                         <label><input type="checkbox" id="conjugationRandomTense" /> Randomize tense</label>
-                    </div>
-               </div>
-
-               <div class="card conjugation-card">
-                    <div class="conjugation-prompt" id="conjugationPrompt"></div>
-                    <label for="conjugationAnswer">Your answer</label>
-                    <input type="text" id="conjugationAnswer" autocomplete="off" autocapitalize="none" />
-                    <div class="accent-bar" aria-label="Spanish accent marks">
-                         <button type="button" class="accent-key" data-char="á" title="Insert á — Shift+click for uppercase">á</button>
-                         <button type="button" class="accent-key" data-char="é" title="Insert é — Shift+click for uppercase">é</button>
-                         <button type="button" class="accent-key" data-char="í" title="Insert í — Shift+click for uppercase">í</button>
-                         <button type="button" class="accent-key" data-char="ó" title="Insert ó — Shift+click for uppercase">ó</button>
-                         <button type="button" class="accent-key" data-char="ú" title="Insert ú — Shift+click for uppercase">ú</button>
-                         <button type="button" class="accent-key" data-char="ü" title="Insert ü — Shift+click for uppercase">ü</button>
-                         <button type="button" class="accent-key" data-char="ñ" title="Insert ñ — Shift+click for uppercase">ñ</button>
-                         <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button>
-                         <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button>
-                    </div>
-                    <div class="btn-row">
-                         <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
-                         <button type="button" id="revealConjugationBtn">Reveal</button>
-                         <button type="button" id="hearConjugationBtn">Hear answer</button>
-                         <button type="button" id="newConjugationBtn" class="secondary-action" disabled>New prompt</button>
-                    </div>
-                    <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
-               </div>
-               <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
-          </section> -->
-
-          <!-- ==================== STUDY TAB ==================== -->
-          <!-- <section id="studyPanel" class="practice-panel hidden" role="tabpanel" style="display: none">
-               <section class="practice-intro">
-                    <div>
-                         <span class="eyebrow">Study desk</span>
-                         <h2>Choose a way to remember.</h2>
-                         <p>Use a page from the Cheat Sheet, a category, or the Top 1000 words as your study set.</p>
-                    </div>
-                    <div class="study-goal" id="studyGoalDisplay" style="font-size: 0.9rem; color: var(--muted)">Today: 0 / 10</div>
-               </section>
-
-               <section class="card study-setup">
-                    <div class="section-heading">
-                         <div>
-                              <span class="eyebrow">Study set</span>
-                              <h2>What should we review?</h2>
-                         </div>
-                         <button id="top1000Btn" class="secondary-action">📚 Top 1000</button>
-                    </div>
-                    <div class="filters">
-                         <div>
-                              <label for="studyDifficulty">Difficulty</label>
-                              <select id="studyDifficulty">
-                                   <option value="all">All levels</option>
-                                   <option value="beginner">Beginner</option>
-                                   <option value="intermediate">Intermediate</option>
-                                   <option value="advanced">Advanced</option>
-                              </select>
-                         </div>
-                         <div>
-                              <label for="studyCategory">Category</label>
-                              <select id="studyCategory">
-                                   <option value="all">All categories</option>
-                                   <option value="greetings">Greetings</option>
-                                   <option value="food">Food</option>
-                                   <option value="verbs">Verbs</option>
-                                   <option value="everyday">Everyday</option>
-                                   <option value="travel">Travel</option>
-                                   <option value="family">Family</option>
-                                   <option value="body">Body</option>
-                                   <option value="house">House</option>
-                                   <option value="weather">Weather</option>
-                                   <option value="shopping">Shopping</option>
-                                   <option value="clothing">Clothing</option>
-                                   <option value="animals">Animals</option>
-                                   <option value="emotions">Emotions</option>
-                                   <option value="work">Work &amp; School</option>
-                                   <option value="numbers">Numbers</option>
-                                   <option value="time">Time</option>
-                              </select>
-                         </div>
-                         <label><input type="checkbox" id="studyOnlyVerbs" /> Only verbs</label>
-                    </div>
-                    <div class="study-options">
-                         <label for="studyLang">Spanish variant</label>
-                         <select id="studyLang">
-                              <option value="es-ES">Spain (es-ES)</option>
-                              <option value="es-MX" selected>Mexico (es-MX)</option>
-                              <option value="es-US">United States (es-US)</option>
-                              <option value="es-AR">Argentina (es-AR)</option>
-                         </select>
-                         <label><input type="checkbox" id="studyAutoAdvance" /> Auto-advance successful answers</label>
-                    </div>
-               </section>
-
-               <div class="study-launcher" aria-label="Study modes">
-                    <button id="quizBtn" class="mode-card"><span>📝</span><strong>Quiz</strong><small>Recall meanings and forms</small></button>
-                    <button id="dictationBtn" class="mode-card"><span>✍️</span><strong>Dictation</strong><small>Listen and type Spanish</small></button>
-                    <button id="cardsBtn" class="mode-card"><span>🃏</span><strong>Flashcards</strong><small>Review what is due</small></button>
-                    <button id="weakBtn" class="mode-card"><span>📉</span><strong>Weak words</strong><small>Practice your least-used items</small></button>
-               </div>
-
-               <div class="card result-card" id="studyResultCard">Choose a study mode to begin.</div>
-               <div class="page-pool-status" id="studyPagePoolStatus" hidden></div>
-
-               <div class="card" id="studyCard" style="display: none">
-                    <div class="player-controls">
-                         <strong id="studyTitle">Study</strong>
-                         <div class="player-buttons"><button type="button" id="studyExitBtn">✕ Close study</button></div>
-                    </div>
-                    <div id="studyBody"></div>
-               </div>
-
-               <section class="card progress-tools">
-                    <div class="section-heading">
-                         <div>
-                              <span class="eyebrow">Your record</span>
-                              <h2>Progress tools</h2>
-                         </div>
-                    </div>
-                    <div class="btn-row">
-                         <button id="historyBtn">📜 History</button>
-                         <button id="statsBtn">📊 Stats</button>
-                         <button id="exportBtn">⬆ Export</button>
-                         <button id="importBtn">⬇ Import</button>
-                         <button id="resetBtn">🗑 Reset all progress</button>
-                    </div>
-               </section>
-          </section> -->
 
           <!-- ==================== MODALS ==================== -->
           <div class="modal" id="historyModal">

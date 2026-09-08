@@ -261,7 +261,7 @@ input[type='range'] {
 
 .mobile-conjugation-layout .conjugation-source-status {
      min-height: 20px;
-     margin-top: 5px;
+     /* margin-top: 5px; */
      color: var(--muted);
      font-size: 0.78rem;
 }
@@ -321,6 +321,29 @@ input[type='range'] {
      color: var(--muted);
      font-size: 0.9rem;
      font-weight: 600;
+}
+
+.field-label-row {
+     display: flex;
+     align-items: baseline;
+     justify-content: flex-start;
+     gap: 6px;
+     flex-wrap: nowrap;
+}
+
+.conjugation-source-status {
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     min-width: 0;
+}
+
+.conjugation-source-status.loaded {
+     color: var(--success);
+}
+
+.conjugation-source-status.error {
+     color: var(--danger);
 }
 
 /* ===== SETTINGS ROW - SCOPED ===== */
@@ -1447,7 +1470,7 @@ kbd {
 
      .conjugation-filters select,
      .conjugation-filters label {
-          width: 100%;
+          /* width: 100%; */
           font-size: 16px;
      }
 
@@ -1621,4 +1644,9 @@ kbd {
      opacity: 0.45;
      cursor: default;
      transform: none;
+}
+
+.page-pool-status[hidden],
+.page-pool-status:empty {
+     display: none !important;
 }
