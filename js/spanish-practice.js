@@ -944,6 +944,9 @@
                          const langCode = langSelect ? langSelect.value : 'es-MX';
                          playAudioFromServer(prompt.answer, langCode);
 
+                         const verbSlug = prompt.verb.infinitive.toLowerCase().trim();
+                         const conjugationUrl = `https://muyverbs.com/spanish-verbs/${verbSlug}-conjugation/`;
+
                          let feedbackMsg = '';
                          let feedbackClass = '';
 
@@ -951,6 +954,7 @@
                               feedbackMsg = '✅ Correct!';
                               feedbackClass = 'good';
                          } else {
+                              console.info('conjugationUrl: ' + conjugationUrl);
                               if (normalizedAnswer.length > 0) {
                                    const sim = calculateSimilarity(normalizedAnswer, normalizedCorrect);
                                    if (sim > 0.7) {
@@ -968,7 +972,13 @@
                 <div class="${feedbackClass}" style="padding: 8px; border-radius: 6px;">
                     <strong>${feedbackMsg}</strong>
                     ${!correct ? `<br><span style="font-size: 0.9rem; color: var(--muted);">You typed: ${answer}</span>` : ''}
-                    ${!correct && normalizedAnswer.length > 0 ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>` : ''}
+                    ${
+                         !correct && normalizedAnswer.length > 0
+                              ? `<br><span style="font-size: 0.85rem; color: var(--muted);">Check spelling and accents!</span>
+                                        <br><a href="${conjugationUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem;">View full ${prompt.verb.infinitive.toLowerCase().trim()} conjugation</a>
+`
+                              : ''
+                    }
                 </div>
             `;
                          $('conjugationFeedback').className = 'conjugation-feedback';
