@@ -130,6 +130,8 @@ html.light-mode {
 
      --focus-ring: #60a5fa;
      --surface-raised: #1a2d49;
+     --waring: #e43b3b;
+     --reminder: #5aee46;
 }
 
 html.light-mode {
@@ -181,6 +183,8 @@ html.light-mode {
 
      --focus-ring: #2563eb;
      --surface-raised: #ffffff;
+     --waring: #e43b3b;
+     --reminder: #40ad32;
 }
 
 /* ─── Reset & Base ─── */
