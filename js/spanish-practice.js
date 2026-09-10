@@ -1960,7 +1960,7 @@
                     }
                 `;
 
-                              if ($('autoAdvance').checked && weightedScore >= 0.88 && orderedRatio >= 0.75 && extraWordsCount <= 1) {
+                              if ($('autoAdvance').checked && cls === 'good') {
                                    setTimeout(() => randomBtn.click(), 1200);
                               }
 

@@ -659,6 +659,19 @@
           next.style.color = 'white';
           next.textContent = study.index + 1 >= study.questions.length ? 'See score' : 'Next';
           actions.appendChild(next);
+
+          if (ok && $('autoAdvance') && $('autoAdvance').checked) {
+               const idx = study.index;
+               setTimeout(function () {
+                    if (study && study.mode === 'quiz' && study.index === idx) advanceQuiz();
+               }, 900);
+          }
+     }
+
+     function advanceQuiz() {
+          if (!study || study.mode !== 'quiz') return;
+          study.index++;
+          renderQuiz();
      }
 
      function submitTypeAnswer() {
@@ -796,6 +809,19 @@
                next.textContent = study.index + 1 >= study.questions.length ? 'See score' : 'Next';
                actions.appendChild(next);
           }
+
+          if (ok && $('autoAdvance') && $('autoAdvance').checked) {
+               const idx = study.index;
+               setTimeout(function () {
+                    if (study && study.mode === 'dictation' && study.index === idx) advanceDictation();
+               }, 900);
+          }
+     }
+
+     function advanceDictation() {
+          if (!study || study.mode !== 'dictation') return;
+          study.index++;
+          renderDictation();
      }
 
      function startDictation() {
@@ -924,6 +950,13 @@
                fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}<br/>` : `<span class="bad">❌</span> → <strong>${esc(expected)}</strong>${yoBit}<br/>`;
           }
           showCardRating();
+
+          if (ok && $('autoAdvance') && $('autoAdvance').checked) {
+               const idx = study.index;
+               setTimeout(function () {
+                    if (study && study.mode === 'cards' && study.index === idx) rateCard(4);
+               }, 900);
+          }
      }
 
      function revealCard() {
@@ -1062,10 +1095,16 @@
                else submitTypeAnswer();
           } else if (action === 'next') {
                if (!study) return;
+               if (study.mode === 'quiz') {
+                    advanceQuiz();
+                    return;
+               }
+               if (study.mode === 'dictation') {
+                    advanceDictation();
+                    return;
+               }
                study.index++;
-               if (study.mode === 'quiz') renderQuiz();
-               else if (study.mode === 'dictation') renderDictation();
-               else renderCard();
+               renderCard();
           } else if (action === 'hear') {
                if (study && study.current) speakText(study.current.answer);
           } else if (action === 'reveal') {
