@@ -357,8 +357,17 @@
           return conjugateRegular(inf, tense);
      }
 
+     function regularEnding(type, tense, index) {
+          const endings = ENDINGS[tense] && ENDINGS[tense][type];
+          if (endings && Number.isInteger(index)) return endings[index] || '';
+          if (tense === 'future' && Number.isInteger(index)) return FUTURE[index] || '';
+          if (tense === 'conditional' && Number.isInteger(index)) return CONDITIONAL[index] || '';
+          return '';
+     }
+
      const api = {
           conjugate: conjugate,
+          regularEnding: regularEnding,
           stemChangeOf: function (inf) {
                return STEM_CHANGE[String(inf || '').toLowerCase()] || null;
           },

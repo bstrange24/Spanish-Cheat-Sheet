@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Spanish Tense Endings Practice</title>
+          <link rel="stylesheet" href="css/spanish-practice.css" />
+     </head>
+     <body>
+          <div class="header">
+               <div class="header-left">
+                    <h1>Spanish Tense Endings</h1>
+                    <p class="subtitle">Practice the regular ending for each tense and pronoun.</p>
+               </div>
+               <div class="header-tools">
+                    <div class="streak" id="streakDisplay" title="Practice streak">
+                         <span class="streak-icon" aria-hidden="true">🔥</span>
+                         <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
+                    </div>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+               </div>
+          </div>
+
+          <nav class="page-nav" aria-label="Practice navigation">
+               <a href="spanish-conjugation.html">Conjugation</a>
+               <a class="active" href="spanish-endings.html">Tense endings</a>
+               <a href="spanish-cheatsheet.html">Cheat sheet</a>
+          </nav>
+
+          <section class="practice-intro">
+               <div>
+                    <span class="eyebrow">Endings lab.</span>
+                    <h2>Build the ending.</h2>
+                    <p>Choose a regular verb group, tense, and pronoun. Type only the ending that belongs there.</p>
+               </div>
+          </section>
+
+          <div class="mobile-conjugation-layout">
+               <div class="quick-select-row">
+                    <button class="quick-select-btn" id="quickGroupBtn" aria-label="Select verb group">
+                         <span class="label">Verb group</span>
+                         <span class="value" id="selectedGroupDisplay">-ar</span>
+                         <span class="arrow">▾</span>
+                    </button>
+                    <button class="quick-select-btn" id="quickTenseBtn" aria-label="Select tense">
+                         <span class="label">Tense</span>
+                         <span class="value" id="selectedTenseDisplay">Present</span>
+                         <span class="arrow">▾</span>
+                    </button>
+                    <button class="quick-select-btn" id="quickPronounBtn" aria-label="Select pronoun">
+                         <span class="label">Pronoun</span>
+                         <span class="value" id="selectedPronounDisplay">yo</span>
+                         <span class="arrow">▾</span>
+                    </button>
+               </div>
+
+               <div class="conjugation-settings-row">
+                    <label class="setting-checkbox"><input type="checkbox" id="endingAutoAdvance" checked /><span class="checkmark"></span>Auto-advance</label>
+                    <label class="setting-checkbox"><input type="checkbox" id="endingRandomGroup" /><span class="checkmark"></span>Random verb group</label>
+                    <label class="setting-checkbox"><input type="checkbox" id="endingRandomPronoun" /><span class="checkmark"></span>Random pronoun</label>
+                    <label class="setting-checkbox"><input type="checkbox" id="endingRandomTense" /><span class="checkmark"></span>Random tense</label>
+               </div>
+
+               <div class="filters-panel" id="filtersPanel">
+                    <div class="filters-panel-header">
+                         <span class="filters-panel-title">⚙️ Filters</span>
+                         <button class="filters-panel-close" id="filtersPanelClose" aria-label="Close filters">✕</button>
+                    </div>
+                    <div class="conjugation-filters">
+                         <div>
+                              <label for="endingGroup">Regular verb group</label
+                              ><select id="endingGroup"></select>
+                         </div>
+                         <div>
+                              <label for="endingTense">Tense</label
+                              ><select id="endingTense"></select>
+                         </div>
+                         <div>
+                              <label for="endingPronoun">Pronoun</label
+                              ><select id="endingPronoun"></select>
+                         </div>
+                    </div>
+               </div>
+               <div class="filters-overlay" id="filtersOverlay"></div>
+
+               <div class="card conjugation-card">
+                    <div class="conjugation-prompt" id="endingPrompt"></div>
+                    <label for="endingAnswer">Your answer</label>
+                    <input type="text" id="endingAnswer" autocomplete="off" autocapitalize="none" />
+                    <div class="accent-bar" aria-label="Spanish accent marks">
+                         <button type="button" class="accent-key" data-char="á">á</button>
+                         <button type="button" class="accent-key" data-char="é">é</button>
+                         <button type="button" class="accent-key" data-char="í">í</button>
+                         <button type="button" class="accent-key" data-char="ó">ó</button>
+                         <button type="button" class="accent-key" data-char="ú">ú</button>
+                         <button type="button" class="accent-key" data-char="ñ">ñ</button>
+                    </div>
+                    <div class="btn-row">
+                         <button type="button" id="checkEndingBtn" class="conjugation-check">Check</button>
+                         <button type="button" id="newEndingBtn" class="secondary-action">Clear answer</button>
+                         <button type="button" id="revealEndingBtn">Reveal</button>
+                    </div>
+                    <div id="endingFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
+               </div>
+               <div class="conjugation-progress" id="endingProgress">0 correct / 0 attempted</div>
+          </div>
+
+          <script src="js/shared.js"></script>
+          <script src="js/spanish-conjugate.js"></script>
+          <script src="js/spanish-endings.js"></script>
+     </body>
+</html>

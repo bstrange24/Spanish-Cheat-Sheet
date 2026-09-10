@@ -1197,6 +1197,13 @@
                     window.open(url, '_blank', 'noopener');
                };
           }
+          function openEndingsPractice() {
+               window.open('spanish-endings.html', '_blank', 'noopener');
+          }
+          const endingsPageBtn = document.getElementById('endingsPageBtn');
+          if (endingsPageBtn) endingsPageBtn.onclick = openEndingsPractice;
+          const chartEndingsPracticeBtn = document.getElementById('chartEndingsPracticeBtn');
+          if (chartEndingsPracticeBtn) chartEndingsPracticeBtn.onclick = openEndingsPractice;
      }
 
      const SECTION_ALIASES = {
