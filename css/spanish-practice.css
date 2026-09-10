@@ -1064,6 +1064,73 @@ details.tips summary {
      margin-top: 0;
 }
 
+.modal-heading-row {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     gap: 12px;
+}
+
+.modal-heading-row h3 {
+     margin-bottom: 0;
+}
+
+.modal-close {
+     flex: 0 0 auto;
+     padding: 4px 8px;
+     background: transparent;
+     color: var(--muted);
+     font-size: 1.2rem;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+     background: var(--bg);
+     color: var(--text);
+}
+
+.endings-table-modal-content {
+     max-width: 460px;
+}
+
+.endings-table-summary {
+     color: var(--muted);
+     margin: 8px 0 14px;
+}
+
+.endings-table-wrap {
+     overflow-x: auto;
+}
+
+.endings-table {
+     width: 100%;
+     border-collapse: collapse;
+     margin: 0;
+}
+
+.endings-table th,
+.endings-table td {
+     padding: 9px 10px;
+     border-bottom: 1px solid var(--border);
+     text-align: left;
+}
+
+.endings-table th {
+     color: var(--muted);
+     font-size: 0.78rem;
+     letter-spacing: 0.04em;
+     text-transform: uppercase;
+}
+
+.endings-table tr.selected {
+     background: var(--tips-bg);
+}
+
+.endings-table tr.selected td:last-child {
+     color: var(--accent);
+     font-weight: 700;
+}
+
 .history-item {
      padding: 8px 0;
      border-bottom: 1px solid var(--border);

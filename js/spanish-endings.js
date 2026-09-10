@@ -61,6 +61,20 @@
           $('selectedPronounDisplay').textContent = $('endingPronoun').selectedOptions[0]?.textContent || 'yo';
      }
 
+     function renderEndingsTable() {
+          const group = $('endingGroup').value;
+          const tense = $('endingTense').value;
+          const selectedPronoun = $('endingPronoun').value;
+          const groupLabel = $('endingGroup').selectedOptions[0]?.textContent || group;
+          const tenseLabel = $('endingTense').selectedOptions[0]?.textContent || tense;
+          $('endingsTableSummary').textContent = `${groupLabel} · ${tenseLabel}`;
+          $('endingsTableBody').innerHTML = PRONOUNS.map(([key, label], index) => {
+               const selected = key === selectedPronoun ? ' class="selected"' : '';
+               const ending = window.SpanishConjugate.regularEnding(group, tense, index);
+               return `<tr${selected}><th scope="row">${label}</th><td>-${ending}</td></tr>`;
+          }).join('');
+     }
+
      function renderPrompt() {
           const prompt = currentPrompt();
           $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${prompt.group[1]}</span><small>${prompt.tense[1]} ending</small>`;
@@ -72,6 +86,7 @@
                button.disabled = false;
           });
           updateQuickSelects();
+          renderEndingsTable();
           $('endingAnswer').focus();
      }
 
@@ -153,6 +168,17 @@
                $(id).addEventListener('change', renderPrompt);
           });
           $('newEndingBtn').onclick = renderPrompt;
+          $('viewEndingsTableBtn').onclick = () => {
+               renderEndingsTable();
+               $('endingsTableModal').classList.add('open');
+          };
+          $('closeEndingsTableBtn').onclick = () => $('endingsTableModal').classList.remove('open');
+          $('endingsTableModal').addEventListener('click', event => {
+               if (event.target === $('endingsTableModal')) $('endingsTableModal').classList.remove('open');
+          });
+          document.addEventListener('keydown', event => {
+               if (event.key === 'Escape') $('endingsTableModal').classList.remove('open');
+          });
           $('checkEndingBtn').onclick = () => checkAnswer(false);
           $('revealEndingBtn').onclick = () => checkAnswer(true);
           $('endingAnswer').addEventListener('keydown', event => {

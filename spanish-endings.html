@@ -99,10 +99,29 @@
                          <button type="button" id="checkEndingBtn" class="conjugation-check">Check</button>
                          <button type="button" id="newEndingBtn" class="secondary-action">Clear answer</button>
                          <button type="button" id="revealEndingBtn">Reveal</button>
+                         <button type="button" id="viewEndingsTableBtn" class="secondary-action">📋 View endings table</button>
                     </div>
                     <div id="endingFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
                </div>
                <div class="conjugation-progress" id="endingProgress">0 correct / 0 attempted</div>
+          </div>
+
+          <div class="modal" id="endingsTableModal" role="dialog" aria-modal="true" aria-labelledby="endingsTableTitle">
+               <div class="modal-content endings-table-modal-content">
+                    <div class="modal-heading-row">
+                         <h3 id="endingsTableTitle">Regular verb endings</h3>
+                         <button type="button" class="modal-close" id="closeEndingsTableBtn" aria-label="Close endings table">✕</button>
+                    </div>
+                    <p id="endingsTableSummary" class="endings-table-summary"></p>
+                    <div class="endings-table-wrap">
+                         <table class="endings-table">
+                              <thead>
+                                   <tr><th scope="col">Pronoun</th><th scope="col">Ending</th></tr>
+                              </thead>
+                              <tbody id="endingsTableBody"></tbody>
+                         </table>
+                    </div>
+               </div>
           </div>
 
           <script src="js/shared.js"></script>
