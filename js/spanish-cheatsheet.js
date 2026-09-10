@@ -739,6 +739,37 @@
           return found.length ? found[0] : '';
      }
 
+     function sayDisplayTexts(cell) {
+          if (!cell) return [];
+          const found = [];
+          cell.querySelectorAll('.say').forEach(el => {
+               const t = cleanStudyText(el.textContent);
+               if (t && t.length <= 24) found.push(t);
+          });
+          return found;
+     }
+
+     const GENERIC_ENDING_HEADERS = /^(singular|plural|ending|example|gerund ending)$/i;
+
+     // Builds a short label (e.g. "Preterite Tense — -AR Preterite Endings") from the
+     // nearest enclosing <details> summaries, for tables with no English column.
+     function endingTableContext(root, table) {
+          const labels = [];
+          let node = table.parentElement;
+          while (node && node !== root) {
+               if (node.tagName === 'DETAILS') {
+                    const summary = node.querySelector('summary');
+                    if (summary) {
+                         const t = cleanStudyText(summary.textContent).replace(/:$/, '');
+                         if (/subject pronouns/i.test(t)) return null;
+                         if (t && !/^examples?$/i.test(t)) labels.unshift(t);
+                    }
+               }
+               node = node.parentElement;
+          }
+          return labels.slice(-2).join(' — ');
+     }
+
      function isIrregularYoColumn(header, sectionId) {
           const h = String(header || '')
                .replace(/\s+/g, ' ')
@@ -869,26 +900,56 @@
                     }
 
                     const hasEs = kinds.indexOf('es') !== -1;
+                    const hasEnCol = kinds.indexOf('en') !== -1;
+                    const endingCtx = hasEnCol ? '' : endingTableContext(root, table);
                     cells.forEach(function (cell, i) {
                          if (!cell) return;
                          if (kinds[i] === 'en' || kinds[i] === 'pron' || kinds[i] === 'ask' || kinds[i] === 'use') return;
                          if (kinds[i] === 'yo' || kinds[i] === 'person' || kinds[i] === 'skip') return;
                          if (hasEs && kinds[i] !== 'es') return;
-                         const says = sayTexts(cell);
-                         if (!says.length) return;
-                         const enAt = nearestEn(i);
-                         if (enAt < 0 || !cells[enAt]) return;
-                         let english = cleanStudyText(cells[enAt].textContent);
-                         if (!english || english === '-' || looksPhonetic(english)) return;
-                         says.forEach(function (es) {
-                              if (!es || es.length > 48) return;
-                              addItem({
-                                   kind: 'pair',
-                                   spanish: es,
-                                   english: english,
-                                   prompt: english,
-                                   answer: es,
+
+                         if (hasEnCol) {
+                              const says = sayTexts(cell);
+                              if (!says.length) return;
+                              const enAt = nearestEn(i);
+                              if (enAt < 0 || !cells[enAt]) return;
+                              let english = cleanStudyText(cells[enAt].textContent);
+                              if (!english || english === '-' || looksPhonetic(english)) return;
+                              says.forEach(function (es) {
+                                   if (!es || es.length > 48) return;
+                                   addItem({
+                                        kind: 'pair',
+                                        spanish: es,
+                                        english: english,
+                                        prompt: english,
+                                        answer: es,
+                                   });
                               });
+                              return;
+                         }
+
+                         // Tables with no English column (e.g. Singular/Plural conjugation
+                         // ending charts) — quiz the endings using nearby context instead.
+                         if (endingCtx === null) return;
+                         const says = sayDisplayTexts(cell);
+                         if (!says.length) return;
+                         const meaningEl = cell.querySelector('.secondary-meaning');
+                         let personLabel = meaningEl ? cleanStudyText(meaningEl.textContent) : '';
+                         if (!personLabel) {
+                              const rowLabel = cells[0] && cells[0] !== cell ? cleanStudyText(cells[0].textContent) : '';
+                              const colLabel = headers[i] && !GENERIC_ENDING_HEADERS.test(headers[i]) ? headers[i] : '';
+                              personLabel = [rowLabel, colLabel].filter(Boolean).join(' — ');
+                         }
+                         if (!personLabel || personLabel.length > 60) return;
+                         const ending = says[0];
+                         if (!ending) return;
+                         const prompt = (endingCtx ? endingCtx + ' — ' : '') + personLabel;
+                         addItem({
+                              kind: 'pair',
+                              spanish: ending,
+                              english: prompt,
+                              prompt: prompt,
+                              answer: ending,
                          });
                     });
                });

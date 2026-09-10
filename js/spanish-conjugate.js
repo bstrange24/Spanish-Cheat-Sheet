@@ -33,24 +33,30 @@
                STEM_CHANGE[verb] = change;
           });
      }
-     addChange('o→ue', [
-          'acostar', 'almorzar', 'aprobar', 'colgar', 'comprobar', 'contar', 'costar', 'demostrar',
-          'devolver', 'doler', 'dormir', 'encontrar', 'envolver', 'llover', 'morir', 'mostrar',
-          'mover', 'poder', 'probar', 'recordar', 'resolver', 'soñar', 'volar', 'volver',
-     ]);
-     addChange('e→ie', [
-          'ascender', 'atender', 'atravesar', 'calentar', 'cerrar', 'comenzar', 'confesar',
-          'convertir', 'defender', 'despertar', 'empezar', 'encender', 'entender', 'mentir',
-          'negar', 'nevar', 'pensar', 'perder', 'preferir', 'querer', 'sentar', 'sentir',
-          'temblar', 'tender', 'tener', 'venir',
-     ]);
-     addChange('e→i', [
-          'competir', 'conseguir', 'corregir', 'decir', 'elegir', 'freír', 'medir', 'pedir',
-          'reír', 'repetir', 'seguir', 'servir', 'sonreír', 'vestir',
-     ]);
+     addChange('o→ue', ['acostar', 'almorzar', 'aprobar', 'colgar', 'comprobar', 'contar', 'costar', 'demostrar', 'devolver', 'doler', 'dormir', 'encontrar', 'envolver', 'forzar', 'llover', 'moler', 'morir', 'mostrar', 'mover', 'poder', 'probar', 'promover', 'recordar', 'resolver', 'soñar', 'torcer', 'volar', 'volver']);
+     addChange('e→ie', ['ascender', 'atender', 'atravesar', 'calentar', 'cerrar', 'comenzar', 'confesar', 'convertir', 'defender', 'despertar', 'divertir', 'empezar', 'encender', 'entender', 'extender', 'fregar', 'gobernar', 'manifestar', 'mentir', 'negar', 'nevar', 'pensar', 'perder', 'preferir', 'querer', 'recomendar', 'regar', 'sentar', 'sentir', 'sugerir', 'temblar', 'tender', 'tener', 'venir']);
+     addChange('e→i', ['competir', 'conseguir', 'corregir', 'decir', 'elegir', 'freír', 'medir', 'pedir', 'reír', 'repetir', 'seguir', 'servir', 'sonreír', 'vestir']);
      addChange('u→ue', ['jugar']);
+     addChange('i→ie', ['adquirir', 'inquirir']);
 
-     const IAR_STRESS = { enviar: true, esquiar: true, fiar: true, guiar: true, liar: true };
+     const IAR_STRESS = { confiar: true, enviar: true, esquiar: true, fiar: true, fotografiar: true, guiar: true, liar: true };
+
+     // A handful of -ir verbs break the hiatus and stress the u in boot forms (reúno, reúnes...).
+     const HIATUS_U_STRESS = { reunir: true };
+
+     // -uar verbs stress the u in boot forms (continúo, actúo) except when
+     // the u is part of a gu/cu digraph pronounced as a single glide.
+     const UAR_NO_STRESS = {
+          averiguar: true,
+          apaciguar: true,
+          amortiguar: true,
+          santiguar: true,
+          menguar: true,
+          atestiguar: true,
+          aguar: true,
+          desaguar: true,
+          fraguar: true,
+     };
 
      const PREFIX_ROOTS = {
           contener: 'tener',
@@ -98,6 +104,7 @@
           conducir: 'conduj',
           producir: 'produj',
           traducir: 'traduj',
+          satisfacer: 'satisfic',
      };
 
      const J_STEMS = { dij: true, traj: true, conduj: true, produj: true, traduj: true };
@@ -115,6 +122,7 @@
           tener: 'tendr',
           valer: 'valdr',
           venir: 'vendr',
+          satisfacer: 'satisfar',
      };
 
      const FULL = {
@@ -173,10 +181,13 @@
           caer: 'caigo',
           traer: 'traigo',
           valer: 'valgo',
+          satisfacer: 'satisfago',
      };
 
      function splitVerb(infinitive) {
-          const inf = String(infinitive || '').toLowerCase().trim();
+          const inf = String(infinitive || '')
+               .toLowerCase()
+               .trim();
           if (inf.endsWith('ír')) return { inf: inf, stem: inf.slice(0, -2), type: 'ir' };
           if (/(ar|er|ir)$/.test(inf)) return { inf: inf, stem: inf.slice(0, -2), type: inf.slice(-2) };
           return null;
@@ -202,6 +213,9 @@
           if ((/[aeiouáéíóú]c[ei]r$/.test(inf) || /ucir$/.test(inf)) && form.endsWith('co')) {
                return form.slice(0, -2) + 'zco';
           }
+          if (/[^aeiouáéíóú]c[ei]r$/.test(inf) && form.endsWith('co')) {
+               return form.slice(0, -2) + 'zo';
+          }
           return form;
      }
 
@@ -226,6 +240,7 @@
 
      function futureStem(inf) {
           if (FUTURE_STEMS[inf]) return FUTURE_STEMS[inf];
+          if (REGULAR_FUTURE_OVERRIDE[inf]) return inf;
           if (PREFIX_ROOTS[inf] && FUTURE_STEMS[PREFIX_ROOTS[inf]]) {
                const root = PREFIX_ROOTS[inf];
                return inf.slice(0, -root.length) + FUTURE_STEMS[root];
@@ -269,9 +284,7 @@
                const irrStem = preteriteStemFor(inf);
                if (irrStem) {
                     const jStem = !!J_STEMS[irrStem] || irrStem.endsWith('j');
-                    const irrEndings = jStem
-                         ? ['e', 'iste', 'o', 'imos', 'isteis', 'eron']
-                         : ['e', 'iste', 'o', 'imos', 'isteis', 'ieron'];
+                    const irrEndings = jStem ? ['e', 'iste', 'o', 'imos', 'isteis', 'eron'] : ['e', 'iste', 'o', 'imos', 'isteis', 'ieron'];
                     return irrEndings.map(function (suffix, index) {
                          let form = irrStem + suffix;
                          if (irrStem.endsWith('c') && suffix.startsWith('o')) form = irrStem.slice(0, -1) + 'z' + suffix;
@@ -301,6 +314,13 @@
                     if (IAR_STRESS[inf] && BOOT.indexOf(index) >= 0 && useStem.endsWith('i')) {
                          useStem = useStem.slice(0, -1) + 'í';
                     }
+                    if (/uar$/.test(inf) && !UAR_NO_STRESS[inf] && BOOT.indexOf(index) >= 0 && useStem.endsWith('u')) {
+                         useStem = useStem.slice(0, -1) + 'ú';
+                    }
+                    if (HIATUS_U_STRESS[inf] && BOOT.indexOf(index) >= 0 && useStem.indexOf('u') >= 0) {
+                         const pos = useStem.lastIndexOf('u');
+                         useStem = useStem.slice(0, pos) + 'ú' + useStem.slice(pos + 1);
+                    }
                     if (/uir$/.test(inf) && !/guir$/.test(inf) && BOOT.indexOf(index) >= 0) {
                          useStem = stem + 'y';
                     }
@@ -315,10 +335,16 @@
           return null;
      }
 
+     // predecir/bendecir inherit decir's present & preterite irregularities,
+     // but their future/conditional stay regular (predeciré, not "prediré").
+     const REGULAR_FUTURE_OVERRIDE = { predecir: true, bendecir: true };
+
      function conjugate(infinitive, tense) {
-          const inf = String(infinitive || '').toLowerCase().trim();
+          const inf = String(infinitive || '')
+               .toLowerCase()
+               .trim();
           if (FULL[inf] && FULL[inf][tense]) return FULL[inf][tense].slice();
-          if (PREFIX_ROOTS[inf]) {
+          if (PREFIX_ROOTS[inf] && !(REGULAR_FUTURE_OVERRIDE[inf] && (tense === 'future' || tense === 'conditional'))) {
                const root = PREFIX_ROOTS[inf];
                const prefix = inf.slice(0, -root.length);
                const rootForms = conjugate(root, tense);
