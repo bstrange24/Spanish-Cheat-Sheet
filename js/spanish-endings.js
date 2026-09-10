@@ -127,6 +127,15 @@
      }
 
      document.addEventListener('DOMContentLoaded', function () {
+          function activateEndingsNavigation() {
+               document.querySelectorAll('.page-nav a').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === 'spanish-endings.html');
+               });
+               document.title = 'Spanish Tense Endings Practice';
+          }
+          activateEndingsNavigation();
+          setTimeout(activateEndingsNavigation, 150);
+
           $('endingGroup').innerHTML = optionMarkup(GROUPS);
           $('endingTense').innerHTML = optionMarkup(TENSES);
           $('endingPronoun').innerHTML = optionMarkup(PRONOUNS);

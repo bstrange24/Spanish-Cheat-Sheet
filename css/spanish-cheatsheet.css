@@ -504,6 +504,44 @@ body::before {
      gap: 12px;
 }
 
+.practice-actions-header {
+     display: grid;
+     gap: 6px;
+     /* margin-top: 14px; */
+}
+
+.practice-actions-header button {
+     width: 100%;
+     padding: 8px 10px;
+     border: none;
+     border-radius: 7px;
+     background: var(--bg-primary);
+     color: var(--text-primary);
+     font: inherit;
+     font-size: 0.78rem;
+     text-align: left;
+     cursor: pointer;
+}
+
+.practice-actions {
+     display: grid;
+     gap: 6px;
+     margin-top: 14px;
+}
+
+.practice-actions button {
+     width: 100%;
+     padding: 8px 10px;
+     border: none;
+     border-radius: 7px;
+     background: var(--bg-secondary);
+     color: var(--text-primary);
+     font: inherit;
+     font-size: 0.78rem;
+     text-align: left;
+     cursor: pointer;
+}
+
 .sidebar-study-actions {
      display: grid;
      gap: 6px;
