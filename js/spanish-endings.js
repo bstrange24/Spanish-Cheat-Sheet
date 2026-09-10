@@ -97,6 +97,13 @@
           renderPrompt();
      }
 
+     function randomizeEnding() {
+          randomize($('endingGroup'));
+          if ($('endingRandomPronoun').checked) randomize($('endingPronoun'));
+          if ($('endingRandomTense').checked) randomize($('endingTense'));
+          renderPrompt();
+     }
+
      function checkAnswer(revealOnly) {
           const prompt = currentPrompt();
           const input = $('endingAnswer');
@@ -168,6 +175,7 @@
                $(id).addEventListener('change', renderPrompt);
           });
           $('newEndingBtn').onclick = renderPrompt;
+          $('randomEndingBtn').onclick = randomizeEnding;
           $('viewEndingsTableBtn').onclick = () => {
                renderEndingsTable();
                $('endingsTableModal').classList.add('open');
