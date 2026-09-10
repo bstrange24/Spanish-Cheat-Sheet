@@ -6,7 +6,7 @@
           <title>Spanish Tense Endings Practice</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
      </head>
-     <body>
+     <body class="endings-page">
           <div class="header">
                <div class="header-left">
                     <h1>Spanish Tense Endings</h1>
@@ -67,18 +67,9 @@
                          <button class="filters-panel-close" id="filtersPanelClose" aria-label="Close filters">✕</button>
                     </div>
                     <div class="conjugation-filters">
-                         <div>
-                              <label for="endingGroup">Regular verb group</label
-                              ><select id="endingGroup"></select>
-                         </div>
-                         <div>
-                              <label for="endingTense">Tense</label
-                              ><select id="endingTense"></select>
-                         </div>
-                         <div>
-                              <label for="endingPronoun">Pronoun</label
-                              ><select id="endingPronoun"></select>
-                         </div>
+                         <div id="endingGroupFilters"></div>
+                         <div id="endingTenseFilters"></div>
+                         <div id="endingPronounFilters"></div>
                     </div>
                </div>
                <div class="filters-overlay" id="filtersOverlay"></div>

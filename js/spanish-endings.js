@@ -23,29 +23,58 @@
      ];
      const state = { correct: 0, attempted: 0 };
      const shuffled = new Map();
+     const activePrompt = { group: 'ar', tense: 'present', pronoun: 'yo' };
 
-     function optionMarkup(items) {
-          return items.map(item => `<option value="${item[0]}">${item[1]}</option>`).join('');
+     function filterMarkup(key, label, items) {
+          const options = items
+               .map(
+                    ([value, text], index) =>
+                         `<label class="ending-filter-option"><input type="checkbox" class="ending-filter-input" data-filter="${key}" value="${value}"${index === 0 ? ' checked' : ''} />${text}</label>`,
+               )
+               .join('');
+          return `<fieldset class="ending-filter-group" data-filter-group="${key}"><legend>${label}</legend><div class="ending-filter-options"><label class="ending-filter-option ending-select-all"><input type="checkbox" class="ending-select-all-input" data-filter-select-all="${key}" />Select All</label>${options}</div></fieldset>`;
      }
 
-     function randomize(select) {
-          if (!select.options.length) return;
-          let bag = shuffled.get(select);
+     function selectedOptions(key) {
+          return Array.from(document.querySelectorAll(`.ending-filter-input[data-filter="${key}"]:checked`));
+     }
+
+     function randomize(key) {
+          const options = selectedOptions(key);
+          if (!options.length) return '';
+          const poolKey = options.map(option => option.value).join('|');
+          const previous = shuffled.get(key);
+          let bag = previous && previous.poolKey === poolKey ? previous.bag : null;
           if (!bag || !bag.length) {
-               bag = Array.from({ length: select.options.length }, (_, index) => index);
+               bag = Array.from({ length: options.length }, (_, index) => index);
                for (let index = bag.length - 1; index > 0; index--) {
                     const swap = Math.floor(Math.random() * (index + 1));
                     [bag[index], bag[swap]] = [bag[swap], bag[index]];
                }
           }
-          select.value = select.options[bag.shift()].value;
-          shuffled.set(select, bag);
+          const value = options[bag.shift()].value;
+          shuffled.set(key, { poolKey: poolKey, bag: bag });
+          return value;
+     }
+
+     function selectPromptValue(key, current, shouldRandomize, fallback) {
+          const options = selectedOptions(key);
+          const values = options.map(option => option.value);
+          if (!values.length) return fallback;
+          if (shouldRandomize && values.length > 1) return randomize(key);
+          return values.includes(current) ? current : values[0];
+     }
+
+     function selectPromptValues(settings) {
+          activePrompt.group = selectPromptValue('group', activePrompt.group, settings.group, 'ar');
+          activePrompt.tense = selectPromptValue('tense', activePrompt.tense, settings.tense, 'present');
+          activePrompt.pronoun = selectPromptValue('pronoun', activePrompt.pronoun, settings.pronoun, 'yo');
      }
 
      function currentPrompt() {
-          const group = $('endingGroup').value;
-          const tense = $('endingTense').value;
-          const pronoun = $('endingPronoun').value;
+          const group = activePrompt.group;
+          const tense = activePrompt.tense;
+          const pronoun = activePrompt.pronoun;
           const pronounIndex = PRONOUNS.findIndex(item => item[0] === pronoun);
           return {
                group: GROUPS.find(item => item[0] === group),
@@ -56,17 +85,23 @@
      }
 
      function updateQuickSelects() {
-          $('selectedGroupDisplay').textContent = $('endingGroup').selectedOptions[0]?.textContent || '-ar verbs';
-          $('selectedTenseDisplay').textContent = $('endingTense').selectedOptions[0]?.textContent || 'Present';
-          $('selectedPronounDisplay').textContent = $('endingPronoun').selectedOptions[0]?.textContent || 'yo';
+          function selectedLabel(select, fallback) {
+               const labels = Array.from(document.querySelectorAll(`.ending-filter-input[data-filter="${select}"]:checked`)).map(input => input.parentElement.textContent.trim());
+               if (!labels.length) return fallback;
+               if (labels.length <= 2) return labels.join(', ');
+               return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+          }
+          $('selectedGroupDisplay').textContent = selectedLabel('group', '-ar verbs');
+          $('selectedTenseDisplay').textContent = selectedLabel('tense', 'Present');
+          $('selectedPronounDisplay').textContent = selectedLabel('pronoun', 'yo');
      }
 
      function renderEndingsTable() {
-          const group = $('endingGroup').value;
-          const tense = $('endingTense').value;
-          const selectedPronoun = $('endingPronoun').value;
-          const groupLabel = $('endingGroup').selectedOptions[0]?.textContent || group;
-          const tenseLabel = $('endingTense').selectedOptions[0]?.textContent || tense;
+          const group = activePrompt.group;
+          const tense = activePrompt.tense;
+          const selectedPronoun = activePrompt.pronoun;
+          const groupLabel = GROUPS.find(item => item[0] === group)?.[1] || group;
+          const tenseLabel = TENSES.find(item => item[0] === tense)?.[1] || tense;
           $('endingsTableSummary').textContent = `${groupLabel} · ${tenseLabel}`;
           $('endingsTableBody').innerHTML = PRONOUNS.map(([key, label], index) => {
                const selected = key === selectedPronoun ? ' class="selected"' : '';
@@ -75,7 +110,8 @@
           }).join('');
      }
 
-     function renderPrompt() {
+     function renderPrompt(settings) {
+          selectPromptValues(settings || { group: false, tense: false, pronoun: false });
           const prompt = currentPrompt();
           $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${prompt.group[1]}</span><small>${prompt.tense[1]} ending</small>`;
           $('endingAnswer').value = '';
@@ -91,17 +127,19 @@
      }
 
      function nextPrompt() {
-          if ($('endingRandomGroup').checked) randomize($('endingGroup'));
-          if ($('endingRandomPronoun').checked) randomize($('endingPronoun'));
-          if ($('endingRandomTense').checked) randomize($('endingTense'));
-          renderPrompt();
+          renderPrompt({
+               group: $('endingRandomGroup').checked,
+               tense: $('endingRandomTense').checked,
+               pronoun: $('endingRandomPronoun').checked,
+          });
      }
 
      function randomizeEnding() {
-          randomize($('endingGroup'));
-          if ($('endingRandomPronoun').checked) randomize($('endingPronoun'));
-          if ($('endingRandomTense').checked) randomize($('endingTense'));
-          renderPrompt();
+          renderPrompt({
+               group: true,
+               tense: $('endingRandomTense').checked,
+               pronoun: $('endingRandomPronoun').checked,
+          });
      }
 
      function checkAnswer(revealOnly) {
@@ -136,16 +174,52 @@
      }
 
      function openFilters(field) {
+          const isMobile = window.matchMedia('(max-width: 620px)').matches;
+          document.querySelectorAll('.conjugation-filters > div').forEach(wrapper => {
+               wrapper.classList.toggle('desktop-filter-open', wrapper.id === `ending${field[0].toUpperCase()}${field.slice(1)}Filters`);
+          });
+          if (!isMobile) {
+               const layout = document.querySelector('.mobile-conjugation-layout').getBoundingClientRect();
+               const quickRow = document.querySelector('.quick-select-row').getBoundingClientRect();
+               const quickButton = $({ group: 'quickGroupBtn', tense: 'quickTenseBtn', pronoun: 'quickPronounBtn' }[field]).getBoundingClientRect();
+               const width = Math.max(280, quickButton.width);
+               const left = Math.max(0, Math.min(quickButton.left - layout.left, layout.width - width));
+               $('filtersPanel').style.setProperty('--filter-top', `${quickRow.bottom - layout.top + 8}px`);
+               $('filtersPanel').style.setProperty('--filter-left', `${left}px`);
+               $('filtersPanel').style.setProperty('--filter-width', `${width}px`);
+          }
           $('filtersPanel').classList.add('open');
-          $('filtersOverlay').classList.add('active');
-          document.body.style.overflow = 'hidden';
-          if (field) setTimeout(() => $(field).focus(), 250);
+          if (isMobile) {
+               $('filtersOverlay').classList.add('active');
+               document.body.style.overflow = 'hidden';
+          }
+          if (field) {
+               setTimeout(() => {
+                    const target = document.querySelector(`[data-filter-group="${field}"] .ending-filter-input`);
+                    if (target) target.focus({ preventScroll: !isMobile });
+               }, 250);
+          }
      }
 
      function closeFilters() {
           $('filtersPanel').classList.remove('open');
           $('filtersOverlay').classList.remove('active');
+          document.querySelectorAll('.conjugation-filters > div').forEach(wrapper => wrapper.classList.remove('desktop-filter-open'));
           document.body.style.overflow = '';
+     }
+
+     function ensureFilterSelection(key) {
+          const options = document.querySelectorAll(`.ending-filter-input[data-filter="${key}"]`);
+          if (!Array.from(options).some(option => option.checked) && options[0]) options[0].checked = true;
+     }
+
+     function updateSelectAllState(key) {
+          const options = Array.from(document.querySelectorAll(`.ending-filter-input[data-filter="${key}"]`));
+          const selectAll = document.querySelector(`[data-filter-select-all="${key}"]`);
+          if (!selectAll || !options.length) return;
+          const selectedCount = options.filter(option => option.checked).length;
+          selectAll.checked = selectedCount === options.length;
+          selectAll.indeterminate = selectedCount > 0 && selectedCount < options.length;
      }
 
      document.addEventListener('DOMContentLoaded', function () {
@@ -158,22 +232,40 @@
           activateEndingsNavigation();
           setTimeout(activateEndingsNavigation, 150);
 
-          $('endingGroup').innerHTML = optionMarkup(GROUPS);
-          $('endingTense').innerHTML = optionMarkup(TENSES);
-          $('endingPronoun').innerHTML = optionMarkup(PRONOUNS);
+          $('endingGroupFilters').innerHTML = filterMarkup('group', 'Regular verb group', GROUPS);
+          $('endingTenseFilters').innerHTML = filterMarkup('tense', 'Tense', TENSES);
+          $('endingPronounFilters').innerHTML = filterMarkup('pronoun', 'Pronoun', PRONOUNS);
 
-          $('quickGroupBtn').onclick = () => openFilters('endingGroup');
-          $('quickTenseBtn').onclick = () => openFilters('endingTense');
-          $('quickPronounBtn').onclick = () => openFilters('endingPronoun');
+          $('quickGroupBtn').onclick = () => openFilters('group');
+          $('quickTenseBtn').onclick = () => openFilters('tense');
+          $('quickPronounBtn').onclick = () => openFilters('pronoun');
           $('filtersPanelClose').onclick = closeFilters;
           $('filtersOverlay').onclick = closeFilters;
+          document.addEventListener('click', event => {
+               if (!event.target.closest('.filters-panel') && !event.target.closest('.quick-select-btn')) closeFilters();
+          });
           document.addEventListener('keydown', event => {
                if (event.key === 'Escape') closeFilters();
           });
 
-          ['endingGroup', 'endingTense', 'endingPronoun'].forEach(id => {
-               $(id).addEventListener('change', renderPrompt);
+          document.querySelectorAll('.ending-filter-input').forEach(input => {
+               input.addEventListener('change', () => {
+                    ensureFilterSelection(input.dataset.filter);
+                    updateSelectAllState(input.dataset.filter);
+                    renderPrompt({ group: true, tense: true, pronoun: true });
+               });
           });
+          document.querySelectorAll('.ending-select-all-input').forEach(input => {
+               input.addEventListener('change', () => {
+                    document.querySelectorAll(`.ending-filter-input[data-filter="${input.dataset.filterSelectAll}"]`).forEach(option => {
+                         option.checked = input.checked;
+                    });
+                    ensureFilterSelection(input.dataset.filterSelectAll);
+                    updateSelectAllState(input.dataset.filterSelectAll);
+                    renderPrompt({ group: true, tense: true, pronoun: true });
+               });
+          });
+          ['group', 'tense', 'pronoun'].forEach(key => updateSelectAllState(key));
           $('newEndingBtn').onclick = renderPrompt;
           $('randomEndingBtn').onclick = randomizeEnding;
           $('viewEndingsTableBtn').onclick = () => {
@@ -203,6 +295,6 @@
                });
           });
 
-          renderPrompt();
+          renderPrompt({ group: true, tense: true, pronoun: true });
      });
 })();

@@ -293,6 +293,85 @@ input[type='range'] {
      margin-bottom: 0;
 }
 
+.ending-filter-group {
+     min-width: 0;
+     width: 100%;
+     margin: 0;
+     padding: 0;
+     border: 0;
+     overflow: hidden;
+}
+
+.ending-filter-group legend {
+     padding: 0;
+     font-size: 0.9rem;
+     font-weight: 600;
+}
+
+.ending-filter-options {
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+     margin-top: 7px;
+}
+
+.ending-filter-option {
+     display: flex;
+     align-items: center;
+     min-width: 0;
+     gap: 8px;
+     margin: 0;
+     padding: 8px 10px;
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     background: color-mix(in srgb, var(--card) 88%, var(--bg));
+     color: var(--text);
+     cursor: pointer;
+     font-size: 0.86rem;
+     font-weight: 500;
+     line-height: 1.25;
+     overflow-wrap: anywhere;
+     transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.ending-filter-option input {
+     width: 17px;
+     height: 17px;
+     margin: 0;
+     accent-color: var(--accent);
+     flex: 0 0 auto;
+}
+
+.ending-filter-option:hover,
+.ending-filter-option:has(input:focus-visible) {
+     border-color: var(--accent);
+}
+
+.ending-filter-option:has(input:checked) {
+     border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+     background: var(--tips-bg);
+     color: var(--accent);
+}
+
+.ending-select-all {
+     padding-bottom: 6px;
+     border-color: transparent;
+     background: transparent;
+     color: var(--accent);
+     font-weight: 700;
+}
+
+.ending-select-all:has(input:checked) {
+     border-color: var(--accent);
+     background: var(--tips-bg);
+}
+
+.mobile-conjugation-layout .filters-panel .conjugation-filters,
+.mobile-conjugation-layout .filters-panel .conjugation-filters > div {
+     min-width: 0;
+     width: 100%;
+}
+
 .mobile-conjugation-layout .conjugation-source-status {
      min-height: 20px;
      /* margin-top: 5px; */
@@ -311,10 +390,6 @@ input[type='range'] {
 .mobile-conjugation-layout .conjugation-filters select:disabled {
      cursor: wait;
      opacity: 0.6;
-}
-
-.mobile-conjugation-layout .conjugation-card {
-     /* max-width: 620px; */
 }
 
 .mobile-conjugation-layout .conjugation-prompt {
@@ -1709,6 +1784,56 @@ kbd {
      }
 }
 
+@media (min-width: 621px) {
+     .endings-page .mobile-conjugation-layout {
+          position: relative;
+     }
+
+     .endings-page .mobile-conjugation-layout .quick-select-row {
+          display: grid;
+          order: 2;
+     }
+
+     .endings-page .mobile-conjugation-layout .conjugation-settings-row {
+          order: 1;
+     }
+
+     .endings-page .mobile-conjugation-layout .filters-panel {
+          display: none;
+          position: absolute;
+          top: var(--filter-top, 60px);
+          left: clamp(0px, var(--filter-left), calc(100% - 320px));
+          right: auto;
+          bottom: auto;
+          width: min(var(--filter-width, 320px), calc(100% - 24px));
+          max-height: min(520px, 70vh);
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          box-shadow: 0 12px 28px rgba(16, 28, 50, 0.18);
+          transform: none;
+          background: var(--card);
+          z-index: 1000;
+     }
+
+     .endings-page .mobile-conjugation-layout .filters-panel.open {
+          display: block;
+     }
+
+     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters {
+          display: block;
+          margin: 0;
+     }
+
+     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters > div {
+          display: none;
+     }
+
+     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters > div.desktop-filter-open {
+          display: block;
+     }
+}
+
 /* ===== STUDY PAGE ACCENT BAR ===== */
 .study-accent-bar {
      display: flex;
@@ -1750,6 +1875,22 @@ kbd {
 .page-pool-status[hidden],
 .page-pool-status:empty {
      display: none !important;
+}
+
+.endings-page .mobile-conjugation-layout .conjugation-settings-row {
+     order: 1;
+}
+
+.endings-page .mobile-conjugation-layout .quick-select-row {
+     order: 2;
+}
+
+.endings-page .mobile-conjugation-layout .conjugation-card {
+     order: 3;
+}
+
+.endings-page .mobile-conjugation-layout .conjugation-progress {
+     order: 4;
 }
 
 /* ===== IRREGULAR VERB BADGES ===== */
