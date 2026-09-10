@@ -14,20 +14,43 @@
      const content = document.getElementById('content');
      const ttsLang = document.getElementById('ttsLang');
      const audioCloseButton = document.getElementById('audioPlayerClose');
+     const audioPlayerContainer = document.getElementById('audioPlayerContainer');
+
+     const AUTO_HIDE_DELAY_MS = 4000;
+     let autoHideTimer = null;
 
      function isMobileLayout() {
           return window.matchMedia('(max-width: 768px)').matches;
      }
 
-     function setAudioPlayerVisibility(forceVisible) {
-          const shouldShow = forceVisible || !isMobileLayout();
-          document.body.classList.toggle('audio-player-visible', shouldShow);
+     function cancelAutoHide() {
+          if (autoHideTimer) {
+               clearTimeout(autoHideTimer);
+               autoHideTimer = null;
+          }
      }
 
-     function hideAudioPlayerOnMobile() {
-          if (isMobileLayout()) {
-               setAudioPlayerVisibility(false);
-          }
+     function setAudioPlayerVisibility(forceVisible) {
+          document.body.classList.toggle('audio-player-visible', !!forceVisible);
+     }
+
+     function hideAudioPlayer() {
+          cancelAutoHide();
+          setAudioPlayerVisibility(false);
+     }
+
+     function scheduleAutoHide() {
+          cancelAutoHide();
+          autoHideTimer = setTimeout(hideAudioPlayer, AUTO_HIDE_DELAY_MS);
+     }
+
+     // Keep the player open while the user is interacting with it (hovering, changing voice, etc.)
+     if (audioPlayerContainer) {
+          audioPlayerContainer.addEventListener('mouseenter', cancelAutoHide);
+          audioPlayerContainer.addEventListener('mouseleave', function () {
+               if (player && player.ended) scheduleAutoHide();
+          });
+          audioPlayerContainer.addEventListener('focusin', cancelAutoHide);
      }
 
      function getTtsLang() {
@@ -94,18 +117,13 @@
           player.onended = function () {
                document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
                status.textContent = 'Ready';
-          };
-
-          player.onpause = function () {
-               if (player.ended || player.currentTime >= player.duration - 0.05) {
-                    // leave the player open so the user can replay by clicking the word again
-               }
+               scheduleAutoHide();
           };
      }
 
      if (audioCloseButton) {
           audioCloseButton.addEventListener('click', function () {
-               hideAudioPlayerOnMobile();
+               hideAudioPlayer();
                document.querySelectorAll('.say.playing').forEach(el => el.classList.remove('playing'));
           });
      }
@@ -118,6 +136,7 @@
           const target = e.target.closest('.say');
           if (!target) return;
           e.preventDefault();
+          cancelAutoHide();
           setAudioPlayerVisibility(true);
           let text = target.getAttribute('data-text') || target.textContent.trim();
           text = text.replace(/[🔊📢🎵▶️⏸️]/g, '').trim();
