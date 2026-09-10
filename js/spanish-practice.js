@@ -665,6 +665,7 @@
                const verbSelect = $('conjugationVerb');
                verbSelect.innerHTML = conjugationVerbs.map((verb, index) => `<option value="${index}">${verb.infinitive} (${verb.meaning.replace(/</g, '&lt;').replace(/>/g, '&gt;')})</option>`).join('');
                verbSelect.disabled = false;
+               if (typeof window.updateConjugationVerbCheckboxes === 'function') window.updateConjugationVerbCheckboxes();
                $('newConjugationBtn').disabled = false;
                $('randomConjugationVerbBtn').disabled = false;
                renderConjugationPrompt();
@@ -803,23 +804,145 @@
                const pronounSelect = $('conjugationPronoun');
                if (!verbSelect || !tenseSelect || !pronounSelect) return;
 
+               const checkboxFilters = {
+                    verb: { select: verbSelect, container: 'conjugationVerbFilters', label: 'Verb' },
+                    tense: { select: tenseSelect, container: 'conjugationTenseFilters', label: 'Tense' },
+                    pronoun: { select: pronounSelect, container: 'conjugationPronounFilters', label: 'Pronoun' },
+               };
+
+               function updateCheckboxFilter(key) {
+                    const filter = checkboxFilters[key];
+                    const container = $(filter.container)?.querySelector('.conjugation-checkbox-options');
+                    if (!container) return;
+                    const options = Array.from(filter.select.options);
+                    container.innerHTML = `<label class="ending-filter-option ending-select-all"><input type="checkbox" class="conjugation-select-all-input" data-conjugation-select-all="${key}" />Select All</label>${options.map(option => `<label class="ending-filter-option"><input type="checkbox" class="conjugation-filter-input" data-conjugation-filter="${key}" value="${option.value}" />${option.textContent}</label>`).join('')}`;
+                    const first = options[0];
+                    if (first && !options.some(option => option.selected)) first.selected = true;
+                    syncCheckboxFilter(key);
+                    container.querySelectorAll('.conjugation-filter-input').forEach(input => {
+                         input.addEventListener('change', () => {
+                              ensureConjugationSelection(key);
+                              syncSelectFromCheckboxes(key);
+                              renderPrompt();
+                         });
+                    });
+                    container.querySelector('.conjugation-select-all-input')?.addEventListener('change', event => {
+                         container.querySelectorAll('.conjugation-filter-input').forEach(input => {
+                              input.checked = event.target.checked;
+                         });
+                         ensureConjugationSelection(key);
+                         syncSelectFromCheckboxes(key);
+                         renderPrompt();
+                    });
+               }
+
+               function syncCheckboxFilter(key) {
+                    const filter = checkboxFilters[key];
+                    const selected = new Set(Array.from(filter.select.selectedOptions).map(option => option.value));
+                    const container = $(filter.container)?.querySelector('.conjugation-checkbox-options');
+                    if (!container) return;
+                    container.querySelectorAll('.conjugation-filter-input').forEach(input => {
+                         input.checked = selected.has(input.value);
+                    });
+                    const all = container.querySelector('.conjugation-select-all-input');
+                    const inputs = Array.from(container.querySelectorAll('.conjugation-filter-input'));
+                    const count = inputs.filter(input => input.checked).length;
+                    if (all) {
+                         all.checked = count === inputs.length;
+                         all.indeterminate = count > 0 && count < inputs.length;
+                    }
+               }
+
+               function ensureConjugationSelection(key) {
+                    const inputs = Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]`));
+                    if (!inputs.some(input => input.checked) && inputs[0]) inputs[0].checked = true;
+               }
+
+               function syncSelectFromCheckboxes(key) {
+                    const filter = checkboxFilters[key];
+                    const selected = new Set(Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]:checked`)).map(input => input.value));
+                    Array.from(filter.select.options).forEach(option => {
+                         option.selected = selected.has(option.value);
+                    });
+                    filter.select._activeValue = Array.from(selected)[0] || '';
+                    syncCheckboxFilter(key);
+                    const labels = Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]:checked`)).map(input => input.parentElement.textContent.trim());
+                    const display = $({ verb: 'selectedVerbDisplay', tense: 'selectedTenseDisplay', pronoun: 'selectedPronounDisplay' }[key]);
+                    if (display && labels.length) display.textContent = labels.length <= 2 ? labels.join(', ') : `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+               }
+
+               function openConjugationFilter(key) {
+                    const isMobile = window.matchMedia('(max-width: 620px)').matches;
+                    const panel = $('filtersPanel');
+                    const isSameFilterOpen = panel.classList.contains('open') && panel.dataset.openFilter === key;
+                    if (isSameFilterOpen) {
+                         closeConjugationFilter();
+                         return;
+                    }
+                    document.querySelectorAll('.conjugation-filters > div').forEach(wrapper => {
+                         wrapper.classList.toggle('desktop-filter-open', wrapper.id === checkboxFilters[key].container);
+                    });
+                    if (!isMobile) {
+                         const layout = document.querySelector('.mobile-conjugation-layout').getBoundingClientRect();
+                         const quickRow = document.querySelector('.quick-select-row').getBoundingClientRect();
+                         const quick = $({ verb: 'quickVerbBtn', tense: 'quickTenseBtn', pronoun: 'quickPronounBtn' }[key]).getBoundingClientRect();
+                         const width = Math.max(280, quick.width);
+                         panel.style.setProperty('--filter-top', `${quickRow.bottom - layout.top + 8}px`);
+                         panel.style.setProperty('--filter-left', `${Math.max(0, Math.min(quick.left - layout.left, layout.width - width))}px`);
+                         panel.style.setProperty('--filter-width', `${width}px`);
+                    }
+                    panel.classList.add('open');
+                    panel.dataset.openFilter = key;
+                    if (isMobile) {
+                         $('filtersOverlay').classList.add('active');
+                         document.body.style.overflow = 'hidden';
+                    }
+                    setTimeout(() => $(checkboxFilters[key].container)?.querySelector('.conjugation-filter-input')?.focus({ preventScroll: !isMobile }), 250);
+               }
+
+               function closeConjugationFilter() {
+                    const panel = $('filtersPanel');
+                    panel.classList.remove('open');
+                    panel.removeAttribute('data-open-filter');
+                    document.querySelectorAll('.conjugation-filters > div').forEach(wrapper => wrapper.classList.remove('desktop-filter-open'));
+                    $('filtersOverlay').classList.remove('active');
+                    document.body.style.overflow = '';
+               }
+
+               window.openConjugationFilter = openConjugationFilter;
+               window.closeConjugationFilter = closeConjugationFilter;
+               window.updateConjugationVerbCheckboxes = () => updateCheckboxFilter('verb');
+
+               document.addEventListener('click', event => {
+                    if (!$('filtersPanel').classList.contains('open')) return;
+                    if (!event.target.closest('#filtersPanel') && !event.target.closest('.quick-select-btn')) closeConjugationFilter();
+               });
+               document.addEventListener('keydown', event => {
+                    if (event.key === 'Escape' && $('filtersPanel').classList.contains('open')) closeConjugationFilter();
+               });
+
                verbSelect.disabled = true;
                tenseSelect.innerHTML = CONJUGATION_TENSES.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
                pronounSelect.innerHTML = CONJUGATION_PRONOUNS.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+               updateCheckboxFilter('tense');
+               updateCheckboxFilter('pronoun');
 
                function currentPrompt() {
-                    const verb = conjugationVerbs[Number(verbSelect.value)];
+                    const verbValue = verbSelect._activeValue || verbSelect.value;
+                    const tenseValue = tenseSelect._activeValue || tenseSelect.value;
+                    const pronounValue = pronounSelect._activeValue || pronounSelect.value;
+                    const verb = conjugationVerbs[Number(verbValue)];
                     if (!verb) return null;
-                    const tense = CONJUGATION_TENSES.find(item => item[0] === tenseSelect.value);
-                    const pronoun = CONJUGATION_PRONOUNS.find(item => item[0] === pronounSelect.value);
-                    const forms = conjugateVerb(verb, tenseSelect.value);
-                    const index = CONJUGATION_PRONOUNS.findIndex(item => item[0] === pronounSelect.value);
+                    const tense = CONJUGATION_TENSES.find(item => item[0] === tenseValue);
+                    const pronoun = CONJUGATION_PRONOUNS.find(item => item[0] === pronounValue);
+                    const forms = conjugateVerb(verb, tenseValue);
+                    const index = CONJUGATION_PRONOUNS.findIndex(item => item[0] === pronounValue);
                     return {
                          verb: verb,
                          tense: tense ? tense[1] : '',
-                         tenseKey: tenseSelect.value,
+                         tenseKey: tenseValue,
                          pronoun: pronoun ? pronoun[1] : '',
-                         pronounKey: pronounSelect.value,
+                         pronounKey: pronounValue,
                          answer: forms ? forms[index] : '',
                     };
                }
@@ -971,23 +1094,7 @@
 
                function randomizeVerb() {
                     if (!conjugationVerbs.length) return;
-
-                    // Create a new shuffled list when we've used every verb
-                    if (shuffledVerbIndex >= shuffledVerbs.length) {
-                         shuffledVerbs = conjugationVerbs.map((_, index) => index);
-
-                         // Fisher-Yates shuffle
-                         for (let i = shuffledVerbs.length - 1; i > 0; i--) {
-                              const j = Math.floor(Math.random() * (i + 1));
-                              [shuffledVerbs[i], shuffledVerbs[j]] = [shuffledVerbs[j], shuffledVerbs[i]];
-                         }
-
-                         shuffledVerbIndex = 0;
-                    }
-
-                    // Get the next verb from the shuffled list
-                    const next = shuffledVerbs[shuffledVerbIndex++];
-                    verbSelect.value = String(next);
+                    randomizeSelect(verbSelect);
 
                     if ($('conjugationRandomPronoun').checked && pronounSelect.options.length > 1) {
                          randomizeSelect(pronounSelect);
@@ -1006,6 +1113,9 @@
                function randomizeSelect(select) {
                     if (!select || select.options.length === 0) return;
 
+                    const options = Array.from(select.selectedOptions.length ? select.selectedOptions : select.options);
+                    const poolKey = options.map(option => option.value).join('|');
+
                     // Get or create the shuffle bag for this select
                     if (!shuffledSelectOptions.has(select)) {
                          shuffledSelectOptions.set(select, []);
@@ -1016,8 +1126,8 @@
                     let index = shuffledSelectIndexes.get(select);
 
                     // Create a new shuffled list when we've used every option
-                    if (index >= shuffled.length) {
-                         shuffled = Array.from({ length: select.options.length }, (_, i) => i);
+                    if (index >= shuffled.length || select._shufflePoolKey !== poolKey) {
+                         shuffled = Array.from({ length: options.length }, (_, i) => i);
 
                          // Fisher-Yates shuffle
                          for (let i = shuffled.length - 1; i > 0; i--) {
@@ -1026,6 +1136,7 @@
                          }
 
                          shuffledSelectOptions.set(select, shuffled);
+                         select._shufflePoolKey = poolKey;
                          index = 0;
                     }
 
@@ -1033,7 +1144,13 @@
                     const next = shuffled[index++];
                     shuffledSelectIndexes.set(select, index);
 
-                    select.value = select.options[next].value;
+                    if (select.multiple) {
+                         options[next].selected = true;
+                         select._activeValue = options[next].value;
+                    } else {
+                         select.value = options[next].value;
+                    }
+                    syncCheckboxFilter(select === verbSelect ? 'verb' : select === tenseSelect ? 'tense' : 'pronoun');
                }
 
                function advanceConjugationPrompt() {

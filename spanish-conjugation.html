@@ -9,7 +9,7 @@
           <script src="js/dictionary-extra.js"></script>
           <script src="js/top1000.js"></script>
      </head>
-     <body>
+     <body class="conjugation-page">
           <div class="header">
                <div class="header-left">
                     <h1>Spanish Conjugation Practice</h1>
@@ -40,25 +40,6 @@
 
           <!-- MOBILE-FIRST LAYOUT -->
           <div class="mobile-conjugation-layout">
-               <!-- Quick Select Row -->
-               <div class="quick-select-row">
-                    <button class="quick-select-btn" id="quickVerbBtn" aria-label="Select verb">
-                         <span class="label">Verb</span>
-                         <span class="value" id="selectedVerbDisplay">Loading...</span>
-                         <span class="arrow">▾</span>
-                    </button>
-                    <button class="quick-select-btn" id="quickTenseBtn" aria-label="Select tense">
-                         <span class="label">Tense</span>
-                         <span class="value" id="selectedTenseDisplay">Present</span>
-                         <span class="arrow">▾</span>
-                    </button>
-                    <button class="quick-select-btn" id="quickPronounBtn" aria-label="Select pronoun">
-                         <span class="label">Pronoun</span>
-                         <span class="value" id="selectedPronounDisplay">yo</span>
-                         <span class="arrow">▾</span>
-                    </button>
-               </div>
-
                <!-- Settings Row - ALWAYS VISIBLE -->
                <div class="conjugation-settings-row">
                     <label class="setting-checkbox">
@@ -78,6 +59,12 @@
                     </label>
                </div>
 
+               <div class="quick-select-row">
+                    <button class="quick-select-btn" id="quickVerbBtn" aria-label="Select verb"><span class="label">Verb</span><span class="value" id="selectedVerbDisplay">Loading...</span><span class="arrow">▾</span></button>
+                    <button class="quick-select-btn" id="quickTenseBtn" aria-label="Select tense"><span class="label">Tense</span><span class="value" id="selectedTenseDisplay">Present</span><span class="arrow">▾</span></button>
+                    <button class="quick-select-btn" id="quickPronounBtn" aria-label="Select pronoun"><span class="label">Pronoun</span><span class="value" id="selectedPronounDisplay">yo</span><span class="arrow">▾</span></button>
+               </div>
+
                <!-- Full Filters Panel - slide up/down -->
                <div class="filters-panel" id="filtersPanel">
                     <div class="filters-panel-header">
@@ -86,7 +73,7 @@
                     </div>
 
                     <div class="conjugation-filters">
-                         <div>
+                         <div id="conjugationLangFilter">
                               <label for="conjugationLang">Spanish variant</label>
                               <select id="conjugationLang">
                                    <option value="es-ES">Spain (es-ES)</option>
@@ -95,20 +82,23 @@
                                    <option value="es-AR">Argentina (es-AR)</option>
                               </select>
                          </div>
-                         <div>
+                         <div id="conjugationVerbFilters">
                               <div class="field-label-row">
                                    <label for="conjugationVerb">Verb</label>
                                    <span id="conjugationVerbStatus" class="conjugation-source-status">Loading verbs.html…</span>
                               </div>
-                              <select id="conjugationVerb"></select>
+                              <select id="conjugationVerb" multiple></select>
+                              <div class="conjugation-checkbox-options" data-checkbox-filter="verb"></div>
                          </div>
-                         <div>
+                         <div id="conjugationTenseFilters">
                               <label for="conjugationTense">Tense</label>
-                              <select id="conjugationTense"></select>
+                              <select id="conjugationTense" multiple></select>
+                              <div class="conjugation-checkbox-options" data-checkbox-filter="tense"></div>
                          </div>
-                         <div>
+                         <div id="conjugationPronounFilters">
                               <label for="conjugationPronoun">Pronoun</label>
-                              <select id="conjugationPronoun"></select>
+                              <select id="conjugationPronoun" multiple></select>
+                              <div class="conjugation-checkbox-options" data-checkbox-filter="pronoun"></div>
                          </div>
                     </div>
                </div>
@@ -238,7 +228,22 @@
 
                     // ===== UPDATE QUICK SELECT DISPLAY =====
                     function updateQuickSelectDisplay() {
-                         if (verbSelect && selectedVerbDisplay) {
+                         function selectedFilterLabel(key, fallback) {
+                              const labels = Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]:checked`)).map(input => input.parentElement.textContent.trim());
+                              if (!labels.length) return fallback;
+                              if (labels.length <= 2) return labels.join(', ');
+                              return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+                         }
+                         if (selectedVerbDisplay && document.querySelector('.conjugation-filter-input[data-conjugation-filter="verb"]')) {
+                              selectedVerbDisplay.textContent = selectedFilterLabel('verb', 'Select verb');
+                         }
+                         if (selectedTenseDisplay && document.querySelector('.conjugation-filter-input[data-conjugation-filter="tense"]')) {
+                              selectedTenseDisplay.textContent = selectedFilterLabel('tense', 'Present');
+                         }
+                         if (selectedPronounDisplay && document.querySelector('.conjugation-filter-input[data-conjugation-filter="pronoun"]')) {
+                              selectedPronounDisplay.textContent = selectedFilterLabel('pronoun', 'yo');
+                         }
+                         if (verbSelect && selectedVerbDisplay && !document.querySelector('.conjugation-filter-input[data-conjugation-filter="verb"]')) {
                               const selectedOption = verbSelect.options[verbSelect.selectedIndex];
                               if (selectedOption) {
                                    const text = selectedOption.textContent;
@@ -246,13 +251,13 @@
                                    selectedVerbDisplay.textContent = verbName || 'Select verb';
                               }
                          }
-                         if (tenseSelect && selectedTenseDisplay) {
+                         if (tenseSelect && selectedTenseDisplay && !document.querySelector('.conjugation-filter-input[data-conjugation-filter="tense"]')) {
                               const selectedOption = tenseSelect.options[tenseSelect.selectedIndex];
                               if (selectedOption) {
                                    selectedTenseDisplay.textContent = selectedOption.textContent || 'Present';
                               }
                          }
-                         if (pronounSelect && selectedPronounDisplay) {
+                         if (pronounSelect && selectedPronounDisplay && !document.querySelector('.conjugation-filter-input[data-conjugation-filter="pronoun"]')) {
                               const selectedOption = pronounSelect.options[pronounSelect.selectedIndex];
                               if (selectedOption) {
                                    selectedPronounDisplay.textContent = selectedOption.textContent || 'yo';
@@ -327,6 +332,10 @@
                     }
 
                     function closeFiltersPanel() {
+                         if (typeof closeConjugationFilter === 'function') {
+                              closeConjugationFilter();
+                              return;
+                         }
                          filtersPanel.classList.remove('open');
                          filtersOverlay.classList.remove('active');
                          document.body.style.overflow = '';
@@ -335,17 +344,20 @@
                     // Quick select button handlers
                     quickVerbBtn.addEventListener('click', function (e) {
                          e.stopPropagation();
-                         openFiltersPanel('conjugationVerb');
+                         if (typeof openConjugationFilter === 'function') openConjugationFilter('verb');
+                         else openFiltersPanel('conjugationVerb');
                     });
 
                     quickTenseBtn.addEventListener('click', function (e) {
                          e.stopPropagation();
-                         openFiltersPanel('conjugationTense');
+                         if (typeof openConjugationFilter === 'function') openConjugationFilter('tense');
+                         else openFiltersPanel('conjugationTense');
                     });
 
                     quickPronounBtn.addEventListener('click', function (e) {
                          e.stopPropagation();
-                         openFiltersPanel('conjugationPronoun');
+                         if (typeof openConjugationFilter === 'function') openConjugationFilter('pronoun');
+                         else openFiltersPanel('conjugationPronoun');
                     });
 
                     filtersPanelClose.addEventListener('click', closeFiltersPanel);

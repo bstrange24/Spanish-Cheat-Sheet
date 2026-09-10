@@ -26,12 +26,7 @@
      const activePrompt = { group: 'ar', tense: 'present', pronoun: 'yo' };
 
      function filterMarkup(key, label, items) {
-          const options = items
-               .map(
-                    ([value, text], index) =>
-                         `<label class="ending-filter-option"><input type="checkbox" class="ending-filter-input" data-filter="${key}" value="${value}"${index === 0 ? ' checked' : ''} />${text}</label>`,
-               )
-               .join('');
+          const options = items.map(([value, text], index) => `<label class="ending-filter-option"><input type="checkbox" class="ending-filter-input" data-filter="${key}" value="${value}"${index === 0 ? ' checked' : ''} />${text}</label>`).join('');
           return `<fieldset class="ending-filter-group" data-filter-group="${key}"><legend>${label}</legend><div class="ending-filter-options"><label class="ending-filter-option ending-select-all"><input type="checkbox" class="ending-select-all-input" data-filter-select-all="${key}" />Select All</label>${options}</div></fieldset>`;
      }
 

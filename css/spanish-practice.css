@@ -366,8 +366,21 @@ input[type='range'] {
      background: var(--tips-bg);
 }
 
+.conjugation-checkbox-options {
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+     margin-top: 7px;
+     max-height: 260px;
+     overflow-y: auto;
+}
+
+.conjugation-page .conjugation-filters>div:not(#conjugationLangFilter)>select {
+     display: none;
+}
+
 .mobile-conjugation-layout .filters-panel .conjugation-filters,
-.mobile-conjugation-layout .filters-panel .conjugation-filters > div {
+.mobile-conjugation-layout .filters-panel .conjugation-filters>div {
      min-width: 0;
      width: 100%;
 }
@@ -1825,11 +1838,11 @@ kbd {
           margin: 0;
      }
 
-     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters > div {
+     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters>div {
           display: none;
      }
 
-     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters > div.desktop-filter-open {
+     .endings-page .mobile-conjugation-layout .filters-panel .conjugation-filters>div.desktop-filter-open {
           display: block;
      }
 }
@@ -1891,6 +1904,75 @@ kbd {
 
 .endings-page .mobile-conjugation-layout .conjugation-progress {
      order: 4;
+}
+
+.conjugation-page .mobile-conjugation-layout .conjugation-settings-row {
+     order: 1;
+}
+
+.conjugation-page .mobile-conjugation-layout .quick-select-row {
+     order: 2;
+}
+
+.conjugation-page .mobile-conjugation-layout .irregular-legend {
+     order: 3;
+}
+
+.conjugation-page .mobile-conjugation-layout .conjugation-card {
+     order: 4;
+}
+
+.conjugation-page .mobile-conjugation-layout .conjugation-progress {
+     order: 5;
+}
+
+@media (min-width: 621px) {
+     .conjugation-page .mobile-conjugation-layout {
+          position: relative;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .quick-select-row {
+          display: grid;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-panel {
+          display: none;
+          position: absolute;
+          top: var(--filter-top, 60px);
+          left: var(--filter-left, 0px);
+          right: auto;
+          bottom: auto;
+          width: min(var(--filter-width, 320px), calc(100% - 24px));
+          max-height: min(520px, 70vh);
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          box-shadow: 0 12px 28px rgba(16, 28, 50, 0.18);
+          transform: none;
+          background: var(--card);
+          z-index: 1000;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-panel.open {
+          display: block;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-panel .conjugation-filters {
+          display: block;
+          margin: 0;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-panel .conjugation-filters>div {
+          display: none;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-panel .conjugation-filters>div.desktop-filter-open {
+          display: block;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .filters-overlay {
+          display: none;
+     }
 }
 
 /* ===== IRREGULAR VERB BADGES ===== */
