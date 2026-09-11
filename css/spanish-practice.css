@@ -516,7 +516,7 @@ input[type='range'] {
 /* Quick Select Row */
 .mobile-conjugation-layout .quick-select-row {
      display: grid;
-     grid-template-columns: 1fr 1fr 1fr;
+     grid-template-columns: repeat(3, minmax(0, 1fr));
      gap: 6px;
      margin-bottom: 2px;
 }
@@ -538,6 +538,7 @@ input[type='range'] {
      font-family: inherit;
      font-size: inherit;
      width: 100%;
+     min-width: 0;
 }
 
 .mobile-conjugation-layout .quick-select-btn:hover {
@@ -564,6 +565,7 @@ input[type='range'] {
      overflow: hidden;
      text-overflow: ellipsis;
      white-space: nowrap;
+     min-width: 0;
      line-height: 1.3;
 }
 
@@ -1924,6 +1926,24 @@ kbd {
 
 .conjugation-page .mobile-conjugation-layout .conjugation-progress {
      order: 5;
+}
+
+@media (max-width: 620px) {
+     .conjugation-page {
+          overflow-x: hidden;
+     }
+
+     .conjugation-page .mobile-conjugation-layout,
+     .conjugation-page .mobile-conjugation-layout .quick-select-row {
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+     }
+
+     .conjugation-page .mobile-conjugation-layout .quick-select-btn {
+          min-width: 0;
+          max-width: 100%;
+     }
 }
 
 @media (min-width: 621px) {

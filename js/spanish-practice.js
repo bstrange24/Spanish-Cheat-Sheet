@@ -231,7 +231,7 @@
           // ===================== DOM =====================
           const targetInput = $('target');
           const targetCard = $('targetCard');
-            const resultCard = $('resultCard');
+          const resultCard = $('resultCard');
           const speakBtn = $('speakBtn');
           const listenBtn = $('listenBtn');
           const randomBtn = $('randomBtn');
@@ -868,7 +868,15 @@
                     syncCheckboxFilter(key);
                     const labels = Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]:checked`)).map(input => input.parentElement.textContent.trim());
                     const display = $({ verb: 'selectedVerbDisplay', tense: 'selectedTenseDisplay', pronoun: 'selectedPronounDisplay' }[key]);
-                    if (display && labels.length) display.textContent = labels.length <= 2 ? labels.join(', ') : `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+                    if (display && labels.length) display.textContent = formatConjugationFilterLabel(key, labels.length, labels);
+               }
+
+               function formatConjugationFilterLabel(key, count, labels) {
+                    const total = checkboxFilters[key].select.options.length;
+                    const noun = key === 'verb' ? 'verb' : key === 'tense' ? 'tense' : 'pronoun';
+                    if (count === total && total > 1) return `All ${noun}s`;
+                    if (count > 1) return `${count} ${noun}s`;
+                    return key === 'verb' ? (labels[0] || '').split('(')[0].trim() : labels[0] || '';
                }
 
                function openConjugationFilter(key) {

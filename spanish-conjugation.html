@@ -231,8 +231,11 @@
                          function selectedFilterLabel(key, fallback) {
                               const labels = Array.from(document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]:checked`)).map(input => input.parentElement.textContent.trim());
                               if (!labels.length) return fallback;
-                              if (labels.length <= 2) return labels.join(', ');
-                              return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+                              const noun = key === 'verb' ? 'verb' : key === 'tense' ? 'tense' : 'pronoun';
+                              const total = document.querySelectorAll(`.conjugation-filter-input[data-conjugation-filter="${key}"]`).length;
+                              if (labels.length === total && total > 1) return `All ${noun}s`;
+                              if (labels.length > 1) return `${labels.length} ${noun}s`;
+                              return key === 'verb' ? (labels[0] || '').split('(')[0].trim() : labels[0] || '';
                          }
                          if (selectedVerbDisplay && document.querySelector('.conjugation-filter-input[data-conjugation-filter="verb"]')) {
                               selectedVerbDisplay.textContent = selectedFilterLabel('verb', 'Select verb');
