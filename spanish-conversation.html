@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Talk with your Spanish Tutor</title>
+          <link rel="stylesheet" href="css/spanish-practice.css" />
+          <link rel="stylesheet" href="css/spanish-conversation.css" />
+     </head>
+     <body class="conversation-page">
+          <div class="header">
+               <div class="header-left">
+                    <h1>Talk with your Spanish Tutor</h1>
+                    <p class="subtitle">Speak or type in Spanish. Your AI tutor replies out loud and corrects gently.</p>
+               </div>
+               <div class="header-tools">
+                    <div class="streak" id="streakDisplay" title="Practice streak">
+                         <span class="streak-icon" aria-hidden="true">🔥</span>
+                         <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
+                    </div>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+               </div>
+          </div>
+
+          <nav class="page-nav" aria-label="Practice navigation">
+               <a class="active" href="spanish-conversation.html">Talk</a>
+               <a href="spanish-practice.html">Pronunciation</a>
+               <a href="spanish-conjugation.html">Conjugation</a>
+               <a href="spanish-cheatsheet.html">Cheat sheet</a>
+          </nav>
+
+          <section class="practice-intro">
+               <div>
+                    <span class="eyebrow">Conversation lab.</span>
+                    <h2>Have a real chat.</h2>
+                    <p>Tap the mic and speak in Spanish, or type a message. Your tutor answers in Spanish and speaks the reply back to you.</p>
+               </div>
+          </section>
+
+          <div class="chat-shell">
+               <div class="chat-toolbar">
+                    <label class="player-lang-label" for="chatLang">Voice</label>
+                    <select id="chatLang" aria-label="Tutor voice">
+                         <option value="es-419" selected>Latin America (es-419)</option>
+                         <option value="es">Spain (es)</option>
+                         <option value="es-us">US Spanish (es-us)</option>
+                    </select>
+                    <span class="chat-status" id="chatStatus">Ready</span>
+                    <button type="button" class="reset-btn" id="resetChatBtn" title="Start a new conversation">Reset chat</button>
+               </div>
+
+               <div class="chat-log" id="chatLog"></div>
+
+               <div class="chat-input-row">
+                    <button type="button" class="mic-btn" id="micBtn" aria-label="Speak in Spanish" title="Speak">🎤</button>
+                    <input type="text" id="chatInput" placeholder="Escribe o habla en español…" autocomplete="off" />
+                    <button type="button" class="send-btn" id="sendBtn" aria-label="Send message" title="Send">➤</button>
+               </div>
+          </div>
+
+          <script src="js/shared.js"></script>
+          <script src="js/spanish-conversation.js"></script>
+     </body>
+</html>
