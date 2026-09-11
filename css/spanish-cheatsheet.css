@@ -548,7 +548,8 @@ body::before {
      margin-top: 14px;
 }
 
-.sidebar-study-actions button {
+.sidebar-study-actions button,
+.sidebar-study-actions a {
      width: 100%;
      padding: 8px 10px;
      border: 1px solid var(--border-color);
@@ -558,10 +559,13 @@ body::before {
      font: inherit;
      font-size: 0.78rem;
      text-align: left;
+     text-decoration: none;
+     box-sizing: border-box;
      cursor: pointer;
 }
 
-.sidebar-study-actions button:hover {
+.sidebar-study-actions button:hover,
+.sidebar-study-actions a:hover {
      background: var(--hover-color);
 }
 
@@ -1335,7 +1339,8 @@ body.audio-player-visible #audioPlayerContainer {
           padding: 12px 16px;
      }
 
-     .sidebar-study-actions button {
+     .sidebar-study-actions button,
+     .sidebar-study-actions a {
           min-height: 42px;
      }
 

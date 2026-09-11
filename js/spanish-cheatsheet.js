@@ -1223,6 +1223,11 @@
           if (endingsPageBtn) endingsPageBtn.onclick = openEndingsPractice;
           const chartEndingsPracticeBtn = document.getElementById('chartEndingsPracticeBtn');
           if (chartEndingsPracticeBtn) chartEndingsPracticeBtn.onclick = openEndingsPractice;
+          const talkPageBtn = document.getElementById('talkPageBtn');
+          if (talkPageBtn)
+               talkPageBtn.onclick = function () {
+                    window.open('spanish-conversation.html', '_blank', 'noopener');
+               };
      }
 
      const SECTION_ALIASES = {

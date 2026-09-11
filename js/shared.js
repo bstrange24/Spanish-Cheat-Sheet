@@ -229,6 +229,7 @@ function switchTab(tabId) {
      }
 
      // Update nav links
+     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
      document.querySelectorAll('.page-nav a').forEach(link => {
           link.classList.remove('active');
           if (link.dataset.tab === tabId) {
@@ -243,6 +244,10 @@ function switchTab(tabId) {
                     link.classList.add('active');
                }
                if (href.includes('spanish-practice.html') && tabId === 'pronunciation') {
+                    link.classList.add('active');
+               }
+               // Pages without an in-page tab system (e.g. Talk, Tense endings) stay active by URL match
+               if (href.split('?')[0].split('#')[0] === currentPage) {
                     link.classList.add('active');
                }
           }
