@@ -955,6 +955,18 @@
                     };
                }
 
+               function renderConjugationEndingsTable() {
+                    const prompt = currentPrompt();
+                    if (!prompt) return;
+                    const type = prompt.verb.infinitive.endsWith('ír') ? 'ir' : prompt.verb.infinitive.slice(-2);
+                    $('conjugationEndingsTableSummary').textContent = `${prompt.verb.infinitive} · ${prompt.tense}`;
+                    $('conjugationEndingsTableBody').innerHTML = CONJUGATION_PRONOUNS.map(([key, label], index) => {
+                         const selected = key === prompt.pronounKey ? ' class="selected"' : '';
+                         const ending = window.SpanishConjugate.regularEnding(type, prompt.tenseKey, index);
+                         return `<tr${selected}><th scope="row">${label}</th><td>${ending ? '-' + ending : '—'}</td></tr>`;
+                    }).join('');
+               }
+
                function displayConjugationPrompt(verb, tenseKey, pronounKey, answer, showAnswer) {
                     const promptDiv = $('conjugationPrompt');
                     if (!promptDiv) return;

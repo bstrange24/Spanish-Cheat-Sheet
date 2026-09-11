@@ -108,7 +108,9 @@
      function renderPrompt(settings) {
           selectPromptValues(settings || { group: false, tense: false, pronoun: false });
           const prompt = currentPrompt();
-          $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${prompt.group[1]}</span><small>${prompt.tense[1]} ending</small>`;
+          const groupLabel = prompt.group[1];
+          const groupSound = activePrompt.group;
+          $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${groupLabel}</span><button type="button" id="hearEndingModelBtn" style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" aria-label="Hear ${groupLabel}" title="Hear ${groupLabel}">🔊</button><small>(${prompt.tense[1]})</small>`;
           $('endingAnswer').value = '';
           $('endingAnswer').disabled = false;
           $('endingFeedback').textContent = 'Type only the ending.';
@@ -118,6 +120,7 @@
           });
           updateQuickSelects();
           renderEndingsTable();
+          $('hearEndingModelBtn').onclick = () => playAudioFromServer(groupSound, 'es-MX');
           if (!window.matchMedia('(max-width: 620px)').matches) $('endingAnswer').focus();
      }
 
@@ -150,7 +153,10 @@
           if (!revealOnly) {
                state.attempted++;
                const correct = normalize(answer) === normalize(prompt.answer);
-               if (correct) state.correct++;
+               if (correct) {
+                    state.correct++;
+                    playAudioFromServer(prompt.answer, 'es-MX');
+               }
                $('endingFeedback').textContent = correct ? '✅ Correct!' : `❌ The correct ending is ${prompt.answer}`;
                $('endingFeedback').className = `conjugation-feedback ${correct ? 'good' : 'bad'}`;
                if (correct && ($('endingAutoAdvance').checked || $('endingRandomGroup').checked || $('endingRandomPronoun').checked || $('endingRandomTense').checked)) {
@@ -262,6 +268,7 @@
           });
           ['group', 'tense', 'pronoun'].forEach(key => updateSelectAllState(key));
           $('newEndingBtn').onclick = renderPrompt;
+          $('hearEndingBtn').onclick = () => playAudioFromServer(currentPrompt().answer, 'es-MX');
           $('randomEndingBtn').onclick = randomizeEnding;
           $('viewEndingsTableBtn').onclick = () => {
                renderEndingsTable();

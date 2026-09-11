@@ -140,20 +140,42 @@
                          <button type="button" class="accent-key" data-char="ú" title="Insert ú — Shift+click for uppercase">ú</button>
                          <button type="button" class="accent-key" data-char="ü" title="Insert ü — Shift+click for uppercase">ü</button>
                          <button type="button" class="accent-key" data-char="ñ" title="Insert ñ — Shift+click for uppercase">ñ</button>
-                         <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button>
-                         <button type="button" class="accent-key" data-char="?" title="Insert ?">?</button>
-                         <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button>
+                         <!-- <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button> -->
+                         <!-- <button type="button" class="accent-key" data-char="?" title="Insert ?">?</button> -->
+                         <!-- <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button> -->
                     </div>
                     <div class="btn-row">
                          <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
                          <button type="button" id="newConjugationBtn" class="secondary-action" disabled>Clear answer</button>
                          <button type="button" id="revealConjugationBtn">Reveal</button>
                          <button type="button" id="hearConjugationBtn">Hear answer</button>
+                         <button type="button" id="viewConjugationEndingsBtn" class="secondary-action">📋 View endings table</button>
                          <button type="button" id="randomConjugationVerbBtn" class="primary-action" disabled>Get new word</button>
                     </div>
                     <div id="conjugationFeedback" class="conjugation-feedback" aria-live="polite">Choose your answer.</div>
                </div>
                <div class="conjugation-progress" id="conjugationProgress">0 correct / 0 attempted</div>
+          </div>
+
+          <div class="modal" id="conjugationEndingsTableModal" role="dialog" aria-modal="true" aria-labelledby="conjugationEndingsTableTitle">
+               <div class="modal-content endings-table-modal-content">
+                    <div class="modal-heading-row">
+                         <h3 id="conjugationEndingsTableTitle">Conjugation endings</h3>
+                         <button type="button" class="modal-close" id="closeConjugationEndingsTableBtn" aria-label="Close endings table">✕</button>
+                    </div>
+                    <p id="conjugationEndingsTableSummary" class="endings-table-summary"></p>
+                    <div class="endings-table-wrap">
+                         <table class="endings-table">
+                              <thead>
+                                   <tr>
+                                        <th scope="col">Pronoun</th>
+                                        <th scope="col">Ending</th>
+                                   </tr>
+                              </thead>
+                              <tbody id="conjugationEndingsTableBody"></tbody>
+                         </table>
+                    </div>
+               </div>
           </div>
 
           <div class="practice-runtime" aria-hidden="true">
