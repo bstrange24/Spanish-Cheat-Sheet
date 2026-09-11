@@ -1311,6 +1311,17 @@
                     const langCode = langSelect ? langSelect.value : 'es-MX';
                     playAudioFromServer(prompt.answer, langCode);
                };
+               $('viewConjugationEndingsBtn').onclick = () => {
+                    renderConjugationEndingsTable();
+                    $('conjugationEndingsTableModal').classList.add('open');
+               };
+               $('closeConjugationEndingsTableBtn').onclick = () => $('conjugationEndingsTableModal').classList.remove('open');
+               $('conjugationEndingsTableModal').addEventListener('click', event => {
+                    if (event.target === $('conjugationEndingsTableModal')) $('conjugationEndingsTableModal').classList.remove('open');
+               });
+               document.addEventListener('keydown', event => {
+                    if (event.key === 'Escape') $('conjugationEndingsTableModal').classList.remove('open');
+               });
                $('conjugationAnswer').addEventListener('keydown', event => {
                     if (event.key === 'Enter') checkAnswer(false);
                });

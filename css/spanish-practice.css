@@ -245,6 +245,12 @@ button:active {
      color: var(--text);
 }
 
+.tertiary-action {
+     background: var(--bg);
+     border: 1px solid var(--border);
+     color: var(--text);
+}
+
 .conjugation-check {
      background: var(--success);
      color: white;
