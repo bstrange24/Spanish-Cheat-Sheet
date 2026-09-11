@@ -231,7 +231,7 @@
           // ===================== DOM =====================
           const targetInput = $('target');
           const targetCard = $('targetCard');
-          const resultCard = $('resultCard');
+            const resultCard = $('resultCard');
           const speakBtn = $('speakBtn');
           const listenBtn = $('listenBtn');
           const randomBtn = $('randomBtn');
@@ -1071,7 +1071,7 @@
                     input.disabled = false;
                     $('conjugationFeedback').innerHTML = 'Type the conjugated form.';
                     $('conjugationFeedback').className = 'conjugation-feedback';
-                    input.focus();
+                    if (!window.matchMedia('(max-width: 620px)').matches) input.focus();
                     enableConjugationAccentBar();
 
                     // Only play audio if NOT coming from a page launch and if conjugation tab is active

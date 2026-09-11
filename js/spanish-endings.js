@@ -118,7 +118,7 @@
           });
           updateQuickSelects();
           renderEndingsTable();
-          $('endingAnswer').focus();
+          if (!window.matchMedia('(max-width: 620px)').matches) $('endingAnswer').focus();
      }
 
      function nextPrompt() {
