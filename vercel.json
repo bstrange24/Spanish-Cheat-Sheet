@@ -1,7 +1,18 @@
 {
-  "routes": [
-    { "src": "/", "dest": "/spanish-cheatsheet.html" },
-    { "src": "/index.html", "dest": "/spanish-cheatsheet.html" },
-    { "src": "/api/(.*)", "dest": "/api/$1" }
-  ]
+     "routes": [
+          { "src": "/", "dest": "/spanish-cheatsheet.html" },
+          { "src": "/index.html", "dest": "/spanish-cheatsheet.html" },
+          { "src": "/api/(.*)", "dest": "/api/$1" }
+     ],
+     "headers": [
+          {
+               "source": "/(.*)",
+               "headers": [
+                    {
+                         "key": "Permissions-Policy",
+                         "value": "microphone=(self)"
+                    }
+               ]
+          }
+     ]
 }
