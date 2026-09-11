@@ -1012,7 +1012,7 @@
         <div style="display: flex; flex-direction: column; gap: 4px;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <strong>${pronounLabel}</strong>
-                <span style="font-size: 1.1rem; font-weight: 500;">${verb.infinitive}</span>
+                <span>${verb.infinitive}</span>
                 ${irregBadge}
                 <button type="button" id="conjugationHearInfinitiveBtn" 
                         style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
