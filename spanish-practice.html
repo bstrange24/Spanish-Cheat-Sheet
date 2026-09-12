@@ -6,6 +6,7 @@
           <title>Spanish Practice</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
           <script src="js/dictionary.js"></script>
+          <script src="https://unpkg.com/lucide@latest"></script>
           <script src="js/dictionary-extra.js"></script>
           <script src="js/top1000.js"></script>
      </head>
@@ -20,7 +21,7 @@
                          <span class="streak-icon" aria-hidden="true">🔥</span>
                          <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
                     </div>
-                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme"><i data-lucide="moon" aria-hidden="true"></i></button>
                </div>
           </div>
 
@@ -57,7 +58,7 @@
                     </select>
 
                     <label for="target">Spanish word or sentence</label>
-                    <input type="text" id="target" placeholder="Type a word or sentence or click 🎲 Random" />
+                    <input type="text" id="target" placeholder="Type a word or sentence or click Random" />
 
                     <div class="filters">
                          <div class="filter-fields">
@@ -107,15 +108,15 @@
                     </div>
 
                     <div class="btn-row practice-actions">
-                         <button id="randomBtn" class="primary-action">🎲 Give me a phrase</button>
-                         <button id="speakBtn">🔊 Hear</button>
-                         <button id="listenBtn">🎤 Speak</button>
-                         <button id="tryAgainBtn">🔄 Again</button>
-                         <button id="starBtn">⭐ Star</button>
-                         <button id="weakBtn">📉 Weak</button>
-                         <button id="recordBtn">⏺ Record me</button>
-                         <button id="playMyBtn" disabled>▶ My voice</button>
-                         <button id="playerBtn">🎧 Player</button>
+                         <button id="randomBtn" class="primary-action"><i data-lucide="dices" aria-hidden="true"></i> Give me a phrase</button>
+                         <button id="speakBtn"><i data-lucide="volume-2" aria-hidden="true"></i> Hear</button>
+                         <button id="listenBtn"><i data-lucide="mic" aria-hidden="true"></i> Speak</button>
+                         <button id="tryAgainBtn"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Again</button>
+                         <button id="starBtn"><i data-lucide="star" aria-hidden="true"></i> Star</button>
+                         <button id="weakBtn"><i data-lucide="trending-down" aria-hidden="true"></i> Weak</button>
+                         <button id="recordBtn"><i data-lucide="circle" aria-hidden="true"></i> Record me</button>
+                         <button id="playMyBtn" disabled><i data-lucide="play" aria-hidden="true"></i> My voice</button>
+                         <button id="playerBtn"><i data-lucide="headphones" aria-hidden="true"></i> Player</button>
                          <button id="clearBtn">Clear</button>
                     </div>
 
@@ -149,7 +150,7 @@
                          <div class="player-buttons">
                               <button id="openPlayerBtn">🔗 Open in new tab</button>
                               <button id="testPlayerBtn">🔍 Test Connection</button>
-                              <button id="refreshPlayerBtn">🔄 Refresh</button>
+                              <button id="refreshPlayerBtn"><i data-lucide="refresh-cw" aria-hidden="true"></i> Refresh</button>
                               <button id="togglePlayerBtn">▼ Hide</button>
                          </div>
                     </div>

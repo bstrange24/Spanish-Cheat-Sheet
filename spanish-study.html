@@ -6,6 +6,7 @@
           <title>Spanish Study &amp; Progress</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
           <script src="js/dictionary.js"></script>
+          <script src="https://unpkg.com/lucide@latest"></script>
           <script src="js/dictionary-extra.js"></script>
           <script src="js/top1000.js"></script>
      </head>
@@ -20,7 +21,7 @@
                          <span class="streak-icon" aria-hidden="true">🔥</span>
                          <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
                     </div>
-                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme"><i data-lucide="moon" aria-hidden="true"></i></button>
                </div>
           </div>
 
@@ -99,10 +100,18 @@
                     </div>
                     <div>Choose a study mode to begin.</div>
                     <div class="study-launcher" aria-label="Study modes">
-                         <button id="quizBtn" class="mode-card"><span>📝</span><strong>Quiz</strong><small>Recall meanings and forms</small></button>
-                         <button id="dictationBtn" class="mode-card"><span>✍️</span><strong>Dictation</strong><small>Listen and type Spanish</small></button>
-                         <button id="cardsBtn" class="mode-card"><span>🃏</span><strong>Flashcards</strong><small>Review what is due</small></button>
-                         <button id="weakBtn" class="mode-card"><span>📉</span><strong>Weak words</strong><small>Practice your least-used items</small></button>
+                         <button id="quizBtn" class="mode-card">
+                              <span><i data-lucide="clipboard-list" aria-hidden="true"></i></span><strong>Quiz</strong><small>Recall meanings and forms</small>
+                         </button>
+                         <button id="dictationBtn" class="mode-card">
+                              <span><i data-lucide="pen-line" aria-hidden="true"></i></span><strong>Dictation</strong><small>Listen and type Spanish</small>
+                         </button>
+                         <button id="cardsBtn" class="mode-card">
+                              <span><i data-lucide="layers-3" aria-hidden="true"></i></span><strong>Flashcards</strong><small>Review what is due</small>
+                         </button>
+                         <button id="weakBtn" class="mode-card">
+                              <span><i data-lucide="trending-down" aria-hidden="true"></i></span><strong>Weak words</strong><small>Practice your least-used items</small>
+                         </button>
                     </div>
                     <div class="page-pool-status" id="pagePoolStatus" hidden></div>
                </div>
@@ -111,7 +120,9 @@
           <div class="card" id="studyCard" style="display: none">
                <div class="player-controls">
                     <strong id="studyTitle">Study</strong>
-                    <div class="player-buttons"><button type="button" id="studyExitBtn">✕ Close study</button></div>
+                    <div class="player-buttons">
+                         <button type="button" id="studyExitBtn"><i data-lucide="x" aria-hidden="true"></i> Close study</button>
+                    </div>
                </div>
                <div id="studyBody"></div>
           </div>

@@ -1017,7 +1017,7 @@
                 <button type="button" id="conjugationHearInfinitiveBtn" 
                         style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" 
                         title="Hear the infinitive">
-                    🔊
+                    <i data-lucide="volume-2" aria-hidden="true"></i>
                 </button>
                 <small style="color: var(--muted);">(${tenseLabel})</small>
             </div>
@@ -1027,6 +1027,7 @@
         </div>
     `;
 
+                    refreshIcons();
                     const hearBtn = document.getElementById('conjugationHearInfinitiveBtn');
                     if (hearBtn) {
                          hearBtn.addEventListener('click', function (e) {

@@ -6,6 +6,7 @@
           <title>Talk with your Spanish Tutor</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
           <link rel="stylesheet" href="css/spanish-conversation.css" />
+          <script src="https://unpkg.com/lucide@latest"></script>
      </head>
      <body class="conversation-page">
           <div class="header">
@@ -18,7 +19,7 @@
                          <span class="streak-icon" aria-hidden="true">🔥</span>
                          <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
                     </div>
-                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme"><i data-lucide="moon" aria-hidden="true"></i></button>
                </div>
           </div>
 
@@ -50,9 +51,9 @@
                <div class="chat-log" id="chatLog"></div>
 
                <div class="chat-input-row">
-                    <button type="button" class="mic-btn" id="micBtn" aria-label="Speak in Spanish" title="Speak">🎤</button>
+                    <button type="button" class="mic-btn" id="micBtn" aria-label="Speak in Spanish" title="Speak"><i data-lucide="mic" aria-hidden="true"></i></button>
                     <input type="text" id="chatInput" placeholder="Escribe o habla en español…" autocomplete="off" />
-                    <button type="button" class="send-btn" id="sendBtn" aria-label="Send message" title="Send">➤</button>
+                    <button type="button" class="send-btn" id="sendBtn" aria-label="Send message" title="Send"><i data-lucide="send" aria-hidden="true"></i></button>
                </div>
           </div>
 

@@ -42,7 +42,8 @@
                replayBtn.className = 'replay-btn';
                replayBtn.title = 'Listen again';
                replayBtn.setAttribute('aria-label', 'Listen to this reply again');
-               replayBtn.textContent = '🔊';
+               replayBtn.innerHTML = '<i data-lucide="volume-2" aria-hidden="true"></i>';
+               refreshIcons();
                replayBtn.addEventListener('click', function () {
                     const lang = chatLang ? chatLang.value : 'es-419';
                     setStatus('Speaking…');

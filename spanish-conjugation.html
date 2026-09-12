@@ -5,6 +5,7 @@
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Spanish Conjugation Practice</title>
           <link rel="stylesheet" href="css/spanish-practice.css" />
+          <script src="https://unpkg.com/lucide@latest"></script>
           <script src="js/dictionary.js"></script>
           <script src="js/dictionary-extra.js"></script>
           <script src="js/top1000.js"></script>
@@ -20,7 +21,7 @@
                          <span class="streak-icon" aria-hidden="true">🔥</span>
                          <span class="streak-copy"><span class="streak-word">Streak</span> <span class="streak-count">0</span><span class="streak-unit"> days</span></span>
                     </div>
-                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme"><i data-lucide="moon" aria-hidden="true"></i></button>
                </div>
           </div>
 
@@ -69,8 +70,8 @@
                <!-- Full Filters Panel - slide up/down -->
                <div class="filters-panel" id="filtersPanel">
                     <div class="filters-panel-header">
-                         <span class="filters-panel-title">⚙️ Filters</span>
-                         <button class="filters-panel-close" id="filtersPanelClose" aria-label="Close filters">✕</button>
+                         <span class="filters-panel-title"><i data-lucide="settings-2" aria-hidden="true"></i> Filters</span>
+                         <button class="filters-panel-close" id="filtersPanelClose" aria-label="Close filters"><i data-lucide="x" aria-hidden="true"></i></button>
                     </div>
 
                     <div class="conjugation-filters">
@@ -162,7 +163,7 @@
                <div class="modal-content endings-table-modal-content">
                     <div class="modal-heading-row">
                          <h3 id="conjugationEndingsTableTitle">Conjugation endings</h3>
-                         <button type="button" class="modal-close" id="closeConjugationEndingsTableBtn" aria-label="Close endings table">✕</button>
+                         <button type="button" class="modal-close" id="closeConjugationEndingsTableBtn" aria-label="Close endings table"><i data-lucide="x" aria-hidden="true"></i></button>
                     </div>
                     <p id="conjugationEndingsTableSummary" class="endings-table-summary"></p>
                     <div class="endings-table-wrap">

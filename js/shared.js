@@ -28,6 +28,12 @@ if (typeof extraPool === 'undefined') {
 // ===================== SHARED DOM HELPERS =====================
 const $ = id => document.getElementById(id);
 
+function refreshIcons() {
+     if (window.lucide) window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+}
+
+refreshIcons();
+
 // ===================== SHARED HELPERS =====================
 function dictEntry(k) {
      if (!k || typeof DICT !== 'object' || !DICT) return null;
@@ -199,7 +205,10 @@ function fallbackBrowserTTS(text, langCode) {
 function setTheme(t) {
      document.documentElement.setAttribute('data-theme', t);
      const btn = $('themeBtn');
-     if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+     if (btn) {
+          btn.innerHTML = `<i data-lucide="${t === 'dark' ? 'sun' : 'moon'}" aria-hidden="true"></i>`;
+          refreshIcons();
+     }
      localStorage.setItem('sp_theme', t);
 }
 

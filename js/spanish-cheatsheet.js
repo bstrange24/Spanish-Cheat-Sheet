@@ -1,6 +1,65 @@
 (function () {
      'use strict';
 
+     function replaceSidebarEmoji() {
+          if (!window.lucide) return;
+
+          const iconNames = {
+               '▶️': 'chevron-right',
+               '´': 'type',
+               '📖': 'book-open',
+               '🎵': 'music-2',
+               '🔊': 'volume-2',
+               '🔤': 'languages',
+               '🎨': 'palette',
+               '➡️': 'arrow-right',
+               '⚖️': 'scale',
+               '🔗': 'link',
+               '🔹': 'diamond',
+               '⚠️': 'triangle-alert',
+               '⚥': 'venetian-mask',
+               '🚫': 'ban',
+               '📝': 'clipboard-list',
+               '📌': 'pin',
+               '🔁': 'repeat-2',
+               '👉': 'pointer',
+               '📚': 'library',
+               '🔀': 'shuffle',
+               '↔️': 'arrow-left-right',
+               '👤': 'user-round',
+               '❓': 'circle-help',
+               '⚡': 'zap',
+               '🏃': 'person-standing',
+               '🐾': 'paw-print',
+               '🧍': 'person-standing',
+               '👕': 'shirt',
+               '🗺️': 'map',
+               '😊': 'smile',
+               '👪': 'users-round',
+               '🍽️': 'utensils',
+               '👋': 'hand',
+               '🏠': 'house',
+               '🔢': 'binary',
+               '🛒': 'shopping-cart',
+               '📅': 'calendar-days',
+               '✈️': 'plane',
+               '⛅': 'cloud-sun',
+               '🎒': 'briefcase-business',
+               '🎲': 'dices',
+               '⏱️': 'timer',
+               '🗣️': 'messages-square',
+               '🔌': 'plug',
+          };
+
+          document.querySelectorAll('.icon').forEach(function (element) {
+               const iconName = iconNames[element.textContent.trim()];
+               if (iconName) element.setAttribute('data-lucide', iconName);
+          });
+          window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+     }
+
+     replaceSidebarEmoji();
+
      function getAudioBaseUrl() {
           const host = window.location.hostname;
           const isLocal = host === 'localhost' || host === '127.0.0.1';
@@ -75,6 +134,12 @@
      }
 
      // ─── Server check ───
+     function setServerStatus(iconName, message, className) {
+          serverStatus.innerHTML = `<i data-lucide="${iconName}" aria-hidden="true"></i> ${message}`;
+          serverStatus.className = className;
+          if (window.lucide) window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+     }
+
      async function checkServer() {
           const baseUrl = getAudioBaseUrl();
           const isLocal = baseUrl === 'http://127.0.0.1:8765';
@@ -85,15 +150,12 @@
                     signal: AbortSignal.timeout(2000),
                });
                if (resp.ok || resp.status === 404) {
-                    serverStatus.textContent = isLocal ? '✅ Server online' : '✅ Vercel audio API ready';
-                    serverStatus.className = 'online';
+                    setServerStatus('check-circle', isLocal ? 'Server online' : 'Vercel audio API ready', 'online');
                } else {
-                    serverStatus.textContent = '❌ Server error';
-                    serverStatus.className = 'offline';
+                    setServerStatus('circle-x', 'Server error', 'offline');
                }
           } catch {
-               serverStatus.textContent = isLocal ? '❌ Server offline — start server!' : '❌ Audio API unavailable';
-               serverStatus.className = 'offline';
+               setServerStatus('circle-x', isLocal ? 'Server offline — start server!' : 'Audio API unavailable', 'offline');
           }
      }
      checkServer();

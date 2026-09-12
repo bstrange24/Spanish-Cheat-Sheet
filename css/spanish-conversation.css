@@ -125,6 +125,15 @@
      animation: pulse-mic 1s infinite;
 }
 
+.mic-btn .lucide,
+.send-btn .lucide,
+.replay-btn .lucide {
+     width: 1.1em;
+     height: 1.1em;
+     vertical-align: -0.15em;
+     stroke-width: 2;
+}
+
 @keyframes pulse-mic {
 
      0%,

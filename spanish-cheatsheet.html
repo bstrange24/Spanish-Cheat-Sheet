@@ -36,11 +36,11 @@
                          <div class="header-actions">
                               <button id="sidebarToggle" class="toggle-btn" aria-label="Toggle sidebar">
                                    <span class="hamburger">☰</span>
-                                   <span class="close">✕</span>
+                                   <span class="close"><i data-lucide="x" aria-hidden="true"></i></span>
                               </button>
                               <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light mode">
-                                   <span class="theme-icon-dark">🌙</span>
-                                   <span class="theme-icon-light">☀️</span>
+                                   <span class="theme-icon-dark"><i data-lucide="moon" aria-hidden="true"></i></span>
+                                   <span class="theme-icon-light"><i data-lucide="sun" aria-hidden="true"></i></span>
                               </button>
                          </div>
                     </div>
@@ -65,7 +65,7 @@
                          <button class="nav-item" data-section="pronunciation-basics/accent-stress"><span class="icon">´</span> Accent & Stress</button>
                          <button class="nav-item" data-section="pronunciation-basics/alphabet"><span class="icon">📖</span> Alphabet</button>
                          <button class="nav-item" data-section="pronunciation-basics/diphthongs"><span class="icon">🎵</span> Diphthongs</button>
-                         <button class="nav-item" data-section="pronunciation-basics/pronunciation"><span class="icon">🔊</span> Pronunciation</button>
+                         <button class="nav-item" data-section="pronunciation-basics/pronunciation"><i class="icon" data-lucide="volume-2" aria-hidden="true"></i> Pronunciation</button>
                          <button class="nav-item" data-section="pronunciation-basics/vowels"><span class="icon">🔤</span> Vowels</button>
                     </div>
 
@@ -164,12 +164,12 @@
 
                <div class="sidebar-footer">
                     <div class="sidebar-study-actions" aria-label="Study actions">
-                         <button id="practicePageBtn">🎲 Practice this page</button>
-                         <button id="quizPageBtn">❓ Quiz this page</button>
-                         <button id="conjugationPageBtn">🔄 Practice Conjugation</button>
-                         <button id="endingsPageBtn">⏱️ Practice Tense Endings</button>
-                         <button id="talkPageBtn">🗣️ Talk to your Spanish Tutor</button>
-                         <span id="serverStatus" style="padding-top: 10px; margin-left: 2px">🔌 checking...</span>
+                         <button id="practicePageBtn"><i data-lucide="dices" aria-hidden="true"></i> Practice this page</button>
+                         <button id="quizPageBtn"><i data-lucide="circle-help" aria-hidden="true"></i> Quiz this page</button>
+                         <button id="conjugationPageBtn"><i data-lucide="repeat-2" aria-hidden="true"></i> Practice Conjugation</button>
+                         <button id="endingsPageBtn"><i data-lucide="timer" aria-hidden="true"></i> Practice Tense Endings</button>
+                         <button id="talkPageBtn"><i data-lucide="messages-square" aria-hidden="true"></i> Talk to your Spanish Tutor</button>
+                         <span id="serverStatus" style="padding-top: 10px; margin-left: 2px"><i data-lucide="plug" aria-hidden="true"></i> checking...</span>
                     </div>
                </div>
           </aside>
@@ -180,6 +180,7 @@
                <div id="content"></div>
           </main>
 
+          <script src="https://unpkg.com/lucide@latest"></script>
           <script src="./js/spanish-cheatsheet.js"></script>
      </body>
 </html>

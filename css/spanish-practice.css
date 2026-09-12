@@ -29,6 +29,8 @@
      --prefix-counting-bg: #ede9fe;
      --prefix-counting-text: #5b21b6;
      --prefix-counting-border: #8b5cf6;
+
+     --mode-card-small: #474647;
 }
 
 [data-theme='dark'] {
@@ -60,6 +62,7 @@
      --prefix-counting-bg: rgba(196, 181, 253, 0.12);
      --prefix-counting-text: #c4b5fd;
      --prefix-counting-border: rgba(196, 181, 253, 0.25);
+     --mode-card-small: #ede9fe;
 }
 
 /* ===== BASE STYLES ===== */
@@ -156,6 +159,22 @@ body {
 .theme-toggle:focus-visible {
      background: var(--tips-bg);
      transform: none;
+}
+
+.theme-toggle .lucide,
+.btn-row .lucide,
+.mode-card .lucide,
+.filters-panel-title .lucide,
+.filters-panel-close .lucide {
+     width: 1em;
+     height: 1em;
+     vertical-align: -0.15em;
+     stroke-width: 2;
+}
+
+.mode-card>span .lucide {
+     width: 1.5rem;
+     height: 1.5rem;
 }
 
 /* ===== NAVIGATION ===== */
@@ -818,7 +837,7 @@ input[type='range'] {
 }
 
 .mode-card small {
-     color: var(--muted);
+     color: var(--mode-card-small);
      font-size: 0.78rem;
      font-weight: 400;
 }
@@ -1405,6 +1424,24 @@ details.tips summary {
 #studyExitBtn {
      background: #64748b;
      color: white;
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+}
+
+#studyExitBtn .lucide {
+     width: 0.95rem;
+     height: 0.95rem;
+     flex: 0 0 auto;
+     stroke-width: 2.25;
+}
+
+#hearEndingModelBtn .lucide,
+#conjugationHearInfinitiveBtn .lucide {
+     width: 0.92rem;
+     height: 0.92rem;
+     vertical-align: middle;
+     stroke-width: 2.25;
 }
 
 #playerBtn {

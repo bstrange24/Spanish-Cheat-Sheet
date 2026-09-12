@@ -410,9 +410,22 @@ body::before {
 
 .category-toggle .icon {
      width: 20px;
-     font-size: 0.8rem;
+     height: 16px;
+     flex: 0 0 20px;
      text-align: center;
      transition: transform 0.2s;
+}
+
+.category-toggle .icon,
+.nav-item .icon {
+     color: currentColor;
+     stroke-width: 2;
+}
+
+.nav-item .icon {
+     width: 17px;
+     height: 17px;
+     flex: 0 0 17px;
 }
 
 .category-toggle.open .icon {
@@ -568,6 +581,21 @@ body::before {
 .sidebar-study-actions button:hover,
 .sidebar-study-actions a:hover {
      background: var(--hover-color);
+}
+
+.sidebar-study-actions .lucide,
+.theme-toggle .lucide,
+.toggle-btn .lucide {
+     width: 1em;
+     height: 1em;
+     vertical-align: -0.15em;
+     stroke-width: 2;
+}
+
+#serverStatus {
+     display: inline-flex;
+     align-items: center;
+     gap: 5px;
 }
 
 .practice-link {

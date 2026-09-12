@@ -110,7 +110,8 @@
           const prompt = currentPrompt();
           const groupLabel = prompt.group[1];
           const groupSound = activePrompt.group;
-          $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${groupLabel}</span><button type="button" id="hearEndingModelBtn" style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" aria-label="Hear ${groupLabel}" title="Hear ${groupLabel}">🔊</button><small>(${prompt.tense[1]})</small>`;
+          $('endingPrompt').innerHTML = `<strong>${prompt.pronoun[1]}</strong><span>${groupLabel}</span><button type="button" id="hearEndingModelBtn" style="padding: 2px 8px; font-size: 0.9rem; background: var(--accent, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer;" aria-label="Hear ${groupLabel}" title="Hear ${groupLabel}"><i data-lucide="volume-2" aria-hidden="true"></i></button><small>(${prompt.tense[1]})</small>`;
+          refreshIcons();
           $('endingAnswer').value = '';
           $('endingAnswer').disabled = false;
           $('endingFeedback').textContent = 'Type only the ending.';
