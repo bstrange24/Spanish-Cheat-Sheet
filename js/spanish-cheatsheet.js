@@ -1,6 +1,10 @@
 (function () {
      'use strict';
 
+     function refreshIcons() {
+          if (window.lucide) window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+     }
+
      function replaceSidebarEmoji() {
           if (!window.lucide) return;
 
@@ -24,6 +28,7 @@
                '🔁': 'repeat-2',
                '👉': 'pointer',
                '📚': 'library',
+               '📍': 'map-pin',
                '🔀': 'shuffle',
                '↔️': 'arrow-left-right',
                '👤': 'user-round',
@@ -55,7 +60,7 @@
                const iconName = iconNames[element.textContent.trim()];
                if (iconName) element.setAttribute('data-lucide', iconName);
           });
-          window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+          refreshIcons();
      }
 
      replaceSidebarEmoji();
@@ -1089,16 +1094,17 @@
                '<span class="page-option-label-mobile">Hide Examples</span>' +
                '</label>' +
                '<button type="button" id="bookmarkPageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Save this topic">' +
-               '<span class="page-tool-icon" aria-hidden="true">☆</span>' +
+               '<span class="page-tool-icon" aria-hidden="true"><i data-lucide="star"></i></span>' +
                '<span class="page-tool-label">Save</span>' +
                '</button>' +
                '<button type="button" id="completePageBtn" class="page-tool-btn" aria-pressed="false" aria-label="Mark this topic complete">' +
-               '<span class="page-tool-icon" aria-hidden="true">○</span>' +
+               '<span class="page-tool-icon" aria-hidden="true"><i data-lucide="circle"></i></span>' +
                '<span class="page-tool-label">Done</span>' +
                '</button>' +
                '</div>' +
                '</div>';
           content.insertBefore(bar, content.firstChild);
+          refreshIcons();
           const bookmarkButton = document.getElementById('bookmarkPageBtn');
           const completeButton = document.getElementById('completePageBtn');
           const optionsToggle = document.getElementById('pageOptionsToggle');
@@ -1118,12 +1124,15 @@
                setOptionsCollapsed(collapsed);
           });
 
-          function setToolButton(button, pressed, iconHtml, label) {
+          function setToolButton(button, pressed, iconName, label) {
                button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+               button.setAttribute('aria-label', pressed ? 'Remove saved topic' : 'Save this topic');
+               button.title = pressed ? 'Remove saved topic' : 'Save this topic';
                const iconEl = button.querySelector('.page-tool-icon');
                const labelEl = button.querySelector('.page-tool-label');
-               if (iconEl) iconEl.innerHTML = iconHtml;
+               if (iconEl) iconEl.innerHTML = `<i data-lucide="${iconName}"${pressed ? ' class="is-filled"' : ''}></i>`;
                if (labelEl) labelEl.textContent = label;
+               refreshIcons();
           }
 
           function readSectionSet(key) {
@@ -1139,18 +1148,13 @@
                localStorage.setItem(key, JSON.stringify(values));
           }
 
-          const ICON_SAVE = '<svg class="page-tool-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.47 5.01 5.53.8-4 3.9.94 5.5L12 16.9 7.06 18.8l.94-5.5-4-3.9 5.53-.8L12 3.6z"/></svg>';
-          const ICON_SAVED = '<svg class="page-tool-svg is-filled" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.47 5.01 5.53.8-4 3.9.94 5.5L12 16.9 7.06 18.8l.94-5.5-4-3.9 5.53-.8L12 3.6z"/></svg>';
-          const ICON_DONE = '<svg class="page-tool-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>';
-          const ICON_COMPLETE = '<svg class="page-tool-svg is-filled" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 12.2l3 3.1 6-6.4"/><circle cx="12" cy="12" r="8"/></svg>';
-
           function updateStudyState() {
                const bookmarks = readSectionSet('spanishBookmarks');
                const completed = readSectionSet('spanishCompleted');
                const bookmarked = bookmarks.includes(sectionId);
                const isComplete = completed.includes(sectionId);
-               setToolButton(bookmarkButton, bookmarked, bookmarked ? ICON_SAVED : ICON_SAVE, bookmarked ? 'Saved' : 'Save');
-               setToolButton(completeButton, isComplete, isComplete ? ICON_COMPLETE : ICON_DONE, 'Done');
+               setToolButton(bookmarkButton, bookmarked, 'star', bookmarked ? 'Saved' : 'Save');
+               setToolButton(completeButton, isComplete, isComplete ? 'circle-check' : 'circle', 'Done');
                document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.toggle('bookmarked', bookmarks.includes(item.dataset.section));
                     item.classList.toggle('completed', completed.includes(item.dataset.section));

@@ -127,6 +127,9 @@ html.light-mode {
 
      --accent: #fbbf24;
      --accent-soft: rgba(251, 191, 36, 0.14);
+     --icon-nav: #93c5fd;
+     --icon-action: #fbbf24;
+     --icon-status: #4ade80;
 
      --focus-ring: #60a5fa;
      --surface-raised: #1a2d49;
@@ -180,6 +183,9 @@ html.light-mode {
 
      --accent: #b45309;
      --accent-soft: rgba(180, 83, 9, 0.12);
+     --icon-nav: #1d5fa7;
+     --icon-action: #b45309;
+     --icon-status: #28764c;
 
      --focus-ring: #2563eb;
      --surface-raised: #ffffff;
@@ -492,10 +498,21 @@ body::before {
      font-weight: 700;
 }
 
-.nav-item.bookmarked .icon::after {
-     content: ' ★';
+.nav-item.bookmarked::after {
+     content: 'Saved';
+     margin-left: auto;
+     padding: 2px 5px;
+     border: 1px solid var(--accent);
+     border-radius: 999px;
      color: var(--accent);
-     font-size: 0.72rem;
+     font-size: 0.62rem;
+     font-weight: 700;
+     letter-spacing: 0.04em;
+     text-transform: uppercase;
+}
+
+.nav-item.bookmarked.completed::after {
+     content: 'Saved  ✓';
 }
 
 .nav-item.search-hidden,
@@ -590,6 +607,26 @@ body::before {
      height: 1em;
      vertical-align: -0.15em;
      stroke-width: 2;
+}
+
+.sidebar-study-actions button .lucide {
+     color: var(--icon-action);
+}
+
+.nav-item .icon {
+     color: var(--icon-nav);
+}
+
+.category-toggle .icon {
+     color: var(--accent);
+}
+
+#serverStatus.online .lucide {
+     color: var(--icon-status);
+}
+
+#serverStatus.offline .lucide {
+     color: var(--waring);
 }
 
 #serverStatus {
@@ -935,6 +972,22 @@ html.light-mode .theme-toggle .theme-icon-dark {
      background: var(--accent-soft);
      color: var(--accent);
      font-weight: 700;
+}
+
+.page-tool-icon {
+     display: inline-flex;
+     align-items: center;
+     color: currentColor;
+}
+
+.page-tool-icon .lucide {
+     width: 0.95rem;
+     height: 0.95rem;
+     stroke-width: 2;
+}
+
+.page-tool-icon .is-filled {
+     fill: currentColor;
 }
 
 .page-option-chip input {

@@ -12,6 +12,10 @@
      --danger: #dc2626;
      --tips-bg: #e8f0f8;
      --tips-border: #1d4ed8;
+     --icon-muted: #52657d;
+     --icon-accent: #1d4ed8;
+     --icon-success: #047857;
+     --icon-danger: #b91c1c;
 
      /* Irregular verb badge colors - Light theme */
      --irreg-yo-bg: #fef3c7;
@@ -45,6 +49,10 @@
      --danger: #f87171;
      --tips-bg: #14233d;
      --tips-border: #4f8cff;
+     --icon-muted: #a9b9ce;
+     --icon-accent: #8db4ff;
+     --icon-success: #6ee7b7;
+     --icon-danger: #fca5a5;
 
      /* Irregular verb badge colors - Dark theme */
      --irreg-yo-bg: rgba(251, 191, 36, 0.12);
@@ -170,6 +178,23 @@ body {
      height: 1em;
      vertical-align: -0.15em;
      stroke-width: 2;
+}
+
+.theme-toggle .lucide,
+.filters-panel-title .lucide {
+     color: var(--icon-accent);
+}
+
+.filters-panel-close .lucide {
+     color: var(--icon-muted);
+}
+
+.btn-row button .lucide {
+     color: currentColor;
+}
+
+.mode-card .lucide {
+     color: currentColor;
 }
 
 .mode-card>span .lucide {
