@@ -588,6 +588,7 @@
           const hideEn = localStorage.getItem('hideEnglish') === 'true';
           const hidePron = localStorage.getItem('hidePronunciation') === 'true';
           const hideExamples = localStorage.getItem('hideExamples') === 'true';
+
           const enBox = document.getElementById('hideEnglish');
           const pronBox = document.getElementById('hidePronunciation');
           const examplesBox = document.getElementById('hideExamples');
@@ -595,19 +596,32 @@
           if (pronBox) pronBox.checked = hidePron;
           if (examplesBox) examplesBox.checked = hideExamples;
 
+          // Match "example sentences", "examples", "examples of usage", etc.
+          const isExampleText = text => /\bexamples?\b/i.test(text || '');
+
+          // Hide <details> blocks whose summary mentions examples
           content.querySelectorAll('details').forEach(detail => {
                const summary = detail.querySelector('summary');
-               const isExampleSection = summary && /example sentences/i.test(summary.textContent || '');
-               if (isExampleSection) detail.style.display = hideExamples ? 'none' : '';
+               if (summary && isExampleText(summary.textContent)) {
+                    detail.style.display = hideExamples ? 'none' : '';
+               }
           });
 
-          // Hide inline pronunciation spans such as <span class="secondary">pehn-SAHR</span>
-          // and <span class="pronunciation">OH-lah</span> when the user toggles the checkbox,
-          // while keeping the existing table-column behavior.
+          // Hide headings/paragraphs that start with "Examples ..." (e.g. <h3>Examples of usage</h3>)
+          content.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li').forEach(el => {
+               // Only match if the element's own text begins with "Example(s)"
+               const text = (el.textContent || '').trim();
+               if (/^examples?\b/i.test(text)) {
+                    el.style.display = hideExamples ? 'none' : '';
+               }
+          });
+
+          // Hide inline pronunciation spans
           content.querySelectorAll('.secondary, .pronunciation').forEach(el => {
                el.style.display = hidePron ? 'none' : '';
           });
 
+          // Table column hiding (unchanged)
           content.querySelectorAll('table').forEach(table => {
                const enIdxs = [];
                const pronIdxs = [];

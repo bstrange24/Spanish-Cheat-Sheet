@@ -380,6 +380,7 @@ body::before {
 #nav {
      flex: 1;
      padding: 0 10px;
+     margin-bottom: 16px;
 }
 
 .category-toggle {
