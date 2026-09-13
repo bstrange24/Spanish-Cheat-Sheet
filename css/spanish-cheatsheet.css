@@ -1010,11 +1010,20 @@ details {
 }
 
 details summary {
+     display: flex;
+     align-items: center;
+     gap: 10px;
      padding: 15px 4px;
      font-size: 1.05rem;
+     line-height: 1.35;
      list-style: none;
      cursor: pointer;
      user-select: none;
+     transition: color 0.2s ease;
+}
+
+details summary strong {
+     flex: 1;
 }
 
 details summary::-webkit-details-marker {
@@ -1023,17 +1032,21 @@ details summary::-webkit-details-marker {
 
 details summary::before {
      content: '+';
-     display: inline-grid;
+     display: inline-flex;
+     align-items: center;
      place-items: center;
-     width: 1rem;
-     height: 1rem;
-     margin-right: 9px;
+     justify-content: center;
+     width: 1.35rem;
+     height: 1.35rem;
+     flex: 0 0 1.35rem;
      border: 1px solid currentColor;
-     border-radius: 50%;
+     border-radius: 6px;
+     background: var(--accent-soft);
      color: var(--summary-hover);
-     font-size: 1.05rem;
-     font-weight: 400;
+     font-size: 1rem;
+     font-weight: 500;
      line-height: 1;
+     transition: background 0.2s ease, transform 0.2s ease;
 }
 
 details[open] summary,
@@ -1043,6 +1056,12 @@ details summary:hover {
 
 details[open] summary::before {
      content: '-';
+     background: var(--summary-hover);
+     color: var(--bg-secondary);
+}
+
+details summary:hover::before {
+     transform: scale(1.06);
 }
 
 details ul {
