@@ -1109,6 +1109,7 @@
           const completeButton = document.getElementById('completePageBtn');
           const optionsToggle = document.getElementById('pageOptionsToggle');
           const optionsControls = document.getElementById('pageToolbarControls');
+          const optionsPanel = bar.querySelector('.page-options');
 
           function setOptionsCollapsed(collapsed) {
                optionsControls.hidden = collapsed;
@@ -1122,6 +1123,12 @@
                const collapsed = optionsToggle.getAttribute('aria-expanded') === 'true';
                localStorage.setItem('pageOptionsCollapsed', collapsed ? 'true' : 'false');
                setOptionsCollapsed(collapsed);
+          });
+          document.addEventListener('click', function (event) {
+               if (!optionsPanel.contains(event.target) && optionsToggle.getAttribute('aria-expanded') === 'true') {
+                    localStorage.setItem('pageOptionsCollapsed', 'true');
+                    setOptionsCollapsed(true);
+               }
           });
 
           function setToolButton(button, pressed, iconName, label) {
