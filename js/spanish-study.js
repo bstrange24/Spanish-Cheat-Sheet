@@ -11,6 +11,7 @@
      const MAX_QUIZ = 100;
      const MAX_DICTATION = 50;
      const MAX_NEW_CARDS = 100;
+     const AUTO_ADVANCE_DELAY = 1500;
 
      let study = null;
 
@@ -652,19 +653,21 @@
           }
 
           const actions = studyBody.querySelector('.study-actions') || studyBody;
+          const autoAdvance = ok && $('autoAdvance') && $('autoAdvance').checked;
           const next = document.createElement('button');
           next.type = 'button';
           next.setAttribute('data-study', 'next');
           next.style.background = '#8b5cf6';
           next.style.color = 'white';
           next.textContent = study.index + 1 >= study.questions.length ? 'See score' : 'Next';
+          if (autoAdvance) next.hidden = true;
           actions.appendChild(next);
 
-          if (ok && $('autoAdvance') && $('autoAdvance').checked) {
+          if (autoAdvance) {
                const idx = study.index;
                setTimeout(function () {
                     if (study && study.mode === 'quiz' && study.index === idx) advanceQuiz();
-               }, 900);
+               }, AUTO_ADVANCE_DELAY);
           }
      }
 
@@ -814,7 +817,7 @@
                const idx = study.index;
                setTimeout(function () {
                     if (study && study.mode === 'dictation' && study.index === idx) advanceDictation();
-               }, 900);
+               }, AUTO_ADVANCE_DELAY);
           }
      }
 
@@ -930,7 +933,13 @@
      function showCardRating() {
           const actions = studyBody.querySelector('.study-actions');
           if (!actions) return;
-          actions.innerHTML = `<button type="button" data-study="rate" data-quality="1" style="background:#ef4444;color:white">❌ Again</button>` + `<button type="button" data-study="rate" data-quality="3" style="background:#f59e0b;color:white">Hard</button>` + `<button type="button" data-study="rate" data-quality="4" style="background:#10b981;color:white">👍 Good</button>` + `<button type="button" data-study="rate" data-quality="5" style="background:#6366f1;color:white">⭐ Easy</button>`;
+          actions.innerHTML =
+               `<div class="study-meta">Rate how difficult this card felt to set its next review.</div>` +
+               `<button type="button" data-study="rate" data-quality="1" style="background:#ef4444;color:white"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Again</button>` +
+               `<button type="button" data-study="rate" data-quality="3" style="background:#f59e0b;color:white"><i data-lucide="gauge" aria-hidden="true"></i> Hard</button>` +
+               `<button type="button" data-study="rate" data-quality="4" style="background:#10b981;color:white"><i data-lucide="thumbs-up" aria-hidden="true"></i> Good</button>` +
+               `<button type="button" data-study="rate" data-quality="5" style="background:#6366f1;color:white"><i data-lucide="sparkles" aria-hidden="true"></i> Easy</button>`;
+          refreshIcons();
      }
 
      function finishCardChoice(given) {
@@ -949,13 +958,23 @@
           if (fb) {
                fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${yoBit}<br/>` : `<span class="bad">❌</span> → <strong>${esc(expected)}</strong>${yoBit}<br/>`;
           }
-          showCardRating();
+          const autoAdvance = ok && $('autoAdvance') && $('autoAdvance').checked;
+          const actions = studyBody.querySelector('.study-actions');
+          if (ok && actions) {
+               const showAnswer = actions.querySelector('[data-study="show-card"]');
+               if (showAnswer) showAnswer.hidden = true;
+          }
+          if (autoAdvance) {
+               if (actions) actions.hidden = true;
+          } else {
+               showCardRating();
+          }
 
-          if (ok && $('autoAdvance') && $('autoAdvance').checked) {
+          if (autoAdvance) {
                const idx = study.index;
                setTimeout(function () {
                     if (study && study.mode === 'cards' && study.index === idx) rateCard(4);
-               }, 900);
+               }, AUTO_ADVANCE_DELAY);
           }
      }
 

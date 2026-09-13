@@ -202,6 +202,13 @@ body {
      height: 1.5rem;
 }
 
+.study-actions button .lucide {
+     width: 1em;
+     height: 1em;
+     vertical-align: -0.15em;
+     stroke-width: 2;
+}
+
 /* ===== NAVIGATION ===== */
 .page-nav {
      display: flex;
@@ -912,6 +919,10 @@ input[type='range'] {
      flex-wrap: wrap;
      gap: 7px;
      margin-top: 10px;
+}
+
+.study-actions .study-meta {
+     flex-basis: 100%;
 }
 
 .study-feedback {
