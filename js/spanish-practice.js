@@ -1879,15 +1879,23 @@
 
                               if (!isFinal || !bestTranscript) return;
 
-                              allAlternatives = allAlternatives
-                                   .filter(a => a.final)
-                                   .filter((a, index, self) => index === self.findIndex(t => t.text.toLowerCase() === a.text.toLowerCase()))
-                                   .sort((a, b) => b.conf - a.conf)
-                                   .slice(0, 5);
+                              allAlternatives = allAlternatives.filter(a => a.final).filter((a, index, self) => index === self.findIndex(t => t.text.toLowerCase() === a.text.toLowerCase()));
 
                               if (recognitionTimeout) {
                                    clearTimeout(recognitionTimeout);
                                    recognitionTimeout = null;
+                              }
+
+                              const pronunciationGrade = window.PronunciationGrade
+                                   ? window.PronunciationGrade.gradePronunciation({
+                                          target: target,
+                                          lang: recognition.lang,
+                                          alternatives: allAlternatives,
+                                     })
+                                   : null;
+                              if (pronunciationGrade) {
+                                   bestTranscript = pronunciationGrade.transcript;
+                                   bestConfidence = pronunciationGrade.confidence;
                               }
 
                               const normalizedTarget = improvedNormalize(target);
@@ -2001,7 +2009,13 @@
                                    combinedScore *= 0.65;
                               }
 
-                              const weightedScore = Math.min(Math.max(combinedScore, 0), 1.0);
+                              let weightedScore = Math.min(Math.max(combinedScore, 0), 1.0);
+                              if (pronunciationGrade) {
+                                   weightedScore = pronunciationGrade.score;
+                                   matchedWords = pronunciationGrade.hits.map(hit => hit.said);
+                                   orderedMatches = Math.round(pronunciationGrade.orderedRatio * targetWordCount);
+                                   extraWordsCount = pronunciationGrade.extras.length;
+                              }
 
                               let isCompletelyWrong = false;
                               if (targetWordCount === 1) {
@@ -2080,7 +2094,9 @@
                                    altHtml = `
                         <div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">
                             Other possibilities: ${allAlternatives
-                                 .slice(1)
+                                 .filter(a => a.text !== bestTranscript)
+                                 .sort((a, b) => b.conf - a.conf)
+                                 .slice(0, 4)
                                  .map(a => `${a.text} (${Math.round(a.conf * 100)}%)`)
                                  .join(' • ')}
                         </div>`;

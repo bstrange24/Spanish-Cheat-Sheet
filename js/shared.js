@@ -161,10 +161,17 @@ function getAudioBaseUrl() {
      return window.location.protocol === 'file:' || isLocal ? 'http://127.0.0.1:8765' : window.location.origin;
 }
 
-function playAudioFromServer(text, lang, callback) {
+function getTtsRate() {
+     const rateControl = $('ttsRate');
+     const rate = rateControl ? Number(rateControl.value) : 0.85;
+     return Number.isFinite(rate) ? Math.min(4, Math.max(0.25, rate)) : 0.85;
+}
+
+function playAudioFromServer(text, lang, callback, rate) {
      if (!text) return;
      const baseUrl = getAudioBaseUrl();
      const langCode = lang || 'es-MX';
+     const playbackRate = typeof rate === 'number' ? rate : getTtsRate();
      const url = `${baseUrl}/api/tts?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(langCode)}`;
 
      if (window._currentAudio) {
@@ -173,25 +180,27 @@ function playAudioFromServer(text, lang, callback) {
      }
 
      const audio = new Audio(url);
+     audio.playbackRate = playbackRate;
+     audio.preservesPitch = true;
      window._currentAudio = audio;
 
      audio.onended = function () {
           if (callback) callback();
      };
      audio.onerror = function () {
-          fallbackBrowserTTS(text, langCode);
+          fallbackBrowserTTS(text, langCode, playbackRate);
      };
      audio.play().catch(function (err) {
-          fallbackBrowserTTS(text, langCode);
+          fallbackBrowserTTS(text, langCode, playbackRate);
      });
 }
 
-function fallbackBrowserTTS(text, langCode) {
+function fallbackBrowserTTS(text, langCode, rate) {
      if (!synth) return;
      try {
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = langCode || 'es-MX';
-          utterance.rate = 0.85;
+          utterance.rate = typeof rate === 'number' ? rate : getTtsRate();
           utterance.volume = 1;
           utterance.pitch = 1;
           synth.cancel();
