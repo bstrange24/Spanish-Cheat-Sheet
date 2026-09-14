@@ -461,6 +461,28 @@ body::before {
      font-size: 0.9rem;
 }
 
+.category-toggle.nested {
+     margin-left: 8px;
+     padding: 8px 12px;
+     font-size: 0.78rem;
+     text-transform: none;
+     letter-spacing: 0.2px;
+     background: transparent;
+}
+
+.category-toggle.nested:hover {
+     background: rgba(255, 255, 255, 0.06);
+}
+
+.category-items.nested {
+     padding-left: 16px;
+}
+
+.category-items.nested .nav-item {
+     padding-left: 24px;
+     font-size: 0.85rem;
+}
+
 .nav-item {
      display: flex;
      align-items: center;
