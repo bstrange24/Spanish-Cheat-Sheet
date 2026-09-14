@@ -905,6 +905,11 @@ input[type='range'] {
      background: var(--tips-bg);
 }
 
+.quiz-choice.selected {
+     border-color: var(--accent);
+     background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+}
+
 .quiz-choice.wrong {
      border-color: var(--danger);
 }

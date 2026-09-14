@@ -437,6 +437,33 @@
           return `<div class="study-meta">${bits.join(' • ')}</div>`;
      }
 
+     function multipleChoiceActions(includeNext) {
+          return (
+               `<div class="study-actions">` +
+               `<button type="button" data-study="hear" style="background:var(--accent);color:white">🔊 Hear</button>` +
+               `<button type="button" data-study="check" style="background:#14b8a6;color:white">Check</button>` +
+               `<button type="button" data-study="reveal" style="background:#64748b;color:white">Reveal</button>` +
+               `<button type="button" data-study="skip" style="background:#94a3b8;color:white">Skip</button>` +
+               (includeNext ? `<button type="button" data-study="next" style="background:#8b5cf6;color:white">Next</button>` : '') +
+               `</div>`
+          );
+     }
+
+     function selectMultipleChoice(btn) {
+          if (!study || study.answered) return;
+          study.selectedChoice = btn.getAttribute('data-value') || '';
+          studyBody.querySelectorAll('.quiz-choice').forEach(function (choice) {
+               choice.classList.toggle('selected', choice === btn);
+          });
+          if ($('autoAdvance') && $('autoAdvance').checked) checkMultipleChoice();
+     }
+
+     function checkMultipleChoice() {
+          if (!study || study.answered || !study.current || !study.selectedChoice) return;
+          if (study.mode === 'cards') finishCardChoice(study.selectedChoice);
+          else finishQuizAnswer(normalize(study.selectedChoice) === normalize(study.current.answer), study.selectedChoice);
+     }
+
      function isYoPair(p) {
           return !!(p && (p.role === 'yo' || p.irregularYo));
      }
@@ -621,21 +648,23 @@
           const q = study.questions[study.index];
           study.current = q;
           study.answered = false;
+          study.selectedChoice = '';
           let html = progressLine();
           if (q.irregularYo) html += '<div class="study-meta"><span class="irreg-yo-badge">Irregular yo</span></div>';
           else if (q.yoHint) html += '<div class="study-meta"><span class="yo-form-badge">Yo form</span></div>';
           html += `<div class="study-prompt">${esc(q.prompt)}</div>`;
           if (q.mode === 'mcq') {
                html += q.options.map(opt => `<button type="button" class="quiz-choice" data-study="choose" data-value="${esc(opt)}">${esc(opt)}</button>`).join('');
+               html += multipleChoiceActions();
           } else {
-               html += `<input type="text" id="studyInput" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer" />` + accentBarHtml() + `<div class="study-actions"><button type="button" data-study="check" style="background:#0ea5e9;color:white">Check</button></div>`;
+               html += `<input type="text" id="studyInput" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer" />` + accentBarHtml() + multipleChoiceActions();
           }
           html += `<div id="studyFeedback" class="study-feedback"></div>`;
           studyBody.innerHTML = html;
           wireStudyInput(submitTypeAnswer);
      }
 
-     function finishQuizAnswer(ok, given) {
+     function finishQuizAnswer(ok, given, revealed) {
           if (!study || study.answered) return;
           study.answered = true;
           study.answeredCount = (study.answeredCount || 0) + 1;
@@ -648,7 +677,7 @@
           const fb = $('studyFeedback');
           const miss = !ok && q.sectionId ? ` • ${sectionLink(q.sectionId)}` : '';
           if (fb) {
-               fb.innerHTML = ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}<br/>` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>${esc(q.answer)}</strong>${yoNote}${miss}<br/>`;
+               fb.innerHTML = revealed ? `Answer: <strong>${esc(q.answer)}</strong>${yoNote}<br/>` : ok ? `<span class="good">✅ Correct.</span>${note}${yoNote}<br/>` : `<span class="bad">❌ ${esc(given || '')}</span> → <strong>${esc(q.answer)}</strong>${yoNote}${miss}<br/>`;
           }
 
           if (q.mode === 'mcq') {
@@ -911,6 +940,7 @@
           const card = study.questions[study.index];
           study.current = card;
           study.answered = false;
+          study.selectedChoice = '';
           const front = card.dir === 'es-en' ? card.spanish : card.english;
           const hint = card.dir === 'es-en' ? 'What does this mean?' : 'How do you say this in Spanish?';
           const options = cardOptions(card);
@@ -921,7 +951,8 @@
           if (options && options.length > 1) {
                html += options.map(opt => `<button type="button" class="quiz-choice" data-study="choose" data-value="${esc(opt)}">${esc(opt)}</button>`).join('');
           }
-          html += `<div class="study-actions"><button type="button" data-study="show-card" style="background:#6366f1;color:white">Show answer</button></div>` + `<div id="studyFeedback" class="study-feedback"></div>`;
+          html += multipleChoiceActions(true);
+          html += `<div id="studyFeedback" class="study-feedback"></div>`;
           studyBody.innerHTML = html;
      }
 
@@ -949,7 +980,8 @@
                `<button type="button" data-study="rate" data-quality="1" style="background:#ef4444;color:white"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Again</button>` +
                `<button type="button" data-study="rate" data-quality="3" style="background:#f59e0b;color:white"><i data-lucide="gauge" aria-hidden="true"></i> Hard</button>` +
                `<button type="button" data-study="rate" data-quality="4" style="background:#10b981;color:white"><i data-lucide="thumbs-up" aria-hidden="true"></i> Good</button>` +
-               `<button type="button" data-study="rate" data-quality="5" style="background:#6366f1;color:white"><i data-lucide="sparkles" aria-hidden="true"></i> Easy</button>`;
+               `<button type="button" data-study="rate" data-quality="5" style="background:#6366f1;color:white"><i data-lucide="sparkles" aria-hidden="true"></i> Easy</button>` +
+               `<button type="button" data-study="next" style="background:#8b5cf6;color:white">Next</button>`;
           refreshIcons();
      }
 
@@ -971,10 +1003,6 @@
           }
           const autoAdvance = ok && $('autoAdvance') && $('autoAdvance').checked;
           const actions = studyBody.querySelector('.study-actions');
-          if (ok && actions) {
-               const showAnswer = actions.querySelector('[data-study="show-card"]');
-               if (showAnswer) showAnswer.hidden = true;
-          }
           if (autoAdvance) {
                if (actions) actions.hidden = true;
           } else {
@@ -1004,6 +1032,11 @@
           if (fb) fb.innerHTML = `<strong>${esc(back)}</strong>${yoBit}`;
           speakText(card.spanish);
           showCardRating();
+     }
+
+     function revealQuiz() {
+          if (!study || study.mode !== 'quiz' || study.answered || !study.current) return;
+          finishQuizAnswer(false, '', true);
      }
 
      function rateCard(quality) {
@@ -1115,13 +1148,11 @@
                const given = btn.getAttribute('data-value') || '';
                speakClickedChoice(study.current, given);
                if (study.answered) return;
-               if (study.mode === 'cards') finishCardChoice(given);
-               else {
-                    const ok = normalize(given) === normalize(study.current.answer);
-                    finishQuizAnswer(ok, given);
-               }
+               if (study.current.mode === 'mcq' || study.mode === 'cards') selectMultipleChoice(btn);
+               else finishQuizAnswer(normalize(given) === normalize(study.current.answer), given);
           } else if (action === 'check') {
                if (study && study.mode === 'dictation') submitDictation(false);
+               else if (study && (study.current?.mode === 'mcq' || study.mode === 'cards')) checkMultipleChoice();
                else submitTypeAnswer();
           } else if (action === 'next') {
                if (!study) return;
@@ -1136,15 +1167,25 @@
                study.index++;
                renderCard();
           } else if (action === 'hear') {
-               if (study && study.current) speakText(study.current.answer);
+               if (study && study.current) {
+                    if (study.mode === 'cards') speakText(study.current.spanish);
+                    else speakText(study.current.speak || study.current.answer);
+               }
           } else if (action === 'reveal') {
-               submitDictation(true);
+               if (study && study.mode === 'dictation') submitDictation(true);
+               else if (study && study.mode === 'cards') revealCard();
+               else revealQuiz();
           } else if (action === 'skip') {
-               if (!study || study.mode !== 'dictation') return;
-               study.index++;
-               renderDictation();
-          } else if (action === 'show-card') {
-               revealCard();
+               if (!study) return;
+               if (study.mode === 'dictation') {
+                    study.index++;
+                    renderDictation();
+               } else if (study.mode === 'quiz') {
+                    advanceQuiz();
+               } else if (study.mode === 'cards') {
+                    study.index++;
+                    renderCard();
+               }
           } else if (action === 'rate') {
                rateCard(btn.getAttribute('data-quality'));
           } else if (action === 'retry') {
