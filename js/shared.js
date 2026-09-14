@@ -132,8 +132,11 @@ function leaveCheatSheetPool() {
           sessionStorage.removeItem('sp_page_pool');
           sessionStorage.removeItem('sp_page_quiz');
           sessionStorage.removeItem('sp_page_pairs');
+          sessionStorage.removeItem('sp_page_example_quiz');
+          sessionStorage.removeItem('sp_page_example_pairs');
           sessionStorage.removeItem('sp_page_label');
           sessionStorage.removeItem('sp_page_gloss');
+          sessionStorage.removeItem('sp_page_example_pool');
      } catch (err) {}
      const status = $('pagePoolStatus');
      if (status) {

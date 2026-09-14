@@ -11,7 +11,7 @@
      const MAX_QUIZ = 100;
      const MAX_DICTATION = 50;
      const MAX_NEW_CARDS = 100;
-     const AUTO_ADVANCE_DELAY = 1500;
+     const AUTO_ADVANCE_DELAY = 2000;
 
      let study = null;
 
@@ -64,6 +64,10 @@
           }
      }
 
+     function pageExamplesEnabled() {
+          return !!($('pageExamples') && $('pageExamples').checked);
+     }
+
      function fromCheatSheet() {
           if (!extraPool || !extraPool.length) return false;
           const params = new URLSearchParams(window.location.search);
@@ -72,7 +76,8 @@
 
      function storedQuiz() {
           try {
-               const data = JSON.parse(sessionStorage.getItem('sp_page_quiz') || 'null');
+               const key = pageExamplesEnabled() ? 'sp_page_example_quiz' : 'sp_page_quiz';
+               const data = JSON.parse(sessionStorage.getItem(key) || 'null');
                if (data && Array.isArray(data.items) && data.items.length) return data;
           } catch (err) {}
           return null;
@@ -80,7 +85,8 @@
 
      function storedPairs() {
           try {
-               const rows = JSON.parse(sessionStorage.getItem('sp_page_pairs') || '[]');
+               const key = pageExamplesEnabled() ? 'sp_page_example_pairs' : 'sp_page_pairs';
+               const rows = JSON.parse(sessionStorage.getItem(key) || '[]');
                return Array.isArray(rows) ? rows : [];
           } catch (err) {
                return [];
@@ -100,23 +106,28 @@
                     if (Array.isArray(launch.items) && launch.items.length) {
                          sessionStorage.setItem('sp_page_quiz', JSON.stringify({ sectionId: launch.sectionId || '', label: launch.label || '', items: launch.items }));
                     }
+                    if (Array.isArray(launch.exampleItems)) {
+                         sessionStorage.setItem('sp_page_example_quiz', JSON.stringify({ sectionId: launch.sectionId || '', label: launch.label || '', items: launch.exampleItems }));
+                    }
                     if (Array.isArray(launch.pairs)) sessionStorage.setItem('sp_page_pairs', JSON.stringify(launch.pairs));
+                    if (Array.isArray(launch.exampleItems)) sessionStorage.setItem('sp_page_example_pairs', JSON.stringify(launch.exampleItems));
                     if (Array.isArray(launch.words) && launch.words.length) sessionStorage.setItem('sp_page_pool', JSON.stringify(launch.words));
+                    if (Array.isArray(launch.exampleWords)) sessionStorage.setItem('sp_page_example_pool', JSON.stringify(launch.exampleWords));
                     if (launch.label) sessionStorage.setItem('sp_page_label', launch.label);
                     localStorage.removeItem('sp_launch');
                }
           } catch (err) {}
 
           try {
-               const words = JSON.parse(sessionStorage.getItem('sp_page_pool') || '[]');
+               const words = JSON.parse(sessionStorage.getItem(pageExamplesEnabled() ? 'sp_page_example_pool' : 'sp_page_pool') || '[]');
                const label = sessionStorage.getItem('sp_page_label') || 'this page';
                debugLog('Page pool loaded from sessionStorage', { wordCount: words.length, label: label, firstFew: words.slice(0, 5) });
-               if (Array.isArray(words) && words.length) {
-                    extraPool = words;
+               if (Array.isArray(words)) {
+                    extraPool = words.length ? words : null;
                     if ($('category')) $('category').value = 'all';
                     if ($('difficulty')) $('difficulty').value = 'all';
                     if ($('pagePoolStatus')) {
-                         $('pagePoolStatus').textContent = `${label}: ${words.length} words loaded from the Cheat Sheet page. Use any study mode to practice them.`;
+                         $('pagePoolStatus').textContent = words.length ? `${label}: ${words.length} words loaded from the Cheat Sheet page. Use any study mode to practice them.` : `${label}: no words found for the selected page filter.`;
                          $('pagePoolStatus').hidden = false;
                     }
                }
@@ -713,7 +724,7 @@
      function startQuizFromButton() {
           debugLog('startQuizFromButton called');
           const stored = storedQuiz();
-          if (fromCheatSheet() && stored && extraPool && extraPool.length) {
+          if (fromCheatSheet() && stored) {
                const label = stored.label || pageLabel() || stored.sectionId || 'this page';
                debugLog('Using stored quiz from cheat sheet', { label: label, itemCount: stored.items?.length });
                startQuiz(stored.items, label, stored.sectionId);
@@ -1144,12 +1155,20 @@
      });
 
      function applyDictionaryStudySet(ev) {
+          const activeMode = study && study.mode;
+          if (ev && ev.target && ev.target.id === 'pageExamples') {
+               loadPageContext();
+          }
           const leavingPage = ev && ev.target && ev.target.id === 'category';
           if (leavingPage) {
                if (typeof leaveCheatSheetPool === 'function') leaveCheatSheetPool();
                else extraPool = null;
           }
           closeStudy();
+          if (ev && ev.target && ev.target.id === 'pageExamples') {
+               if (activeMode === 'quiz' || new URLSearchParams(window.location.search).get('mode') === 'quiz') startQuizFromButton();
+               else if (activeMode === 'cards') startCards();
+          }
           const keys = studyKeys();
           const label = studySetLabel();
           const status = $('pagePoolStatus');
@@ -1168,6 +1187,7 @@
      if ($('category')) $('category').addEventListener('change', applyDictionaryStudySet);
      if ($('difficulty')) $('difficulty').addEventListener('change', applyDictionaryStudySet);
      if ($('onlyVerbs')) $('onlyVerbs').addEventListener('change', applyDictionaryStudySet);
+     if ($('pageExamples')) $('pageExamples').addEventListener('change', applyDictionaryStudySet);
 
      loadPageContext();
      const params = new URLSearchParams(window.location.search);

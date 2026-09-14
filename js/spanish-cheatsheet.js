@@ -899,6 +899,27 @@
           return gloss;
      }
 
+     function isExampleElement(el) {
+          let node = el;
+          while (node) {
+               if (node.matches && node.matches('details')) {
+                    const summary = node.querySelector('summary');
+                    if (summary && /\bexamples?\b/i.test(summary.textContent || '')) return true;
+               }
+               if (node.matches && node.matches('h2, h3, h4, h5, h6')) {
+                    return /^examples?\b/i.test((node.textContent || '').trim());
+               }
+               let sibling = node.previousElementSibling;
+               while (sibling && !sibling.matches('h2, h3, h4, h5, h6')) sibling = sibling.previousElementSibling;
+               if (sibling && /^examples?\b/i.test((sibling.textContent || '').trim())) {
+                    return true;
+               }
+               node = node.parentElement;
+          }
+          const paragraph = el && el.closest ? el.closest('p') : null;
+          return !!(paragraph && /^\s*examples?\s*:/i.test(paragraph.textContent || ''));
+     }
+
      function collectQuizItems(root, sectionId) {
           const items = [];
           const seen = {};
@@ -918,6 +939,7 @@
           }
 
           root.querySelectorAll('table').forEach((table, tableIdx) => {
+               if (isExampleElement(table)) return;
                const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
                if (!headerRow) return;
                const headers = Array.from(headerRow.children).map(h => (h.textContent || '').replace(/\s+/g, ' ').trim());
@@ -1202,10 +1224,43 @@
                localStorage.setItem('hideExamples', this.checked ? 'true' : 'false');
                applyColumnHides();
           });
+          function collectExamplePairs() {
+               const pairs = [];
+               const seen = {};
+               content.querySelectorAll('.say[data-text]').forEach(function (say) {
+                    if (!isExampleElement(say)) return;
+                    const container = say.closest('li, p');
+                    const spanish = (say.getAttribute('data-text') || '').trim();
+                    if (!container || !spanish) return;
+                    const br = say.parentElement && say.parentElement.querySelector('br');
+                    let englishText = '';
+                    let node = br ? br.nextSibling : say.nextSibling;
+                    while (node) {
+                         if (!(node.nodeType === 1 && node.matches('.pronunciation, .secondary'))) englishText += node.textContent || '';
+                         node = node.nextSibling;
+                    }
+                    const english = cleanStudyText(englishText.replace(/^[\s:—–-]+/, ''));
+                    const key = spanish.toLowerCase() + '|' + english.toLowerCase();
+                    if (!english || seen[key]) return;
+                    seen[key] = true;
+                    pairs.push({
+                         kind: 'pair',
+                         spanish: spanish,
+                         english: english,
+                         prompt: english,
+                         answer: spanish,
+                         isExample: true,
+                         sectionId: sectionId,
+                    });
+               });
+               return pairs;
+          }
+
           function collectPageWords() {
                const words = [];
                const seen = {};
                content.querySelectorAll('.say').forEach(el => {
+                    if (isExampleElement(el)) return;
                     let t = (el.getAttribute('data-text') || '').trim();
                     t = t.replace(/[🔊📢🎵▶️⏸️]/g, '').trim();
                     if (!t || t.length > 48) return;
@@ -1229,16 +1284,21 @@
                     sectionId: sectionId,
                     label: pageTitle(),
                     items: items,
+                    exampleItems: opts.exampleItems || [],
                     pairs: opts.pairs || [],
                     words: opts.words || [],
+                    exampleWords: opts.exampleWords || [],
                     gloss: opts.gloss || glossFromItems(items),
                     ts: Date.now(),
                };
                try {
                     localStorage.setItem('sp_launch', JSON.stringify(payload));
                     sessionStorage.setItem('sp_page_quiz', JSON.stringify({ sectionId: payload.sectionId, label: payload.label, items: payload.items }));
+                    sessionStorage.setItem('sp_page_example_quiz', JSON.stringify({ sectionId: payload.sectionId, label: payload.label, items: payload.exampleItems }));
                     sessionStorage.setItem('sp_page_pairs', JSON.stringify(payload.pairs));
+                    sessionStorage.setItem('sp_page_example_pairs', JSON.stringify(payload.exampleItems));
                     sessionStorage.setItem('sp_page_pool', JSON.stringify(payload.words));
+                    sessionStorage.setItem('sp_page_example_pool', JSON.stringify(payload.exampleWords));
                     sessionStorage.setItem('sp_page_label', payload.label);
                     sessionStorage.setItem('sp_page_gloss', JSON.stringify(payload.gloss || {}));
                } catch (err) {
@@ -1251,7 +1311,9 @@
 
           function pageStudyPayload() {
                const items = collectQuizItems(content, sectionId);
+               const exampleItems = collectExamplePairs();
                const words = collectPageWords();
+               const exampleWords = exampleItems.map(item => item.spanish);
                const pairs = items
                     .filter(it => it.kind === 'pair' && it.spanish && it.english)
                     .map(it => ({
@@ -1263,7 +1325,7 @@
                          meaning: it.meaning || '',
                          yoForm: it.yoForm || '',
                     }));
-               return { items: items, words: words, pairs: pairs, gloss: glossFromItems(items) };
+               return { items: items, exampleItems: exampleItems, words: words, exampleWords: exampleWords, pairs: pairs, gloss: glossFromItems(items) };
           }
 
           const practiceButton = document.getElementById('practicePageBtn');
@@ -1274,17 +1336,17 @@
                          alert('No practice words on this page yet.');
                          return;
                     }
-                    launchStudy({ mode: 'practice', words: payload.words, items: payload.items, pairs: payload.pairs, gloss: payload.gloss });
+                    launchStudy({ mode: 'practice', words: payload.words, exampleWords: payload.exampleWords, items: payload.items, exampleItems: payload.exampleItems, pairs: payload.pairs, gloss: payload.gloss });
                };
           const quizButton = document.getElementById('quizPageBtn');
           if (quizButton)
                quizButton.onclick = function () {
                     const payload = pageStudyPayload();
-                    if (!payload.items.length) {
+                    if (!payload.items.length && !payload.exampleItems.length) {
                          alert('No quiz items on this page yet. Try a vocab or grammar table with English meanings.');
                          return;
                     }
-                    launchStudy({ mode: 'quiz', items: payload.items, pairs: payload.pairs, words: payload.words, gloss: payload.gloss });
+                    launchStudy({ mode: 'quiz', items: payload.items, exampleItems: payload.exampleItems, pairs: payload.pairs, words: payload.words, exampleWords: payload.exampleWords, gloss: payload.gloss });
                };
           const conjugationPageBtn = document.getElementById('conjugationPageBtn');
           if (conjugationPageBtn) {
