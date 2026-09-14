@@ -874,6 +874,11 @@ html.light-mode .theme-toggle .theme-icon-dark {
      justify-content: space-between;
      gap: 8px;
      margin-bottom: 8px;
+     cursor: pointer;
+}
+
+.page-options-head:hover .page-options-label {
+     color: var(--text-primary);
 }
 
 .page-options-toggle {

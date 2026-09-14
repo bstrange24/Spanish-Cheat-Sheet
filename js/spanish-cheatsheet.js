@@ -1110,6 +1110,7 @@
           const optionsToggle = document.getElementById('pageOptionsToggle');
           const optionsControls = document.getElementById('pageToolbarControls');
           const optionsPanel = bar.querySelector('.page-options');
+          const optionsHead = bar.querySelector('.page-options-head');
 
           function setOptionsCollapsed(collapsed) {
                optionsControls.hidden = collapsed;
@@ -1119,7 +1120,8 @@
           }
 
           setOptionsCollapsed(localStorage.getItem('pageOptionsCollapsed') === 'true');
-          optionsToggle.addEventListener('click', function () {
+          // Listen on the whole head row (button click bubbles up, so this covers both) for a larger click target.
+          optionsHead.addEventListener('click', function () {
                const collapsed = optionsToggle.getAttribute('aria-expanded') === 'true';
                localStorage.setItem('pageOptionsCollapsed', collapsed ? 'true' : 'false');
                setOptionsCollapsed(collapsed);
