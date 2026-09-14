@@ -314,6 +314,254 @@
                return null;
           }
 
+          // Cache of Google-Translate lookups for words/phrases missing from DICT.
+          // Keyed by normalize(phrase) -> translated string, or null if the lookup failed.
+          const translationCache = {};
+          const translationPending = new Set();
+
+          async function fetchTranslation(phrase) {
+               const key = normalize(phrase);
+               if (key in translationCache) return translationCache[key];
+               if (translationPending.has(key)) return null;
+               translationPending.add(key);
+               try {
+                    const res = await fetch(`/api/translate?text=${encodeURIComponent(phrase)}&sl=es&tl=en`);
+                    if (!res.ok) throw new Error('translate request failed');
+                    const data = await res.json();
+                    const translation = data && data.translation ? String(data.translation).trim() : '';
+                    translationCache[key] = translation || null;
+               } catch (err) {
+                    translationCache[key] = null;
+               } finally {
+                    translationPending.delete(key);
+               }
+               return translationCache[key];
+          }
+
+          // Best-effort Spanish syllable/stress based phonetic respelling, used when a
+          // word/phrase isn't in DICT and has no hand-tuned "approx" entry.
+          function syllabifyEs(word) {
+               const vowels = 'aeiouáéíóúü';
+               const strongV = 'aeoáéó';
+               const isVowel = c => vowels.includes(c);
+               const isStrong = c => strongV.includes(c);
+               const groups = [];
+               let i = 0;
+               while (i < word.length) {
+                    if (isVowel(word[i])) {
+                         let j = i;
+                         while (j < word.length && isVowel(word[j])) j++;
+                         groups.push({ type: 'V', text: word.slice(i, j) });
+                         i = j;
+                    } else {
+                         let j = i;
+                         while (j < word.length && !isVowel(word[j])) j++;
+                         groups.push({ type: 'C', text: word.slice(i, j) });
+                         i = j;
+                    }
+               }
+               const nuclei = [];
+               groups.forEach(g => {
+                    if (g.type === 'C') {
+                         nuclei.push({ type: 'C', text: g.text });
+                         return;
+                    }
+                    const run = g.text;
+                    let start = 0;
+                    while (start < run.length) {
+                         let take = 1;
+                         if (start + 1 < run.length) {
+                              const a = run[start],
+                                   b = run[start + 1];
+                              const weakAccentBreaks = 'íú'.includes(a) || 'íú'.includes(b);
+                              if (!(isStrong(a) && isStrong(b)) && !weakAccentBreaks) take = 2;
+                         }
+                         nuclei.push({ type: 'V', text: run.slice(start, start + take) });
+                         start += take;
+                    }
+               });
+               const CLUSTERS = /^(pr|br|tr|dr|cr|gr|fr|pl|bl|cl|gl|fl|tl|rr|ll|ch)$/;
+               const syll = [];
+               for (let idx = 0; idx < nuclei.length; idx++) {
+                    const g = nuclei[idx];
+                    if (g.type === 'V') {
+                         syll.push((g._prefix || '') + g.text);
+                         continue;
+                    }
+                    const cons = g.text;
+                    const prevIsV = idx > 0 && nuclei[idx - 1].type === 'V';
+                    const nextIsV = idx < nuclei.length - 1 && nuclei[idx + 1].type === 'V';
+                    if (!prevIsV) {
+                         if (nextIsV) nuclei[idx + 1]._prefix = (nuclei[idx + 1]._prefix || '') + cons;
+                         else if (syll.length) syll[syll.length - 1] += cons;
+                         continue;
+                    }
+                    if (!nextIsV) {
+                         syll[syll.length - 1] += cons;
+                         continue;
+                    }
+                    if (cons.length === 1 || CLUSTERS.test(cons)) {
+                         nuclei[idx + 1]._prefix = (nuclei[idx + 1]._prefix || '') + cons;
+                    } else {
+                         const splitPoint = cons.length - 1;
+                         syll[syll.length - 1] += cons.slice(0, splitPoint);
+                         nuclei[idx + 1]._prefix = (nuclei[idx + 1]._prefix || '') + cons.slice(splitPoint);
+                    }
+               }
+               return syll.filter(Boolean);
+          }
+
+          function vowelSound(run) {
+               const map = { a: 'ah', e: 'eh', i: 'ee', o: 'oh', u: 'oo', á: 'ah', é: 'eh', í: 'ee', ó: 'oh', ú: 'oo', ü: 'oo' };
+               if (run.length === 1) return map[run] || run;
+               const glide = {
+                    ia: 'yah',
+                    ie: 'yeh',
+                    io: 'yoh',
+                    iu: 'yoo',
+                    ai: 'ai',
+                    ei: 'ay',
+                    oi: 'oy',
+                    ui: 'wee',
+                    ua: 'wah',
+                    ue: 'weh',
+                    uo: 'woh',
+                    au: 'ow',
+                    eu: 'eh-oo',
+               };
+               const key = run.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+               return (
+                    glide[key] ||
+                    run
+                         .split('')
+                         .map(c => map[c] || c)
+                         .join('')
+               );
+          }
+
+          function spellSyllable(syl) {
+               const vowels = 'aeiouáéíóúü';
+               let out = '';
+               let i = 0;
+               while (i < syl.length) {
+                    const c = syl[i],
+                         c2 = syl.slice(i, i + 2);
+                    if (c2 === 'qu' && vowels.includes(syl[i + 2] || '')) {
+                         out += 'k';
+                         i += 2;
+                         continue;
+                    }
+                    if (c2 === 'gü') {
+                         out += 'gw';
+                         i += 2;
+                         continue;
+                    }
+                    if (c2 === 'gu' && 'ei'.includes(syl[i + 2] || '')) {
+                         out += 'g';
+                         i += 2;
+                         continue;
+                    }
+                    if (c2 === 'rr') {
+                         out += 'rr';
+                         i += 2;
+                         continue;
+                    }
+                    if (c2 === 'll') {
+                         out += 'y';
+                         i += 2;
+                         continue;
+                    }
+                    if (c2 === 'ch') {
+                         out += 'ch';
+                         i += 2;
+                         continue;
+                    }
+                    if (c === 'c' && 'ei'.includes(syl[i + 1] || '')) {
+                         out += 's';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'c') {
+                         out += 'k';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'g' && 'ei'.includes(syl[i + 1] || '')) {
+                         out += 'h';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'z') {
+                         out += 's';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'j') {
+                         out += 'h';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'ñ') {
+                         out += 'ny';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'h') {
+                         i++;
+                         continue;
+                    }
+                    if (c === 'v') {
+                         out += 'b';
+                         i++;
+                         continue;
+                    }
+                    if (c === 'x') {
+                         out += 'ks';
+                         i++;
+                         continue;
+                    }
+                    if (vowels.includes(c)) {
+                         let j = i;
+                         while (j < syl.length && vowels.includes(syl[j])) j++;
+                         out += vowelSound(syl.slice(i, j));
+                         i = j;
+                         continue;
+                    }
+                    out += c;
+                    i++;
+               }
+               return out;
+          }
+
+          function wordApprox(word) {
+               const clean = word.toLowerCase().replace(/[^a-záéíóúüñ]/g, '');
+               if (!clean) return '';
+               const syllables = syllabifyEs(clean);
+               if (!syllables.length) return clean;
+               let stressIdx;
+               const accentIdx = syllables.findIndex(s => /[áéíóú]/.test(s));
+               if (accentIdx !== -1) {
+                    stressIdx = accentIdx;
+               } else if (syllables.length === 1) {
+                    stressIdx = 0;
+               } else {
+                    const lastChar = clean[clean.length - 1];
+                    stressIdx = /[aeiouns]/.test(lastChar) ? syllables.length - 2 : syllables.length - 1;
+               }
+               return syllables.map((s, i) => (i === stressIdx ? spellSyllable(s).toUpperCase() : spellSyllable(s))).join('-');
+          }
+
+          function approxPhonetic(phrase) {
+               return phrase
+                    .split(/\s+/)
+                    .map(w => {
+                         const stripped = w.replace(/^[¿¡"'“”]+|["'“”.,;:!?]+$/g, '');
+                         return wordApprox(stripped) || stripped;
+                    })
+                    .filter(Boolean)
+                    .join(' ');
+          }
+
           function meaningLineHtml(phrase, reveal) {
                const testMode = $('testMode') && $('testMode').checked;
                if (testMode && !reveal) {
@@ -321,8 +569,22 @@
                }
                const entry = dictEntry(phrase);
                const gloss = pageGloss(phrase);
-               const meaning = (entry && entry.meaning) || (gloss && gloss.meaning) || '';
-               let html = meaning ? `Meaning: <em>${meaning}</em>` : 'Meaning: <em>—</em>';
+               let meaning = (entry && entry.meaning) || (gloss && gloss.meaning) || '';
+               let sourceNote = '';
+               if (!meaning) {
+                    const key = normalize(phrase);
+                    if (key in translationCache) {
+                         meaning = translationCache[key] || '';
+                         if (meaning) sourceNote = ' <span style="color:var(--muted);font-size:0.85em">(Google Translate)</span>';
+                    } else {
+                         fetchTranslation(phrase).then(() => {
+                              if (targetInput.value.trim() === phrase && $('meaningGuide')) {
+                                   $('meaningGuide').innerHTML = meaningLineHtml(phrase, reveal);
+                              }
+                         });
+                    }
+               }
+               let html = meaning ? `Meaning: <em>${meaning}</em>${sourceNote}` : `Meaning: <em>${translationPending.has(normalize(phrase)) ? 'looking up…' : '—'}</em>`;
                if (gloss && gloss.irregularYo) {
                     html += ' <span class="irreg-yo-badge">Irregular yo</span>';
                     if (gloss.infinitive) html += ` of <strong>${gloss.infinitive}</strong>`;
@@ -438,11 +700,11 @@
                const showApproximate = showPh && !testMode;
                if (entry) {
                     $('phoneticGuide').innerHTML = showApproximate ? `Approximate: <em>${entry.approx}</em>` : '';
-                    $('phoneticGuide').style.display = showApproximate ? 'block' : 'none';
                } else {
-                    $('phoneticGuide').innerHTML = showApproximate ? 'Approximate: <em>(not in dictionary)</em>' : '';
-                    $('phoneticGuide').style.display = showApproximate ? 'block' : 'none';
+                    const guess = approxPhonetic(phrase);
+                    $('phoneticGuide').innerHTML = showApproximate ? `Approximate: <em>${guess}</em> <span style="color:var(--muted);font-size:0.85em">(estimated, not in dictionary)</span>` : '';
                }
+               $('phoneticGuide').style.display = showApproximate ? 'block' : 'none';
                $('meaningGuide').innerHTML = meaningLineHtml(phrase, false);
 
                $('starIndicator').textContent = favorites.includes(normalize(phrase)) ? '⭐' : '';
@@ -1361,10 +1623,17 @@
           // ===================== EVENTS =====================
           let debounce;
           if (targetInput) {
-               targetInput.addEventListener('input', () => {
+               const onTargetChanged = () => {
+                    // Clear stale status text (e.g. "Ready: ... from ...") left over from
+                    // Random/Weak/page-pool actions once the user types/pastes something new.
+                    if (resultCard) resultCard.innerHTML = 'Results will appear here…';
                     clearTimeout(debounce);
                     debounce = setTimeout(showTargetInfo, 300);
-               });
+               };
+               targetInput.addEventListener('input', onTargetChanged);
+               // 'input' should already fire on paste, but some browsers/IME flows only
+               // update the value after the paste event finishes — cover that case too.
+               targetInput.addEventListener('paste', () => setTimeout(onTargetChanged, 0));
           }
 
           if ($('showPhonetic')) $('showPhonetic').addEventListener('change', showTargetInfo);
@@ -1413,7 +1682,7 @@
                     const k = keys[Math.floor(Math.random() * keys.length)];
                     targetInput.value = k;
                     showTargetInfo();
-                    // resultCard.innerHTML = `Loaded: <strong>${k}</strong>`;
+                    resultCard.innerHTML = `Loaded: <strong>${k}</strong>`;
                };
           }
 

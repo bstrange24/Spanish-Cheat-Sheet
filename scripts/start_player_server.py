@@ -22,7 +22,7 @@ import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -54,6 +54,17 @@ CHAT_SYSTEM_PROMPT = (
 def pick_voice(lang: str) -> str:
     key = (lang or "es-419").lower().strip()
     return VOICES.get(key, VOICES["es-419"])
+
+
+TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
+
+
+def google_translate(text: str, source: str = "es", target: str = "en") -> str:
+    url = f"{TRANSLATE_URL}?client=gtx&sl={source}&tl={target}&dt=t&q={quote(text)}"
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return "".join(chunk[0] for chunk in data[0] if chunk and chunk[0])
 
 
 def cache_path(text: str, voice: str) -> Path:
@@ -141,6 +152,9 @@ class Handler(SimpleHTTPRequestHandler):
         if parsed.path in ("/api/tts", "/tts"):
             self._handle_tts(parsed)
             return
+        if parsed.path == "/api/translate":
+            self._handle_translate(parsed)
+            return
         if parsed.path in ("/", "/index.html"):
             self.path = "/pronunciation_player.html"
         return super().do_GET()
@@ -181,6 +195,21 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
+
+    def _handle_translate(self, parsed) -> None:
+        qs = parse_qs(parsed.query)
+        text = unquote((qs.get("text") or [""])[0]).strip()[:200]
+        source = (qs.get("sl") or ["es"])[0]
+        target = (qs.get("tl") or ["en"])[0]
+        if not text:
+            self._send_json({"error": "text is required"}, status=400)
+            return
+        try:
+            translation = google_translate(text, source, target)
+        except Exception as e:
+            self._send_json({"error": str(e)}, status=502)
+            return
+        self._send_json({"text": text, "translation": translation})
 
     def _handle_tts(self, parsed) -> None:
         qs = parse_qs(parsed.query)
