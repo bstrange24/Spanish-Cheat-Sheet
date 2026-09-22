@@ -142,9 +142,6 @@
                          <button type="button" class="accent-key" data-char="ú" title="Insert ú — Shift+click for uppercase">ú</button>
                          <button type="button" class="accent-key" data-char="ü" title="Insert ü — Shift+click for uppercase">ü</button>
                          <button type="button" class="accent-key" data-char="ñ" title="Insert ñ — Shift+click for uppercase">ñ</button>
-                         <!-- <button type="button" class="accent-key" data-char="¿" title="Insert ¿">¿</button> -->
-                         <!-- <button type="button" class="accent-key" data-char="?" title="Insert ?">?</button> -->
-                         <!-- <button type="button" class="accent-key" data-char="¡" title="Insert ¡">¡</button> -->
                     </div>
                     <div class="btn-row">
                          <button type="button" id="checkConjugationBtn" class="conjugation-check">Check</button>
@@ -230,6 +227,91 @@
                          if (typeof fixConjugationAccentButtons === 'function') {
                               fixConjugationAccentButtons();
                          }
+
+                         // ===== LONG-PRESS ACCENT INPUT =====
+                         (function initLongPressAccents() {
+                              const input = document.getElementById('conjugationAnswer');
+                              if (!input) return;
+
+                              const ACCENT_MAP = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', n: 'ñ' };
+                              const ACCENT_MAP_UPPER = { A: 'Á', E: 'É', I: 'Í', O: 'Ó', U: 'Ú', N: 'Ñ' };
+                              const HOLD_MS = 500;
+
+                              let holdTimer = null;
+                              let heldKey = null;
+                              let heldKeyStart = 0;
+                              let heldKeyHandled = false;
+
+                              function clearHold() {
+                                   if (holdTimer) {
+                                        clearTimeout(holdTimer);
+                                        holdTimer = null;
+                                   }
+                                   heldKey = null;
+                                   heldKeyHandled = false;
+                              }
+
+                              function applyAccent(key) {
+                                   const caret = input.selectionStart;
+                                   if (caret == null) return;
+                                   const charIndex = caret - 1;
+                                   if (charIndex < 0) return;
+                                   const current = input.value[charIndex];
+                                   if (!current) return;
+
+                                   const lower = current.toLowerCase();
+                                   const isUpper = current !== lower;
+                                   let replacement = null;
+                                   if (isUpper && ACCENT_MAP_UPPER[lower]) replacement = ACCENT_MAP_UPPER[lower];
+                                   else if (ACCENT_MAP[lower]) replacement = ACCENT_MAP[lower];
+                                   if (!replacement) return;
+                                   if (current === replacement) return;
+
+                                   input.value = input.value.slice(0, charIndex) + replacement + input.value.slice(charIndex + 1);
+                                   const newPos = charIndex + replacement.length;
+                                   try {
+                                        input.setSelectionRange(newPos, newPos);
+                                   } catch (err) {}
+                                   heldKeyHandled = true;
+                                   input.dispatchEvent(new Event('input', { bubbles: true }));
+                              }
+
+                              input.addEventListener('keydown', function (e) {
+                                   if (e.key.length !== 1) return;
+                                   if (e.ctrlKey || e.metaKey || e.altKey) return;
+                                   if (e.isComposing || e.keyCode === 229) return;
+
+                                   const key = e.key;
+
+                                   if (e.repeat) {
+                                        if (heldKeyHandled) e.preventDefault();
+                                        return;
+                                   }
+
+                                   const lower = key.toLowerCase();
+                                   if (!ACCENT_MAP[lower]) return;
+
+                                   heldKey = key;
+                                   heldKeyStart = Date.now();
+                                   heldKeyHandled = false;
+
+                                   holdTimer = setTimeout(function () {
+                                        if (heldKey === key) applyAccent(key, false);
+                                   }, 500);
+                              });
+
+                              input.addEventListener('keyup', function (e) {
+                                   if (e.key !== heldKey) return;
+                                   if (holdTimer) {
+                                        clearTimeout(holdTimer);
+                                        holdTimer = null;
+                                   }
+                                   clearHold();
+                              });
+
+                              input.addEventListener('blur', clearHold);
+                              input._clearLongPressHold = clearHold;
+                         })();
                     }, 200);
 
                     // ===== Mobile Filter Controls =====
@@ -438,6 +520,144 @@
                     document.getElementById('conjugationRandomTense')?.addEventListener('change', function () {
                          setTimeout(updateQuickSelectDisplay, 100);
                     });
+
+                    // ===== LONG-PRESS ACCENT INPUT =====
+                    // Hold a vowel (or 'n') for ~500ms to replace it with its accented form.
+                    // Works on physical keyboards. Virtual keyboards handle long-press themselves.
+                    (function initLongPressAccents() {
+                         const input = document.getElementById('conjugationAnswer');
+                         if (!input) return;
+
+                         // Plain letter -> accented letter (lowercase).
+                         // 'u' maps to 'ú'; 'ü' is left to the accent bar button.
+                         const ACCENT_MAP = {
+                              a: 'á',
+                              e: 'é',
+                              i: 'í',
+                              o: 'ó',
+                              u: 'ú',
+                              n: 'ñ',
+                         };
+
+                         // Uppercase variants (Shift + letter).
+                         const ACCENT_MAP_UPPER = {
+                              A: 'Á',
+                              E: 'É',
+                              I: 'Í',
+                              O: 'Ó',
+                              U: 'Ú',
+                              N: 'Ñ',
+                         };
+
+                         const HOLD_MS = 500; // how long to hold before accenting
+
+                         let holdTimer = null;
+                         let heldKey = null;
+                         let heldKeyStart = 0;
+                         let heldKeyHandled = false; // true once we've applied the accent
+
+                         function clearHold() {
+                              if (holdTimer) {
+                                   clearTimeout(holdTimer);
+                                   holdTimer = null;
+                              }
+                              heldKey = null;
+                              heldKeyHandled = false;
+                         }
+
+                         function applyAccent(key) {
+                              const caret = input.selectionStart;
+                              if (caret == null) return;
+
+                              // The character we just typed sits at caret - 1.
+                              const charIndex = caret - 1;
+                              if (charIndex < 0) return;
+
+                              const current = input.value[charIndex];
+                              if (!current) return;
+
+                              const lower = current.toLowerCase();
+                              const isUpper = current !== lower;
+
+                              let replacement = null;
+                              if (isUpper && ACCENT_MAP_UPPER[lower]) {
+                                   replacement = ACCENT_MAP_UPPER[lower];
+                              } else if (ACCENT_MAP[lower]) {
+                                   replacement = ACCENT_MAP[lower];
+                              }
+
+                              if (!replacement) return;
+
+                              // Don't double-accent if it's already accented.
+                              if (current === replacement) return;
+
+                              input.value = input.value.slice(0, charIndex) + replacement + input.value.slice(charIndex + 1);
+
+                              // Move caret to just after the replacement.
+                              const newPos = charIndex + replacement.length;
+                              try {
+                                   input.setSelectionRange(newPos, newPos);
+                              } catch (err) {}
+
+                              heldKeyHandled = true;
+
+                              // Fire an input event so any listeners (validation, live preview) update.
+                              input.dispatchEvent(new Event('input', { bubbles: true }));
+                         }
+
+                         input.addEventListener('keydown', function (e) {
+                              // Ignore modifier keys, arrows, Backspace, Enter, etc.
+                              if (e.key.length !== 1) return;
+
+                              // Let Ctrl/Cmd/Alt shortcuts through (copy, paste, select all, etc.).
+                              if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                              // IME composition (e.g. Japanese, Chinese) — don't interfere.
+                              if (e.isComposing || e.keyCode === 229) return;
+
+                              const key = e.key;
+
+                              // Key-repeat events: if we already accented, swallow the repeats so the
+                              // browser doesn't keep typing the plain letter. Otherwise ignore so we
+                              // don't restart our timer.
+                              if (e.repeat) {
+                                   if (heldKeyHandled) {
+                                        e.preventDefault();
+                                   }
+                                   return;
+                              }
+
+                              // Only start a timer for letters we can accent.
+                              const lower = key.toLowerCase();
+                              if (!ACCENT_MAP[lower]) return;
+
+                              heldKey = key;
+                              heldKeyStart = Date.now();
+                              heldKeyHandled = false;
+
+                              holdTimer = setTimeout(function () {
+                                   if (heldKey === key) applyAccent(key, true); // diaeresis
+                              }, 900);
+                         });
+
+                         input.addEventListener('keyup', function (e) {
+                              if (e.key !== heldKey) return;
+
+                              // Released before the threshold — cancel and let the plain letter stand.
+                              if (holdTimer) {
+                                   clearTimeout(holdTimer);
+                                   holdTimer = null;
+                              }
+
+                              clearHold();
+                         });
+
+                         // If focus leaves mid-hold (e.g. user tabs away), cancel cleanly.
+                         input.addEventListener('blur', clearHold);
+
+                         // Expose for debugging / manual teardown if you ever need it.
+                         input._clearLongPressHold = clearHold;
+                    })();
 
                     console.log('✅ Mobile conjugation controls initialized');
                });

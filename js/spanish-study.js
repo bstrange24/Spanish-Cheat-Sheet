@@ -1113,7 +1113,10 @@
           startCards();
      }
 
-     // Event Listeners
+     // ===================== EVENT LISTENERS =====================
+
+     // Accent-bar button handler. Uses delegation on studyBody so it works
+     // no matter how many times studyBody.innerHTML is swapped.
      studyBody.addEventListener('mousedown', function (e) {
           const btn = e.target.closest('[data-study="accent"]');
           if (!btn) return;
@@ -1137,6 +1140,110 @@
           } catch (err) {}
           input.focus();
      });
+
+     // ===================== LONG-PRESS ACCENT INPUT =====================
+     // Hold a vowel (or 'n') for ~500ms in the study answer field to replace
+     // it with its accented form. Uses event delegation on studyBody, because
+     // #studyInput is recreated on every renderQuiz()/renderDictation() call.
+     // Physical keyboards only; virtual keyboards handle long-press themselves.
+     (function initLongPressAccents() {
+          const ACCENT_MAP = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', n: 'ñ' };
+          const ACCENT_MAP_UPPER = { A: 'Á', E: 'É', I: 'Í', O: 'Ó', U: 'Ú', N: 'Ñ' };
+          const HOLD_MS = 500;
+
+          let holdTimer = null;
+          let heldKey = null;
+          let heldInput = null;
+          let heldKeyHandled = false;
+
+          function clearHold() {
+               if (holdTimer) {
+                    clearTimeout(holdTimer);
+                    holdTimer = null;
+               }
+               heldKey = null;
+               heldInput = null;
+               heldKeyHandled = false;
+          }
+
+          function isStudyInput(el) {
+               return el && el.id === 'studyInput' && !el.disabled;
+          }
+
+          function applyAccent(input, key) {
+               if (!isStudyInput(input)) return;
+               const caret = input.selectionStart;
+               if (caret == null) return;
+               const charIndex = caret - 1;
+               if (charIndex < 0) return;
+               const current = input.value[charIndex];
+               if (!current) return;
+
+               const lower = current.toLowerCase();
+               const isUpper = current !== lower;
+               let replacement = null;
+               if (isUpper && ACCENT_MAP_UPPER[lower]) replacement = ACCENT_MAP_UPPER[lower];
+               else if (ACCENT_MAP[lower]) replacement = ACCENT_MAP[lower];
+               if (!replacement) return;
+               if (current === replacement) return;
+
+               input.value = input.value.slice(0, charIndex) + replacement + input.value.slice(charIndex + 1);
+               const newPos = charIndex + replacement.length;
+               try { input.setSelectionRange(newPos, newPos); } catch (err) {}
+               heldKeyHandled = true;
+               // Fire input event for any live listeners (currently none in study,
+               // but harmless and future-proof).
+               input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+
+          studyBody.addEventListener('keydown', function (e) {
+               const input = e.target;
+               if (!isStudyInput(input)) return;
+               if (e.key.length !== 1) return;
+               if (e.ctrlKey || e.metaKey || e.altKey) return;
+               if (e.isComposing || e.keyCode === 229) return;
+
+               const key = e.key;
+
+               if (e.repeat) {
+                    // Once we've applied the accent, swallow repeats so the
+                    // browser stops typing the plain letter.
+                    if (heldKeyHandled && heldInput === input) e.preventDefault();
+                    return;
+               }
+
+               const lower = key.toLowerCase();
+               if (!ACCENT_MAP[lower]) return;
+
+               // If a previous hold is still pending for another input, cancel it.
+               if (heldInput && heldInput !== input) clearHold();
+
+               heldKey = key;
+               heldInput = input;
+               heldKeyHandled = false;
+
+               holdTimer = setTimeout(function () {
+                    if (heldKey === key && heldInput === input) applyAccent(input, key);
+               }, HOLD_MS);
+          });
+
+          studyBody.addEventListener('keyup', function (e) {
+               const input = e.target;
+               if (!isStudyInput(input)) return;
+               if (heldInput && input !== heldInput) return;
+               if (e.key !== heldKey) return;
+               if (holdTimer) {
+                    clearTimeout(holdTimer);
+                    holdTimer = null;
+               }
+               clearHold();
+          });
+
+          // Cancel any pending hold when focus leaves the study input.
+          studyBody.addEventListener('focusout', function (e) {
+               if (heldInput && e.target === heldInput) clearHold();
+          });
+     })();
 
      studyBody.addEventListener('click', function (e) {
           const btn = e.target.closest('[data-study]');

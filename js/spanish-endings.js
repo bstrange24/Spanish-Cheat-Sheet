@@ -298,6 +298,106 @@
                });
           });
 
+          // ===== LONG-PRESS ACCENT INPUT =====
+          // Hold a vowel (or 'n') for ~500ms to replace it with its accented form.
+          // Works on physical keyboards. Virtual keyboards handle long-press themselves.
+          (function initLongPressAccents() {
+               const input = $('endingAnswer');
+               if (!input) return;
+
+               // Plain letter -> accented letter (lowercase).
+               // 'u' maps to 'ú'; 'ü' is left to the accent bar button.
+               const ACCENT_MAP = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', n: 'ñ' };
+               const ACCENT_MAP_UPPER = { A: 'Á', E: 'É', I: 'Í', O: 'Ó', U: 'Ú', N: 'Ñ' };
+               const HOLD_MS = 500;
+
+               let holdTimer = null;
+               let heldKey = null;
+               let heldKeyHandled = false;
+
+               function clearHold() {
+                    if (holdTimer) {
+                         clearTimeout(holdTimer);
+                         holdTimer = null;
+                    }
+                    heldKey = null;
+                    heldKeyHandled = false;
+               }
+
+               function applyAccent(key) {
+                    const caret = input.selectionStart;
+                    if (caret == null) return;
+                    const charIndex = caret - 1;
+                    if (charIndex < 0) return;
+                    const current = input.value[charIndex];
+                    if (!current) return;
+
+                    const lower = current.toLowerCase();
+                    const isUpper = current !== lower;
+                    let replacement = null;
+                    if (isUpper && ACCENT_MAP_UPPER[lower]) replacement = ACCENT_MAP_UPPER[lower];
+                    else if (ACCENT_MAP[lower]) replacement = ACCENT_MAP[lower];
+                    if (!replacement) return;
+                    if (current === replacement) return;
+
+                    input.value = input.value.slice(0, charIndex) + replacement + input.value.slice(charIndex + 1);
+                    const newPos = charIndex + replacement.length;
+                    try {
+                         input.setSelectionRange(newPos, newPos);
+                    } catch (err) {}
+                    heldKeyHandled = true;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+               }
+
+               input.addEventListener('keydown', function (e) {
+                    if (e.key.length !== 1) return;
+                    if (e.ctrlKey || e.metaKey || e.altKey) return;
+                    if (e.isComposing || e.keyCode === 229) return;
+
+                    const key = e.key;
+
+                    if (e.repeat) {
+                         if (heldKeyHandled) e.preventDefault();
+                         return;
+                    }
+
+                    const lower = key.toLowerCase();
+                    if (!ACCENT_MAP[lower]) return;
+
+                    heldKey = key;
+                    heldKeyHandled = false;
+
+                    holdTimer = setTimeout(function () {
+                         if (heldKey === key) applyAccent(key);
+                    }, HOLD_MS);
+               });
+
+               input.addEventListener('keyup', function (e) {
+                    if (e.key !== heldKey) return;
+                    if (holdTimer) {
+                         clearTimeout(holdTimer);
+                         holdTimer = null;
+                    }
+                    clearHold();
+               });
+
+               input.addEventListener('blur', clearHold);
+               input._clearLongPressHold = clearHold;
+          })();
+
+          renderPrompt({ group: true, tense: true, pronoun: true });
+
+          document.querySelectorAll('.accent-key').forEach(button => {
+               button.addEventListener('mousedown', event => {
+                    event.preventDefault();
+                    const input = $('endingAnswer');
+                    const start = input.selectionStart;
+                    input.value = input.value.slice(0, start) + button.dataset.char + input.value.slice(input.selectionEnd);
+                    input.selectionStart = input.selectionEnd = start + button.dataset.char.length;
+                    input.focus();
+               });
+          });
+
           renderPrompt({ group: true, tense: true, pronoun: true });
      });
 })();
