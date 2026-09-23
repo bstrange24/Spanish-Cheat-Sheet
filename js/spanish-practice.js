@@ -928,6 +928,7 @@
                verbSelect.innerHTML = conjugationVerbs.map((verb, index) => `<option value="${index}">${verb.infinitive} (${verb.meaning.replace(/</g, '&lt;').replace(/>/g, '&gt;')})</option>`).join('');
                verbSelect.disabled = false;
                if (typeof window.updateConjugationVerbCheckboxes === 'function') window.updateConjugationVerbCheckboxes();
+               if (typeof applyCheckedIrregularTypeFilters === 'function') applyCheckedIrregularTypeFilters();
                $('newConjugationBtn').disabled = false;
                $('randomConjugationVerbBtn').disabled = false;
                renderConjugationPrompt();
@@ -1182,6 +1183,70 @@
                window.openConjugationFilter = openConjugationFilter;
                window.closeConjugationFilter = closeConjugationFilter;
                window.updateConjugationVerbCheckboxes = () => updateCheckboxFilter('verb');
+
+               function verbMatchesType(verb, type) {
+                    if (!verb) return false;
+                    if (Array.isArray(verb.irregularInfo) && verb.irregularInfo.some(item => item.type === type)) {
+                         return true;
+                    }
+                    const classifications = getIrregularClassifications(verb.infinitive);
+                    return !!(classifications && classifications.some(item => item.type === type));
+               }
+
+               function verbIndicesForType(type) {
+                    const indices = [];
+                    conjugationVerbs.forEach((verb, index) => {
+                         if (verbMatchesType(verb, type)) indices.push(String(index));
+                    });
+                    return indices;
+               }
+
+               function applyIrregularTypeFilters() {
+                    if (!verbSelect || !conjugationVerbs.length) return;
+
+                    const checkedTypes = Array.from(document.querySelectorAll('.conjugation-type-filter:checked')).map(input => input.value);
+                    const allowed = new Set();
+
+                    checkedTypes.forEach(type => {
+                         verbIndicesForType(type).forEach(index => allowed.add(index));
+                    });
+
+                    Array.from(verbSelect.options).forEach(option => {
+                         option.selected = checkedTypes.length ? allowed.has(option.value) : false;
+                    });
+
+                    if (!Array.from(verbSelect.selectedOptions).length && verbSelect.options[0]) {
+                         verbSelect.options[0].selected = true;
+                    }
+
+                    const selectedValues = Array.from(verbSelect.selectedOptions).map(option => option.value);
+                    verbSelect._activeValue = selectedValues[0] || '';
+                    syncCheckboxFilter('verb');
+
+                    const labels = Array.from(document.querySelectorAll('.conjugation-filter-input[data-conjugation-filter="verb"]:checked')).map(input => input.parentElement.textContent.trim());
+                    const display = $('selectedVerbDisplay');
+                    if (display && labels.length) {
+                         display.textContent = formatConjugationFilterLabel('verb', labels.length, labels);
+                    }
+
+                    $('randomConjugationVerbBtn')?.click();
+               }
+
+               function applyCheckedIrregularTypeFilters() {
+                    document.querySelectorAll('.conjugation-type-filter:checked').forEach(input => {
+                         applyIrregularTypeCheckbox(input.value, true);
+                    });
+               }
+
+               document.querySelectorAll('.conjugation-type-filter').forEach(input => {
+                    if (input._typeFilterBound) return;
+                    input._typeFilterBound = true;
+                    input.addEventListener('change', applyIrregularTypeFilters);
+               });
+
+               function applyCheckedIrregularTypeFilters() {
+                    applyIrregularTypeFilters();
+               }
 
                document.addEventListener('click', event => {
                     if (!$('filtersPanel').classList.contains('open')) return;
