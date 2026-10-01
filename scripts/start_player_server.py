@@ -59,12 +59,18 @@ def pick_voice(lang: str) -> str:
 TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
 
 
-def google_translate(text: str, source: str = "es", target: str = "en") -> str:
+def google_translate(
+    text: str, source: str = "es", target: str = "en"
+) -> tuple[str, str]:
     url = f"{TRANSLATE_URL}?client=gtx&sl={source}&tl={target}&dt=t&q={quote(text)}"
     req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urlopen(req, timeout=10) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    return "".join(chunk[0] for chunk in data[0] if chunk and chunk[0])
+    translation = "".join(chunk[0] for chunk in data[0] if chunk and chunk[0])
+    detected_language = (
+        data[2] if len(data) > 2 and isinstance(data[2], str) else source
+    )
+    return translation, detected_language
 
 
 def cache_path(text: str, voice: str) -> Path:
@@ -205,11 +211,17 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json({"error": "text is required"}, status=400)
             return
         try:
-            translation = google_translate(text, source, target)
+            translation, detected_language = google_translate(text, source, target)
         except Exception as e:
             self._send_json({"error": str(e)}, status=502)
             return
-        self._send_json({"text": text, "translation": translation})
+        self._send_json(
+            {
+                "text": text,
+                "translation": translation,
+                "source_language": detected_language,
+            }
+        )
 
     def _handle_tts(self, parsed) -> None:
         qs = parse_qs(parsed.query)

@@ -318,6 +318,46 @@
           // Keyed by normalize(phrase) -> translated string, or null if the lookup failed.
           const translationCache = {};
           const translationPending = new Set();
+          const englishInputMeanings = Object.create(null);
+          let languageDetectionPendingKey = '';
+          let inputTranslationRequest = 0;
+
+          function escapeHtml(value) {
+               return String(value).replace(
+                    /[&<>"']/g,
+                    character =>
+                         ({
+                              '&': '&amp;',
+                              '<': '&lt;',
+                              '>': '&gt;',
+                              '"': '&quot;',
+                              "'": '&#39;',
+                         })[character]
+               );
+          }
+
+          async function translateEnglishInput(phrase, requestId) {
+               const key = normalize(phrase);
+               languageDetectionPendingKey = key;
+               showTargetInfo();
+               try {
+                    const res = await fetch(`/api/translate?text=${encodeURIComponent(phrase)}&sl=auto&tl=es`);
+                    if (!res.ok) throw new Error('translate request failed');
+                    const data = await res.json();
+                    if (requestId !== inputTranslationRequest || targetInput.value.trim() !== phrase) return;
+
+                    const translated = data && data.translation ? String(data.translation).trim() : '';
+                    if (data.source_language === 'en' && translated) {
+                         englishInputMeanings[normalize(translated)] = phrase;
+                         targetInput.value = translated;
+                    }
+               } catch (err) {
+                    if (requestId !== inputTranslationRequest || targetInput.value.trim() !== phrase) return;
+               }
+               if (requestId !== inputTranslationRequest) return;
+               languageDetectionPendingKey = '';
+               showTargetInfo();
+          }
 
           async function fetchTranslation(phrase) {
                const key = normalize(phrase);
@@ -569,11 +609,13 @@
                }
                const entry = dictEntry(phrase);
                const gloss = pageGloss(phrase);
-               let meaning = (entry && entry.meaning) || (gloss && gloss.meaning) || '';
+               const key = normalize(phrase);
+               let meaning = (entry && entry.meaning) || (gloss && gloss.meaning) || englishInputMeanings[key] || '';
                let sourceNote = '';
                if (!meaning) {
-                    const key = normalize(phrase);
-                    if (key in translationCache) {
+                    if (languageDetectionPendingKey === key) {
+                         meaning = 'detecting language…';
+                    } else if (key in translationCache) {
                          meaning = translationCache[key] || '';
                          if (meaning) sourceNote = ' <span style="color:var(--muted);font-size:0.85em">(Google Translate)</span>';
                     } else {
@@ -584,7 +626,7 @@
                          });
                     }
                }
-               let html = meaning ? `Meaning: <em>${meaning}</em>${sourceNote}` : `Meaning: <em>${translationPending.has(normalize(phrase)) ? 'looking up…' : '—'}</em>`;
+               let html = meaning ? `Meaning: <em>${escapeHtml(meaning)}</em>${sourceNote}` : `Meaning: <em>${translationPending.has(key) ? 'looking up…' : '—'}</em>`;
                if (gloss && gloss.irregularYo) {
                     html += ' <span class="irreg-yo-badge">Irregular yo</span>';
                     if (gloss.infinitive) html += ` of <strong>${gloss.infinitive}</strong>`;
@@ -1692,8 +1734,19 @@
                     // Clear stale status text (e.g. "Ready: ... from ...") left over from
                     // Random/Weak/page-pool actions once the user types/pastes something new.
                     if (resultCard) resultCard.innerHTML = 'Results will appear here…';
+                    const requestId = ++inputTranslationRequest;
+                    languageDetectionPendingKey = '';
                     clearTimeout(debounce);
-                    debounce = setTimeout(showTargetInfo, 300);
+                    debounce = setTimeout(() => {
+                         const phrase = targetInput.value.trim();
+                         if (!phrase) {
+                              showTargetInfo();
+                         } else if (dictEntry(phrase) || pageGloss(phrase)) {
+                              showTargetInfo();
+                         } else {
+                              translateEnglishInput(phrase, requestId);
+                         }
+                    }, 300);
                };
                targetInput.addEventListener('input', onTargetChanged);
                // 'input' should already fire on paste, but some browsers/IME flows only
