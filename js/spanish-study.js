@@ -898,24 +898,28 @@
           const neu = [];
           const fav = new Set(typeof favorites !== 'undefined' && Array.isArray(favorites) ? favorites.map(normalize) : []);
 
+          // One card per word: prefer a due direction, otherwise a random unseen one.
           pairs.forEach(p => {
+               const dueCards = [];
+               const newCards = [];
                ['en-es', 'es-en'].forEach(dir => {
                     const id = dir + ':' + normalize(p.spanish);
                     const card = Object.assign({ spanish: p.spanish, english: p.english, dir: dir, id: id }, pairCardFields(p));
                     const rec = store[id];
-                    if (!rec) neu.push(card);
-                    else if ((rec.next || 0) <= now) due.push(card);
+                    if (!rec) newCards.push(card);
+                    else if ((rec.next || 0) <= now) dueCards.push(card);
                });
+               if (dueCards.length) due.push(shuffle(dueCards)[0]);
+               else if (newCards.length) neu.push(shuffle(newCards)[0]);
           });
 
-          neu.sort((a, b) => {
-               const fa = fav.has(normalize(a.spanish)) ? 1 : 0;
-               const fb = fav.has(normalize(b.spanish)) ? 1 : 0;
-               return fb - fa;
-          });
+          const shuffledNew = shuffle(neu);
+          const favNew = shuffledNew.filter(c => fav.has(normalize(c.spanish)));
+          const otherNew = shuffledNew.filter(c => !fav.has(normalize(c.spanish)));
+          const newPicked = favNew.concat(otherNew).slice(0, MAX_NEW_CARDS);
 
           const result = {
-               queue: shuffle(due).concat(neu.slice(0, MAX_NEW_CARDS)),
+               queue: shuffle(due.concat(newPicked)),
                due: due.length,
                neu: Math.min(neu.length, MAX_NEW_CARDS),
                extra: false,
