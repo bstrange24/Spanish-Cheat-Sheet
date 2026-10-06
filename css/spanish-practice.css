@@ -1054,6 +1054,39 @@ input[type='range'] {
      margin-bottom: 4px;
 }
 
+.study-setup.collapsed {
+     padding-top: 8px;
+     padding-bottom: 8px;
+}
+
+.study-setup.collapsed .section-heading {
+     margin-bottom: 0;
+     align-items: center;
+}
+
+.study-setup.collapsed .section-heading h2 {
+     font-size: 1rem;
+     margin: 0;
+}
+
+.study-setup.collapsed .eyebrow,
+.study-setup.collapsed .filters {
+     display: none;
+}
+
+#setupToggleBtn {
+     padding: 4px 9px;
+     font-size: 0.75rem;
+     line-height: 1.2;
+     min-height: 0;
+     width: auto;
+}
+
+.study-setup.collapsed.open .filters {
+     display: flex;
+     margin-top: 10px;
+}
+
 .study-options {
      display: flex;
      align-items: center;

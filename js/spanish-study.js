@@ -410,7 +410,30 @@
           else if (typeof saveAll === 'function') saveAll();
      }
 
+     const studySetup = $('studySetup');
+     const setupToggleBtn = $('setupToggleBtn');
+
+     function setSetupCollapsed(collapsed, open) {
+          if (!studySetup) return;
+          studySetup.classList.toggle('collapsed', collapsed);
+          studySetup.classList.toggle('open', !!open);
+          if (setupToggleBtn) {
+               setupToggleBtn.hidden = !collapsed;
+               setupToggleBtn.setAttribute('aria-expanded', String(!!open));
+               setupToggleBtn.textContent = open ? '▲ Hide' : '⚙ Change set';
+          }
+     }
+
+     if (setupToggleBtn) {
+          setupToggleBtn.addEventListener('click', function () {
+               const open = studySetup.classList.toggle('open');
+               setupToggleBtn.setAttribute('aria-expanded', String(open));
+               setupToggleBtn.textContent = open ? '▲ Hide' : '⚙ Change set';
+          });
+     }
+
      function closeStudy() {
+          setSetupCollapsed(false);
           study = null;
           studyCard.style.display = 'none';
           studyBody.innerHTML = '';
@@ -420,6 +443,7 @@
      }
 
      function showStudy() {
+          setSetupCollapsed(true, true);
           studyCard.style.display = 'block';
           try {
                studyCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
